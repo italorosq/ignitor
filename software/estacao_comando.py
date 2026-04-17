@@ -19,19 +19,19 @@ Perifericos
 from machine import Pin, SPI
 import utime
 
+Pin(25,1).value(1)
+
+
 # ─────────────────────────────────────────────────────────────────
-#  DEPENDÊNCIA: driver SX127x para MicroPython
-#  Instale copiando sx127x.py para o Pico via Thonny ou mpremote.
-#  Repositório: https://github.com/Serra-Rocketry/ignitor
-#  ou instale via: mpremote mip install github:Wei1234c/SX127x_driver
+#  Driver LoRa (SX127x): prioridade para biblioteca externa,
+#  com fallback para driver nativo em SPI se sx127x.py nao existir.
 # ─────────────────────────────────────────────────────────────────
 try:
     from sx127x import SX127x
-    LORA_AVAILABLE = True
+    SX127X_DRIVER_AVAILABLE = True
 except ImportError:
-    # Modo de desenvolvimento sem hardware LoRa
-    LORA_AVAILABLE = False
-    print("[WARN] sx127x não encontrado — rodando sem LoRa real.")
+    SX127X_DRIVER_AVAILABLE = False
+    print("[WARN] sx127x nao encontrado — tentando driver nativo SX1278.")
 
 
 # ╔══════════════════════════════════════════════════════════════╗
@@ -80,6 +80,39 @@ LORA_PARAMS = {
     "rx_crc"            : True,
 }
 
+# ── Registradores e flags do SX1278 (fallback nativo) ──────────
+REG_FIFO            = 0x00
+REG_OP_MODE         = 0x01
+REG_FRF_MSB         = 0x06
+REG_FRF_MID         = 0x07
+REG_FRF_LSB         = 0x08
+REG_PA_CONFIG       = 0x09
+REG_LNA             = 0x0C
+REG_FIFO_ADDR_PTR   = 0x0D
+REG_FIFO_TX_BASE    = 0x0E
+REG_FIFO_RX_BASE    = 0x0F
+REG_FIFO_RX_CURRENT = 0x10
+REG_IRQ_FLAGS       = 0x12
+REG_RX_NB_BYTES     = 0x13
+REG_MODEM_CONFIG1   = 0x1D
+REG_MODEM_CONFIG2   = 0x1E
+REG_PREAMBLE_MSB    = 0x20
+REG_PREAMBLE_LSB    = 0x21
+REG_PAYLOAD_LENGTH  = 0x22
+REG_MODEM_CONFIG3   = 0x26
+REG_SYNC_WORD       = 0x39
+REG_VERSION         = 0x42
+
+MODE_SLEEP   = 0x00
+MODE_STDBY   = 0x01
+MODE_TX      = 0x03
+MODE_RX_CONT = 0x05
+MODE_LORA    = 0x80
+
+IRQ_RX_DONE           = 0x40
+IRQ_TX_DONE           = 0x08
+IRQ_PAYLOAD_CRC_ERROR = 0x20
+
 
 # ╔══════════════════════════════════════════════════════════════╗
 # ║                    ESTADOS DA MÁQUINA                       ║
@@ -102,41 +135,171 @@ class State:
 # ╚══════════════════════════════════════════════════════════════╝
 class LoRaRadio:
     """
-    Abstração sobre o driver SX127x.
+    Abstracao sobre o radio SX1278.
 
-    Permite operar com o rádio real quando o driver está instalado e
-    um modo mock silencioso quando o hardware não está disponível.
+    Ordem de tentativa:
+    1) Driver externo sx127x.py (se instalado);
+    2) Driver nativo por registradores SPI;
+    3) Modo mock (sem transmissao real).
     """
 
     def __init__(self):
-        if LORA_AVAILABLE:
-            spi = SPI( 
-                0,
-                baudrate=1_000_000,
-                polarity=0,
-                phase=0,
-                sck=Pin(PIN_SCK),
-                mosi=Pin(PIN_MOSI),
-                miso=Pin(PIN_MISO),
-            )
-            self._lora = SX127x(
-                spi,
-                pins={
-                    "cs"    : Pin(PIN_CS,    Pin.OUT),
-                    "reset" : Pin(PIN_RESET, Pin.OUT),
-                    "dio0"  : Pin(PIN_DIO0,  Pin.IN),
-                },
-                parameters=LORA_PARAMS,
-            )
-            print("[LoRa] SX1278 inicializado em 433 MHz.")
+        self._lora = None
+        self._backend = "mock"
+
+        self._spi = SPI(
+            0,
+            baudrate=1_000_000,
+            polarity=0,
+            phase=0,
+            sck=Pin(PIN_SCK),
+            mosi=Pin(PIN_MOSI),
+            miso=Pin(PIN_MISO),
+        )
+        self._cs = Pin(PIN_CS, Pin.OUT, value=1)
+        self._reset = Pin(PIN_RESET, Pin.OUT, value=1)
+        self._dio0 = Pin(PIN_DIO0, Pin.IN)
+
+        if SX127X_DRIVER_AVAILABLE:
+            try:
+                self._lora = SX127x(
+                    self._spi,
+                    pins={
+                        "cs"    : self._cs,
+                        "reset" : self._reset,
+                        "dio0"  : self._dio0,
+                    },
+                    parameters=LORA_PARAMS,
+                )
+                self._backend = "sx127x"
+                print("[LoRa] SX1278 inicializado em 433 MHz (driver sx127x).")
+                return
+            except Exception as exc:
+                print(f"[WARN] Falha ao iniciar sx127x ({exc}) — fallback nativo.")
+
+        if self._init_native():
+            self._backend = "native"
+            print("[LoRa] SX1278 inicializado em 433 MHz (driver nativo SPI).")
         else:
-            self._lora = None
-            print("[LoRa] Modo MOCK ativo.")
+            print("[LoRa] Modo MOCK ativo (sem resposta do SX1278).")
+
+    def _native_write_reg(self, reg, value):
+        self._cs.value(0)
+        self._spi.write(bytes([reg | 0x80, value & 0xFF]))
+        self._cs.value(1)
+
+    def _native_read_reg(self, reg):
+        self._cs.value(0)
+        self._spi.write(bytes([reg & 0x7F]))
+        result = self._spi.read(1)
+        self._cs.value(1)
+        return result[0]
+
+    def _native_read_buf(self, reg, length):
+        self._cs.value(0)
+        self._spi.write(bytes([reg & 0x7F]))
+        result = self._spi.read(length)
+        self._cs.value(1)
+        return result
+
+    def _native_write_fifo(self, payload):
+        self._cs.value(0)
+        self._spi.write(bytes([REG_FIFO | 0x80]))
+        self._spi.write(payload)
+        self._cs.value(1)
+
+    def _native_reset(self):
+        self._reset.value(0)
+        utime.sleep_ms(10)
+        self._reset.value(1)
+        utime.sleep_ms(10)
+
+    def _init_native(self):
+        self._native_reset()
+
+        version = self._native_read_reg(REG_VERSION)
+        if version != 0x12:
+            print(f"[WARN] SX1278 nao detectado no driver nativo (REG_VERSION=0x{version:02X}).")
+            return False
+
+        self._native_write_reg(REG_OP_MODE, MODE_LORA | MODE_SLEEP)
+        utime.sleep_ms(10)
+
+        frf = int((int(LORA_PARAMS["frequency"]) * (1 << 19)) / 32_000_000)
+        self._native_write_reg(REG_FRF_MSB, (frf >> 16) & 0xFF)
+        self._native_write_reg(REG_FRF_MID, (frf >> 8) & 0xFF)
+        self._native_write_reg(REG_FRF_LSB, frf & 0xFF)
+
+        self._native_write_reg(REG_PA_CONFIG, 0x8F)
+        self._native_write_reg(REG_LNA, 0x23)
+        self._native_write_reg(REG_MODEM_CONFIG1, 0x72)
+        self._native_write_reg(REG_MODEM_CONFIG2, 0x74)
+        self._native_write_reg(REG_MODEM_CONFIG3, 0x04)
+        self._native_write_reg(REG_PREAMBLE_MSB, 0x00)
+        self._native_write_reg(REG_PREAMBLE_LSB, 0x08)
+        self._native_write_reg(REG_SYNC_WORD, 0x12)
+        self._native_write_reg(REG_FIFO_TX_BASE, 0x00)
+        self._native_write_reg(REG_FIFO_RX_BASE, 0x00)
+
+        self._native_write_reg(REG_OP_MODE, MODE_LORA | MODE_RX_CONT)
+        utime.sleep_ms(10)
+        return True
+
+    def _native_send_packet(self, payload):
+        if not payload:
+            return
+
+        self._native_write_reg(REG_OP_MODE, MODE_LORA | MODE_STDBY)
+        self._native_write_reg(REG_FIFO_ADDR_PTR, 0x00)
+        self._native_write_reg(REG_PAYLOAD_LENGTH, len(payload))
+        self._native_write_fifo(payload)
+        self._native_write_reg(REG_IRQ_FLAGS, 0xFF)
+
+        self._native_write_reg(REG_OP_MODE, MODE_LORA | MODE_TX)
+
+        t0 = utime.ticks_ms()
+        tx_done = False
+        while utime.ticks_diff(utime.ticks_ms(), t0) < 300:
+            if self._native_read_reg(REG_IRQ_FLAGS) & IRQ_TX_DONE:
+                tx_done = True
+                break
+            utime.sleep_ms(1)
+
+        self._native_write_reg(REG_IRQ_FLAGS, 0xFF)
+        self._native_write_reg(REG_OP_MODE, MODE_LORA | MODE_RX_CONT)
+
+        if not tx_done:
+            print("[WARN] Timeout aguardando TX_DONE no SX1278.")
+
+    def _native_receive_packet(self):
+        flags = self._native_read_reg(REG_IRQ_FLAGS)
+        if not (flags & IRQ_RX_DONE):
+            return None
+
+        self._native_write_reg(REG_IRQ_FLAGS, 0xFF)
+
+        if flags & IRQ_PAYLOAD_CRC_ERROR:
+            return None
+
+        nb_bytes = self._native_read_reg(REG_RX_NB_BYTES)
+        current_addr = self._native_read_reg(REG_FIFO_RX_CURRENT)
+        self._native_write_reg(REG_FIFO_ADDR_PTR, current_addr)
+        raw = self._native_read_buf(REG_FIFO, nb_bytes)
+
+        try:
+            return raw.decode("utf-8", "ignore").strip()
+        except Exception:
+            return None
 
     def send(self, message):
         """Transmite uma mensagem pela interface LoRa e mostra log local."""
-        if self._lora:
-            self._lora.println(message)
+        try:
+            if self._backend == "sx127x":
+                self._lora.println(message)
+            elif self._backend == "native":
+                self._native_send_packet(message.encode("utf-8"))
+        except Exception as exc:
+            print(f"[WARN] Falha no envio LoRa ({self._backend}): {exc}")
         print(f"[LoRa TX] → {message}")
 
     def receive(self):
@@ -145,11 +308,20 @@ class LoRaRadio:
 
         Retorna a mensagem decodificada ou None quando não há nenhum pacote.
         """
-        if self._lora and self._lora.received_packet():
-            payload = self._lora.read_payload(with_header=False)
-            msg = bytes(payload).decode("utf-8", "ignore").strip()
-            print(f"[LoRa RX] ← {msg}")
-            return msg
+        try:
+            if self._backend == "sx127x" and self._lora and self._lora.received_packet():
+                payload = self._lora.read_payload(with_header=False)
+                msg = bytes(payload).decode("utf-8", "ignore").strip()
+                print(f"[LoRa RX] ← {msg}")
+                return msg
+
+            if self._backend == "native":
+                msg = self._native_receive_packet()
+                if msg:
+                    print(f"[LoRa RX] ← {msg}")
+                    return msg
+        except Exception as exc:
+            print(f"[WARN] Falha na leitura LoRa ({self._backend}): {exc}")
         return None
 
 
