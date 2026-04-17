@@ -69,12 +69,12 @@ Conectada fisicamente ao ignitor do foguete.
 | GP2 | LoRa SPI SCK | SPI Clock |
 | GP3 | LoRa SPI TX | SPI MOSI |
 | GP4 | LoRa RESET | Reset |
+| GP15 | LoRa DIO0 | Interrupção do rádio |
 | GP11 | LED Amarelo | Status: conectado |
 | GP12 | LED Vermelho | Status: ignição iminente |
-| GP13 | LED do botão | Status: ligado |
+| GP13 | Botão Ignição | Comando de ignição (segurar 5 s) |
 | GP19 | Buzzer | Alerta sonoro |
-| GP14 | Botão Power | Liga/desliga |
-| GP26 | Botão Ignição | Comando de ignição (segurar 5 s) |
+| GP14 | Chave geral | Liga/desliga de alimentação |
 
 ### Estação de Ignição
 | GPIO Pico | Conexão | Descrição |
@@ -87,7 +87,7 @@ Conectada fisicamente ao ignitor do foguete.
 | GP11 | LED Amarelo | Status: conectado com comando |
 | GP12 | LED Vermelho | Status: ignição iminente |
 | GP19 | Buzzer | Contagem regressiva |
-| GP26 | Gate Ignitor | Comando Relé |
+| GP26 | Gate Ignitor | Comando Relé/ignitor |
 
 
 ## Sequência de Operação
@@ -110,33 +110,34 @@ Conectada fisicamente ao ignitor do foguete.
    - Buzzer emite tom contínuo
 
 2. **Estação de Comando envia sinal LoRa para Estação de Ignição**
-   - Pacote com comando `ARM`
-   - Requer confirmação (ACK) da Estação de Ignição
+   - Envia `ARM_CONFIRMED` continuamente durante a fase de disparo
+   - Requer confirmação `ACK` da Estação de Ignição
 
 3. **Estação de Ignição recebe comando e inicia contagem**
    - LED vermelho pisca rapidamente
    - Buzzer emite **5 apitos** (1 por segundo) = contagem regressiva
-   - A cada segundo, verifica se comando ainda está ativo
+   - Verifica continuamente se `ARM_CONFIRMED` segue ativo
 
 4. **Durante a contagem (5 s):**
-   - Se botão na Estação de Comando for **solto**: abortado
-   - Estação de Ignição envia mensagem de abort
+   - Se botão na Estação de Comando for **solto**: Comando envia `ABORT`
+   - Se sinal `ARM_CONFIRMED` parar por > 500 ms: aborta por segurança
    - Ambas as estações voltam ao estado "Conectado"
 
 5. **Ao final dos 5 segundos:**
    - LED vermelho fica **sólido** em ambas estações
-   - Estação de Ignição aciona o ignitor (GPIO16 HIGH)
-   - Buzzer emite tom longo de confirmação
+   - Estação de Ignição aciona o ignitor (GP26 HIGH) por 2 s
+   - Estação de Ignição envia `IGNITION_COMPLETE` para a base
 
 6. **Após ignição:**
-   - Sistema aguarda 3 s e retorna ao estado "Conectado"
+   - Estação de Comando aguarda 3 s e emite 2 bips de finalização
+   - Sistema retorna ao estado "Conectado"
 
 ## Segurança
 
 - Botão de ignição deve ser do tipo **momentâneo** (não trava)
 - Ignição só ocorre se comando for mantido por toda a sequência (5 s)
 - Comunicação LoRa bidirecional: Estação de Ignição confirma recebimento
-- Timeout: se Estação de Ignição não receber heartbeat por 2 s, aborta
+- Timeout de comando: se Estação de Ignição não receber `ARM_CONFIRMED` por > 500 ms, aborta
 - Sensor de continuidade (opcional): verifica se ignitor está conectado antes de armar
 
 ## Consumo de Energia
@@ -160,10 +161,10 @@ Conectada fisicamente ao ignitor do foguete.
 
 Microcontrolador dual-core ARM Cortex-M0+ (RP2040), 264KB SRAM, 2MB Flash.
 
-### Módulo LoRa SX1268
-<img src="./images/lora.png" width="220" alt="Módulo LoRa SX1268"/>
+### Módulo LoRa RA-02 / SX1278
+<img src="./images/lora.png" width="220" alt="Módulo LoRa RA-02 SX1278"/>
 
-Transceptor LoRa de longo alcance operando em **433 MHz**. Chip Semtech SX1268.
+Transceptor LoRa de longo alcance operando em **433 MHz**. Chip Semtech SX1278.
 
 ### Botão Liga/Desliga
 <img src="./images/power-button.avif" width="220" alt="Botão Liga/Desliga"/>

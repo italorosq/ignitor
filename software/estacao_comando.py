@@ -1,29 +1,19 @@
 """
-╔══════════════════════════════════════════════════════════════════╗
-║         ESTAÇÃO DE COMANDO — SISTEMA DE IGNIÇÃO LoRa             ║
-║  Arquivo  : command_station.py                                   ║
-║  Hardware : Raspberry Pi Pico + SX1278 (433 MHz)                 ║
-║  Autor    : Sistema de Ignição de Foguetes                       ║
-╚══════════════════════════════════════════════════════════════════╝
+ESTACAO DE COMANDO - SISTEMA DE IGNICAO LoRa
 
-PINAGEM — SX1278 → Raspberry Pi Pico
-─────────────────────────────────────
-  SX1278   │ Pico GPIO │ Pino físico
-  ─────────┼───────────┼────────────
-  MOSI     │ GP3      │ 5
-  MISO     │ GP0      │ 1
-  SCK      │ GP2      │ 4
-  NSS/CS   │ GP1      │ 2
-  RESET    │ GP4      │ 6
-  DIO0/G0  │ GP15      │ 20
+Pinagem SX1278 -> Raspberry Pi Pico
+- MOSI: GP3 (pino fisico 5)
+- MISO: GP0 (pino fisico 1)
+- SCK: GP2 (pino fisico 4)
+- CS: GP1 (pino fisico 2)
+- RESET: GP4 (pino fisico 6)
+- DIO0: GP15 (pino fisico 20)
 
-
-PERIFÉRICOS
-─────────────────────────────────────
-  LED Amarelo → GP11  (pino 15)   + resistor 330Ω → GND
-  LED Vermelho→ GP12  (pino 16)   + resistor 330Ω → GND
-  Buzzer      → GP19  (pino 25)   + resistor 100Ω → GND
-  Botão       → GP26  (pino 31)   → GND  (pull-up interno ativado)
+Perifericos
+- LED amarelo: GP11
+- LED vermelho: GP12
+- Buzzer: GP19
+- Botao de ignicao: GP13 (pull-up interno)
 """
 
 from machine import Pin, SPI
@@ -49,18 +39,18 @@ except ImportError:
 # ╚══════════════════════════════════════════════════════════════╝
 
 # ── Pinos SPI / LoRa ─────────────────────────────────────────────
-PIN_MOSI  = 5
-PIN_MISO  = 1
-PIN_SCK   = 4
-PIN_CS    = 2
-PIN_RESET = 6
-PIN_DIO0  = 20
+PIN_MOSI  = 3
+PIN_MISO  = 0
+PIN_SCK   = 2
+PIN_CS    = 1
+PIN_RESET = 4
+PIN_DIO0  = 15
 
 # ── Periféricos ──────────────────────────────────────────────────
-PIN_LED_YELLOW = 15  # pisca durante o arme
-PIN_LED_RED    = 16  # acende fixo ao receber ACK
-PIN_BUZZER     = 25  # bipes de alerta
-PIN_BUTTON     = 31  # botão momentâneo (active-low, pull-up)
+PIN_LED_YELLOW = 11  # status de conexao e armamento
+PIN_LED_RED    = 12  # acende fixo ao receber ACK
+PIN_BUZZER     = 19  # bipes de alerta
+PIN_BUTTON     = 13  # botao momentaneo (active-low, pull-up)
 
 # ── Tempos (ms) ──────────────────────────────────────────────────
 HOLD_REQUIRED_MS   = 5_000   # tempo que o botão deve ficar pressionado
@@ -68,11 +58,17 @@ DEBOUNCE_MS        = 50      # janela de debounce
 BLINK_INTERVAL_MS  = 250     # cadência do LED amarelo / buzzer
 ACK_TIMEOUT_MS     = 2_000   # aguarda ACK por este tempo após ARM_CONFIRMED
 RETRANSMIT_MS      = 200     # intervalo entre re-envios do ARM_CONFIRMED
+PING_INTERVAL_MS   = 1_000   # intervalo de PING para teste de conexao
+LINK_TIMEOUT_MS    = 3_000   # sem PONG neste tempo = sem conexao
+FINALIZE_DELAY_MS  = 3_000   # espera apos ignicao concluida
 
 # ── Mensagens LoRa ───────────────────────────────────────────────
 MSG_ARM    = "ARM_CONFIRMED"
 MSG_ABORT  = "ABORT"
 MSG_ACK    = "ACK"
+MSG_DONE   = "IGNITION_COMPLETE"
+MSG_PING   = "PING"
+MSG_PONG   = "PONG"
 
 # ── Parâmetros LoRa (SX1278 @ 433 MHz) ──────────────────────────
 LORA_PARAMS = {
@@ -95,7 +91,7 @@ class State:
     ARMING      = "ARMING"
     # Estado de transmissão: envia repetidamente o comando de armamento.
     TRANSMITTING = "TRANSMITTING"
-    # Estado de confirmação: ACK recebido do receptor, ignição confirmada.
+    # Estado de confirmação: ignicao concluida no receptor.
     CONFIRMED   = "CONFIRMED"
     # Estado de aborto: envia ABORT para o receptor e retorna a IDLE.
     ABORTING    = "ABORTING"
@@ -115,7 +111,7 @@ class LoRaRadio:
     def __init__(self):
         if LORA_AVAILABLE:
             spi = SPI( 
-                1,
+                0,
                 baudrate=1_000_000,
                 polarity=0,
                 phase=0,
@@ -137,13 +133,13 @@ class LoRaRadio:
             self._lora = None
             print("[LoRa] Modo MOCK ativo.")
 
-    def send(self, message: str) -> None:
+    def send(self, message):
         """Transmite uma mensagem pela interface LoRa e mostra log local."""
         if self._lora:
             self._lora.println(message)
         print(f"[LoRa TX] → {message}")
 
-    def receive(self) -> str | None:
+    def receive(self):
         """
         Lê um pacote LoRa não bloqueante, se houver.
 
@@ -188,6 +184,8 @@ class CommandStation:
         self._last_blink_ms   = 0    # instante do último piscar do LED/buzzer
         self._last_tx_ms      = 0    # instante do último envio de ARM_CONFIRMED
         self._tx_start_ms     = 0    # instante do início da fase de transmissão
+        self._finalize_start_ms = 0  # inicio da janela de finalizacao
+        self._ack_received = False
 
         # Debounce do botão para evitar leituras falsas.
         self._last_btn_change_ms = 0
@@ -195,6 +193,12 @@ class CommandStation:
 
         # Estado de toggle para o efeito de piscar.
         self._blink_on = False
+
+        # Estado de link com a estacao de ignicao.
+        self._link_ok = False
+        self._last_ping_ms = 0
+        self._last_pong_ms = None
+        self._last_no_link_warn_ms = 0
 
     # ─────────────────────────────────────────
     #  LEITURA COM DEBOUNCE
@@ -225,6 +229,28 @@ class CommandStation:
         self.buzzer.value(0)
         self._blink_on = False
 
+    def _refresh_link(self, now):
+        """Mantem o teste de conexao ativo com PING/PONG."""
+        if utime.ticks_diff(now, self._last_ping_ms) >= PING_INTERVAL_MS:
+            self._last_ping_ms = now
+            self.lora.send(MSG_PING)
+
+        incoming = self.lora.receive()
+        if incoming == MSG_PING:
+            self.lora.send(MSG_PONG)
+            self._last_pong_ms = now
+        elif incoming == MSG_PONG:
+            self._last_pong_ms = now
+
+        link_was_ok = self._link_ok
+        if self._last_pong_ms is None:
+            self._link_ok = False
+        else:
+            self._link_ok = utime.ticks_diff(now, self._last_pong_ms) <= LINK_TIMEOUT_MS
+        if self._link_ok != link_was_ok:
+            status = "OK" if self._link_ok else "PERDIDO"
+            print(f"[CMD] Link com ignicao: {status}")
+
     def _blink_tick(self):
         """Alterna LED amarelo e buzzer em BLINK_INTERVAL_MS."""
         now = utime.ticks_ms()
@@ -239,6 +265,8 @@ class CommandStation:
     # ─────────────────────────────────────────
     def _enter_idle(self):
         self._all_off()
+        if self._link_ok:
+            self.led_yellow.value(1)
         self.state = State.IDLE
         print("[CMD] Estado: IDLE — aguardando botão.")
 
@@ -251,14 +279,17 @@ class CommandStation:
     def _enter_transmitting(self):
         self._tx_start_ms = utime.ticks_ms()
         self._last_tx_ms  = 0
+        self._ack_received = False
+        self.led_red.value(0)
         self.state = State.TRANSMITTING
-        print("[CMD] Estado: TRANSMITTING — enviando ARM_CONFIRMED.")
+        print("[CMD] Estado: TRANSMITTING — mantendo ARM_CONFIRMED ativo.")
 
     def _enter_confirmed(self):
         self._all_off()
-        self.led_red.value(1)    # LED vermelho fixo = ACK recebido
+        self.led_red.value(1)
+        self._finalize_start_ms = utime.ticks_ms()
         self.state = State.CONFIRMED
-        print("[CMD] Estado: CONFIRMED — ACK recebido! LED vermelho aceso.")
+        print("[CMD] Estado: CONFIRMED — IGNITION_COMPLETE recebido.")
 
     def _enter_aborting(self):
         self.lora.send(MSG_ABORT)
@@ -273,7 +304,17 @@ class CommandStation:
     # ─────────────────────────────────────────
     def _handle_idle(self):
         # Apenas aguarda o início do armamento quando o botão é pressionado.
+        now = utime.ticks_ms()
+        self._refresh_link(now)
+        if self._link_ok:
+            self.led_yellow.value(1)
+
         if self._button_pressed():
+            if not self._link_ok:
+                if utime.ticks_diff(now, self._last_no_link_warn_ms) >= 1_000:
+                    self._last_no_link_warn_ms = now
+                    print("[CMD] Sem link LoRa ativo. Armamento bloqueado.")
+                return
             self._enter_arming()
 
     def _handle_arming(self):
@@ -314,8 +355,18 @@ class CommandStation:
         # Verifica se o receptor devolveu o ACK.
         incoming = self.lora.receive()
         if incoming == MSG_ACK:
+            if not self._ack_received:
+                self._ack_received = True
+                self.led_red.value(1)
+                print("[CMD] ACK recebido da base de ignicao.")
+        elif incoming == MSG_DONE:
             self._enter_confirmed()
             return
+        elif incoming == MSG_PING:
+            self.lora.send(MSG_PONG)
+        elif incoming == MSG_PONG:
+            self._last_pong_ms = now
+            self._link_ok = True
 
         # Se não receber ACK dentro do tempo, reinicia a janela de espera.
         if utime.ticks_diff(now, self._tx_start_ms) >= ACK_TIMEOUT_MS:
@@ -323,10 +374,14 @@ class CommandStation:
             self._tx_start_ms = now
 
     def _handle_confirmed(self):
-        # Após confirmação, retornar a IDLE apenas quando o botão for solto.
-        if not self._button_pressed():
-            print("[CMD] Botão solto após confirmação — retornando ao IDLE.")
-            self.lora.send(MSG_ABORT)   # sinaliza encerramento à base remota
+        # Aguarda a janela de seguranca final e emite dois bipes curtos.
+        if utime.ticks_diff(utime.ticks_ms(), self._finalize_start_ms) >= FINALIZE_DELAY_MS:
+            print("[CMD] Ciclo concluido. Emitindo bipes de finalizacao.")
+            for _ in range(2):
+                self.buzzer.value(1)
+                utime.sleep_ms(120)
+                self.buzzer.value(0)
+                utime.sleep_ms(120)
             self._enter_idle()
 
     # ─────────────────────────────────────────

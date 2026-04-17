@@ -32,8 +32,8 @@ pip install -r requirements.txt
 
 **Componentes necessários:**
 - 1x Raspberry Pi Pico
-- 1x Módulo LoRa 915 MHz
-- 3x LEDs (verde, amarelo, vermelho) + 3x resistores 220Ω
+- 1x Módulo LoRa 433 MHz (RA-02 / SX1278)
+- 2x LEDs (amarelo, vermelho) + 2x resistores 220Ω
 - 1x Buzzer ativo 5V
 - 2x Botões tácteis (power, ignição)
 - Bateria e regulador (se necessário)
@@ -43,9 +43,9 @@ pip install -r requirements.txt
 **Checklist:**
 1. Soldar headers no Raspberry Pi Pico (se necessário)
 2. Conectar módulo LoRa via SPI (GP0-GP4)
-3. Conectar LEDs aos GPIOs 10-12 com resistores
-4. Conectar buzzer ao GP13
-5. Conectar botões aos GP14 (power) e GP15 (ignição) com pull-down
+3. Conectar LEDs de status aos GP11 (amarelo) e GP12 (vermelho)
+4. Conectar buzzer ao GP19
+5. Conectar botão de ignição ao GP13 com pull-up interno
 6. Fixar antena no módulo LoRa **antes** de energizar
 7. Conectar bateria/fonte
 
@@ -53,8 +53,8 @@ pip install -r requirements.txt
 
 **Componentes necessários:**
 - 1x Raspberry Pi Pico
-- 1x Módulo LoRa 915 MHz
-- 3x LEDs (verde, amarelo, vermelho) + 3x resistores 220Ω
+- 1x Módulo LoRa 433 MHz (RA-02 / SX1278)
+- 2x LEDs (amarelo, vermelho) + 2x resistores 220Ω
 - 1x Buzzer ativo 5V
 - 1x MOSFET ou relé para ignitor
 - Bateria e regulador (se necessário)
@@ -64,9 +64,9 @@ pip install -r requirements.txt
 **Checklist:**
 1. Soldar headers no Raspberry Pi Pico
 2. Conectar módulo LoRa via SPI (GP0-GP4)
-3. Conectar LEDs aos GPIOs 10-12 com resistores
-4. Conectar buzzer ao GP13
-5. Conectar MOSFET/relé ao GP16 (gate do ignitor)
+3. Conectar LEDs aos GP11 (amarelo) e GP12 (vermelho)
+4. Conectar buzzer ao GP19
+5. Conectar MOSFET/relé ao GP26 (gate do ignitor)
 6. Isolar circuito do ignitor com diodo flyback (se usar relé)
 7. Fixar antena no módulo LoRa **antes** de energizar
 8. Conectar bateria/fonte
@@ -80,16 +80,15 @@ Antes de energizar:
 
 ## 4. Configuração do Firmware
 
-### 4.1. Copiar Configuração
+### 4.1. Ajustar Parâmetros
 
-```bash
-cp firmware/config.example.h firmware/config.h
-```
+Os scripts oficiais estão em:
 
-Editar `config.h` e ajustar:
-- `LORA_FREQ` → 915.0 (MHz)
-- `STATION_TYPE` → `COMMAND` ou `IGNITION`
-- IDs únicos para cada estação
+- `software/estacao_comando.py`
+- `software/estacao_ignicao.py`
+
+Parâmetros (frequência, tempos e pinagem) ficam no topo desses arquivos.
+Confirme frequência em 433 MHz e pinagem conforme `hardware/README.md`.
 
 ### 4.2. Compilar e Gravar
 
@@ -97,18 +96,17 @@ Editar `config.h` e ajustar:
 1. Abrir Thonny IDE
 2. Conectar Raspberry Pi Pico via USB (segurar BOOTSEL ao conectar)
 3. Instalar MicroPython: Tools → Options → Interpreter → Install or update MicroPython
-4. Abrir `firmware/main.py` (Estação de Comando ou Ignição)
+4. Abrir `software/estacao_comando.py` (ou `software/estacao_ignicao.py`)
 5. Clicar em Run → Save to Raspberry Pi Pico
 6. Repetir para a outra estação
 
 #### Usando linha de comando:
 ```bash
-cd firmware
 # Para Estação de Comando
-ampy --port /dev/ttyACM0 put command_station.py main.py
+ampy --port /dev/ttyACM0 put software/estacao_comando.py main.py
 
 # Para Estação de Ignição
-ampy --port /dev/ttyACM1 put ignition_station.py main.py
+ampy --port /dev/ttyACM1 put software/estacao_ignicao.py main.py
 ```
 
 ## 5. Validar Operação
@@ -116,19 +114,17 @@ ampy --port /dev/ttyACM1 put ignition_station.py main.py
 ### 5.1. Teste Inicial (sem ignitor)
 
 1. Energizar **apenas** a Estação de Comando
-   - LED verde deve acender
    - LED amarelo permanece apagado (sem conexão)
 
 2. Energizar a Estação de Ignição
-   - LED verde acende em ambas
-   - Após 1-2 s, LEDs amarelos acendem (heartbeat estabelecido)
-   - Monitor serial mostra mensagens `HEARTBEAT` e `HEARTBEAT_ACK`
+   - Após 1-2 s, LED amarelo do comando deve estabilizar ligado
+   - Monitor serial mostra mensagens `PING` e `PONG`
 
 3. Testar sequência de ignição (com carga dummy)
-   - Conectar LED/lâmpada ao GP16 da Estação de Ignição
+   - Conectar LED/lâmpada ao GP26 da Estação de Ignição
    - Pressionar e segurar botão de ignição na Estação de Comando
    - Observar: LEDs vermelhos piscam, buzzer emite 5 apitos
-   - Ao final, LED/lâmpada conectada ao GP16 acende
+   - Ao final, LED/lâmpada conectada ao GP26 acende por 2 s
 
 ### 5.2. Teste de Abort
 
@@ -164,10 +160,9 @@ ampy --port /dev/ttyACM1 put ignition_station.py main.py
 
 | Problema | Possível Causa | Solução |
 |----------|----------------|---------|
-| LED verde não acende | Sem alimentação | Verificar bateria/fonte |
 | LED amarelo não acende | LoRa não comunica | Confirmar antenas, frequência, conexões SPI |
-| Buzzer não soa | GPIO mal conectado | Verificar GP13, trocar buzzer |
-| Ignitor não aciona | MOSFET/relé com problema | Testar GP16 com LED, verificar gate driver |
+| Buzzer não soa | GPIO mal conectado | Verificar GP19, trocar buzzer |
+| Ignitor não aciona | MOSFET/relé com problema | Testar GP26 com LED, verificar gate driver |
 
 Ver mais em `docs/TROUBLESHOOTING.md`.
 

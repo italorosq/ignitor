@@ -4,6 +4,7 @@
 ![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
 
 ## Sobre
+
 Sistema de ignição remota para foguetes experimentais da Serra Rocketry.
 
 A solução é formada por duas estações independentes que se comunicam via LoRa 433 MHz:
@@ -18,7 +19,8 @@ O objetivo é permitir ignição com redundância de segurança, confirmação d
 ### Estação de Comando
 - Inicia a sequência de ignição por botão dedicado
 - Exige ação mantida por 5 segundos
-- Envia comando via LoRa e aguarda ACK
+- Mantém `ARM_CONFIRMED` em transmissão contínua
+- Aguarda `ACK` e confirmação final `IGNITION_COMPLETE`
 - Exibe status por LEDs e buzzer
 
 ### Estação de Ignição
@@ -31,10 +33,12 @@ Para detalhes completos de pinagem, BOM, consumo, segurança e esquemáticos, co
 
 ## Sequência de Ignição (Resumo)
 1. Operador pressiona e mantém o botão de ignição por 5 s
-2. Estação de comando envia `ARM` via LoRa
-3. Estação de ignição confirma recebimento e inicia contagem
-4. Se o botão for solto antes do fim, procedimento é abortado
-5. Ao final de 5 s, a estação de ignição aciona o ignitor
+2. Estação de comando valida link com `PING`/`PONG`
+3. Estação de comando envia `ARM_CONFIRMED` via LoRa
+4. Estação de ignição confirma com `ACK` e inicia contagem
+5. Se o botão for solto antes do fim, procedimento é abortado
+6. Ao final de 5 s, a estação de ignição aciona o ignitor por 2 s
+7. Estação de ignição envia `IGNITION_COMPLETE`
 
 ## Componentes Principais
 - 2x Raspberry Pi Pico
@@ -50,9 +54,9 @@ Para detalhes completos de pinagem, BOM, consumo, segurança e esquemáticos, co
 
 ## Estrutura do Repositório
 - `docs/`: documentação técnica e operacional
-- `firmware/`: código embarcado e interface web local
+- `firmware/`: templates e materiais legados
 - `hardware/`: esquemáticos, modelos, imagens e arquivos de fabricação
-- `software/`: ferramentas de apoio de software
+- `software/`: firmware oficial MicroPython para Raspberry Pi Pico
 - `test/`: materiais de teste e validação
 
 ## Documentação
@@ -65,7 +69,7 @@ Para detalhes completos de pinagem, BOM, consumo, segurança e esquemáticos, co
 ## Segurança
 - O botão de ignição deve ser momentâneo (sem trava)
 - O comando de ignição deve permanecer ativo por toda a janela de 5 s
-- Em perda de comunicação/heartbeat, o sistema deve abortar
+- Em perda de `ARM_CONFIRMED` (> 500 ms), a ignição deve abortar
 - Testes devem ser feitos com carga dummy antes de ignição real
 - Manter distância operacional segura entre operador e foguete
 

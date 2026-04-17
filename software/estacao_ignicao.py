@@ -18,7 +18,6 @@
 #   Buzzer             ──  GP19
 #   LED Vermelho       ──  GP12   (Contagem / Erro)
 #   LED Amarelo        ──  GP11   (Conectado / Ativo)
-#   Botão Energia      ──  GP20   (Pull-down interno, ativo em ALTO)
 #   ─────────────────────────────────────────────────────
 #
 #   LÓGICA DE SEGURANÇA:
@@ -28,8 +27,7 @@
 #     de "ABORT" reseta imediatamente a contagem.
 #   - O sistema usa ticks_ms() para temporização não-bloqueante,
 #     garantindo que o rádio continue sendo lido durante a contagem.
-#   - O botão de energia deve ser pressionado após o boot para
-#     liberar o teste de conexão e o loop principal.
+#   - A estacao inicia diretamente apos energizacao pela chave geral.
 # ==============================================================================
 
 import utime
@@ -39,22 +37,19 @@ from machine import Pin, SPI
 #  DEFINIÇÃO DE PINOS
 # =============================================================================
 
-SPI_SCK  = 4
-SPI_MOSI = 5
-SPI_MISO = 1
+SPI_SCK  = 2
+SPI_MOSI = 3
+SPI_MISO = 0
 
 # Pinos de controle do SX1278
-LORA_CS    = Pin(2, Pin.OUT, value=1)  # NSS: HIGH = modulo desmarcado
-LORA_RESET = Pin(6, Pin.OUT, value=1)  # RESET: LOW por 10ms para resetar
+LORA_CS    = Pin(1, Pin.OUT, value=1)  # NSS: HIGH = modulo desmarcado
+LORA_RESET = Pin(4, Pin.OUT, value=1)  # RESET: LOW por 10ms para resetar
 
 # Atuadores e Indicadores
-PIN_RELE         = Pin(31, Pin.OUT, value=0)  # Rele: garantido BAIXO no boot
-PIN_BUZZER       = Pin(25, Pin.OUT, value=0)
-PIN_LED_VERMELHO = Pin(16, Pin.OUT, value=0)  # Vermelho: Pisca em contagem/erro, ON ignicao
-PIN_LED_AMARELO  = Pin(15, Pin.OUT, value=0)  # Amarelo: ON quando conectado/ativo
-
-# Botão de energia (pull-down interno; pressionar = nível ALTO)
-PIN_BOTAO_ENERGIA = Pin(26, Pin.IN, Pin.PULL_DOWN)
+PIN_RELE         = Pin(26, Pin.OUT, value=0)  # Rele: garantido BAIXO no boot
+PIN_BUZZER       = Pin(19, Pin.OUT, value=0)
+PIN_LED_VERMELHO = Pin(12, Pin.OUT, value=0)  # Vermelho: Pisca em contagem/erro, ON ignicao
+PIN_LED_AMARELO  = Pin(11, Pin.OUT, value=0)  # Amarelo: ON quando conectado/ativo
 
 # =============================================================================
 #  ENDERECOS DE REGISTRADORES DO SX1278
@@ -99,7 +94,7 @@ IRQ_TX_DONE = 0x08  # Transmissao concluida
 # =============================================================================
 
 spi = SPI(0,
-          baudrate=10_000_000,
+          baudrate=1_000_000,
           polarity=0,
           phase=0,
           sck=Pin(SPI_SCK),
@@ -131,6 +126,11 @@ def _spi_read_buf(reg, length):
     result = spi.read(length)
     LORA_CS.value(1)
     return result
+
+
+def _toggle_pin(pin):
+    """Alterna pinos de forma compativel com firmwares sem Pin.toggle()."""
+    pin.value(0 if pin.value() else 1)
 
 # =============================================================================
 #  DRIVER DO MODULO LORA SX1278
@@ -219,7 +219,7 @@ def lora_read_packet():
     except Exception:
         return None
 
-def lora_send(message: str):
+def lora_send(message):
     _spi_write(REG_OP_MODE, MODE_LORA | MODE_STDBY)
     utime.sleep_ms(5)
 
@@ -305,14 +305,7 @@ def executar():
     print("[BOOT] LoRa OK. Modo de recepcao ativo.")
     lora_receive_mode()
 
-    # --- AGUARDA BOTÃO DE ENERGIA ------------------------------------------
-    print("[BOOT] Aguardando pressionar o Botao de Energia para continuar...")
-    # Estado "Ligado (idle)" na tabela: LEDs Amarelo OFF e Vermelho OFF
-    while not PIN_BOTAO_ENERGIA.value():
-        utime.sleep_ms(100) 
-    
-    buzzer_bip(100)
-    print("[BOOT] Botao de Energia pressionado. Prosseguindo...")
+    print("[BOOT] Chave geral ativa. Prosseguindo com auto-inicializacao.")
 
     # --- TESTE DE CONEXAO --------------------------------------------------
     print("[TESTE] Enviando PING para a Base...")
@@ -359,6 +352,10 @@ def executar():
             mensagem_recebida = lora_read_packet()
             if mensagem_recebida:
                 print("[RX] '{}' | Estado: {}".format(mensagem_recebida, estado))
+
+        if mensagem_recebida == "PING":
+            lora_send("PONG")
+            mensagem_recebida = None
 
         # ------------------------------------------------------------------
         #  ESTADO: AGUARDANDO (Conectado)
@@ -407,7 +404,7 @@ def executar():
                 t_ultimo_pisca = agora
 
             if utime.ticks_diff(agora, t_ultimo_buz) >= INTERVALO_BUZZER_MS:
-                PIN_BUZZER.toggle()
+                _toggle_pin(PIN_BUZZER)
                 t_ultimo_buz = agora
 
             decorrido = utime.ticks_diff(agora, t_inicio_contagem)
@@ -416,6 +413,22 @@ def executar():
                 print("[CONTAGEM] {}s restantes...".format(restante // 1000 + 1))
 
             if decorrido >= TEMPO_CONTAGEM_MS:
+                if lora_packet_available():
+                    msg_final = lora_read_packet()
+                    if msg_final == MSG_ABORT:
+                        print("[SEGURANCA] ABORT no instante final. Ignicao cancelada.")
+                        desligar_tudo()
+                        sinalizar_erro(6)
+                        estado = ESTADO_AGUARDANDO
+                        continue
+
+                if utime.ticks_diff(agora, t_ultimo_arm) > TIMEOUT_SINAL_MS:
+                    print("[SEGURANCA] Sinal perdido no instante final. Ignicao cancelada.")
+                    desligar_tudo()
+                    sinalizar_erro(6)
+                    estado = ESTADO_AGUARDANDO
+                    continue
+
                 print("[IGNICAO] Contagem completa! Acionando rele...")
                 PIN_BUZZER.value(0)
                 
@@ -441,7 +454,7 @@ def executar():
                 print("[TX] '{}' enviado para a Base.".format(MSG_DONE))
 
                 for _ in range(5):
-                    PIN_LED_VERMELHO.toggle()
+                    _toggle_pin(PIN_LED_VERMELHO)
                     buzzer_bip(80)
                     utime.sleep_ms(80)
                 PIN_LED_VERMELHO.value(0)

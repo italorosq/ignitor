@@ -12,9 +12,8 @@
 **Objetivo:** Confirmar que as duas estações se comunicam de forma confiável.
 
 Checklist:
-- [ ] Estação de Comando envia `HEARTBEAT`, Estação de Ignição responde com `HEARTBEAT_ACK`
+- [ ] Estação de Comando envia `PING`, Estação de Ignição responde com `PONG`
 - [ ] LED amarelo acende em ambas estações quando conectadas
-- [ ] RSSI da Estação de Ignição visível no serial monitor
 - [ ] Testar perda de comunicação: desligar uma estação e verificar timeout
 
 **Procedimento:**
@@ -30,12 +29,13 @@ Checklist:
 - [ ] Pressionar botão de ignição na Estação de Comando por 5 s completos
 - [ ] LED vermelho pisca em ambas estações durante contagem
 - [ ] Buzzer da Estação de Ignição emite 5 apitos (1 por segundo)
-- [ ] Ao final, GPIO16 da Estação de Ignição vai HIGH
+- [ ] Ao final, GP26 da Estação de Ignição vai HIGH por 2 s
+- [ ] Estação de Comando recebe `IGNITION_COMPLETE`
 - [ ] LED vermelho fica sólido ao acionar ignitor
 - [ ] Usar **carga dummy** (lâmpada 12 V ou LED) no lugar do ignitor real
 
 **Procedimento:**
-1. Conectar lâmpada/LED ao GPIO16 da Estação de Ignição
+1. Conectar lâmpada/LED ao GP26 da Estação de Ignição
 2. Pressionar e **segurar** botão de ignição
 3. Observar: LEDs, buzzers, e acionamento da carga
 4. Confirmar que lâmpada acende apenas após 5 s
@@ -54,7 +54,7 @@ Checklist:
 **Procedimento:**
 1. Iniciar sequência de ignição
 2. Soltar botão no 2º ou 3º apito
-3. Verificar que GPIO16 permanece LOW
+3. Verificar que GP26 permanece LOW
 4. Repetir 5 vezes para consistência
 
 ### 4. Abort Automático por Timeout
@@ -63,7 +63,7 @@ Checklist:
 Checklist:
 - [ ] Iniciar sequência de ignição
 - [ ] Desligar Estação de Comando no 3º segundo
-- [ ] Estação de Ignição detecta timeout (2 s sem heartbeat)
+- [ ] Estação de Ignição detecta timeout (> 500 ms sem `ARM_CONFIRMED`)
 - [ ] LED vermelho pisca rapidamente (erro)
 - [ ] Buzzer emite padrão de erro
 - [ ] Ignitor **não** é acionado
@@ -77,11 +77,10 @@ Checklist:
 **Objetivo:** Confirmar padrões de LEDs e buzzer conforme especificação.
 
 Checklist:
-- [ ] **Verde:** acende ao ligar, permanece durante operação
-- [ ] **Amarelo:** acende quando conectado (heartbeats OK)
+- [ ] **Amarelo:** acende quando conectado (PING/PONG OK)
 - [ ] **Vermelho:** pisca durante ignição iminente, sólido ao acionar
 - [ ] **Buzzer Ignição:** 5 apitos durante contagem + tom longo ao acionar
-- [ ] **Buzzer Comando:** tom contínuo enquanto botão pressionado
+- [ ] **Buzzer Comando:** pisca junto com LED amarelo durante armamento
 
 **Procedimento:**
 1. Testar cada estado individualmente via comandos seriais (debug)

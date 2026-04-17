@@ -10,7 +10,7 @@ STATION_ID = 0x01         # ID único da estação
 # ============================================
 # CONFIGURAÇÃO LoRa
 # ============================================
-LORA_FREQ = 915.0              # Frequência em MHz (915 para América do Sul)
+LORA_FREQ = 433.0              # Frequência em MHz (RA-02/SX1278)
 LORA_BANDWIDTH = 125000        # Largura de banda em Hz (125 kHz)
 LORA_SPREADING_FACTOR = 7      # 7-12 (maior = + alcance, - velocidade)
 LORA_CODING_RATE = 5           # 5-8 (taxa de correção de erros)
@@ -37,17 +37,17 @@ PIN_LORA_MOSI = 3
 PIN_LORA_RESET = 4
 
 # Indicadores
-PIN_LED_GREEN = 10      # LED verde (sistema ligado)
+PIN_LED_GREEN = 10      # Opcional (nao usado no firmware atual)
 PIN_LED_YELLOW = 11     # LED amarelo (conectado)
-PIN_LED_RED = 12        # LED vermelho (ignição iminente)
-PIN_BUZZER = 13         # Buzzer ativo
+PIN_LED_RED = 12        # LED vermelho (ignicao/erro)
+PIN_BUZZER = 19         # Buzzer ativo
 
 # Controles (Estação de Comando)
-PIN_BUTTON_POWER = 14      # Botão de ligar/desligar
-PIN_BUTTON_IGNITION = 15   # Botão de ignição (segurar 5 s)
+PIN_BUTTON_POWER = 14      # Chave geral de alimentacao
+PIN_BUTTON_IGNITION = 13   # Botao de ignicao (segurar 5 s)
 
 # Ignitor (Estação de Ignição)
-PIN_IGNITOR_GATE = 16      # Saída para MOSFET/relé do ignitor
+PIN_IGNITOR_GATE = 26      # Saida para MOSFET/rele do ignitor
 PIN_CONTINUITY_SENSE = 17  # Sensor de continuidade (opcional)
 
 # ============================================

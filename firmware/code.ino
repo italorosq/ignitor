@@ -1,3 +1,12 @@
+/*
+ * LEGADO (nao oficial para o projeto atual)
+ *
+ * Este arquivo foi mantido apenas como referencia historica para ESP32/ESP8266 (Arduino).
+ * O fluxo oficial do repositório usa Raspberry Pi Pico com MicroPython nos arquivos:
+ * - ../software/estacao_comando.py
+ * - ../software/estacao_ignicao.py
+ */
+
 //Wifi SSID and other definitions will be using this name
 #define HostName "Ignitor"
 
