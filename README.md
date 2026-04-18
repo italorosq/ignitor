@@ -62,6 +62,7 @@ Para detalhes completos de pinagem, BOM, consumo, segurança e esquemáticos, co
 ## Documentação
 - [Hardware: arquitetura, BOM e pinagem](./hardware/README.md)
 - [Instalação](./docs/INSTALACAO.md)
+- [Envio de código para RP/Pico e créditos da biblioteca](./docs/README_ENVIO_RP.md)
 - [API e protocolos](./docs/API.md)
 - [Testes](./docs/TESTES.md)
 - [Troubleshooting](./docs/TROUBLESHOOTING.md)
