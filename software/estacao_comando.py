@@ -19,8 +19,6 @@ Perifericos
 from machine import Pin, SPI
 import utime
 
-Pin(25,1).value(1)
-
 
 # ─────────────────────────────────────────────────────────────────
 #  Driver LoRa (SX127x): prioridade para biblioteca externa,
@@ -29,9 +27,9 @@ Pin(25,1).value(1)
 try:
     from sx127x import SX127x
     SX127X_DRIVER_AVAILABLE = True
-except ImportError:
+except Exception as exc:
     SX127X_DRIVER_AVAILABLE = False
-    print("[WARN] sx127x nao encontrado — tentando driver nativo SX1278.")
+    print("[WARN] sx127x indisponivel ({}) - usando driver nativo SX1278.".format(exc))
 
 
 # ╔══════════════════════════════════════════════════════════════╗
@@ -51,6 +49,7 @@ PIN_LED_YELLOW = 11  # status de conexao e armamento
 PIN_LED_RED    = 12  # acende fixo ao receber ACK
 PIN_BUZZER     = 19  # bipes de alerta
 PIN_BUTTON     = 13  # botao momentaneo (active-low, pull-up)
+PIN_LED_LINK   = 25  # LED onboard: indica status de link LoRa
 
 # ── Tempos (ms) ──────────────────────────────────────────────────
 HOLD_REQUIRED_MS   = 5_000   # tempo que o botão deve ficar pressionado
@@ -175,13 +174,73 @@ class LoRaRadio:
                 print("[LoRa] SX1278 inicializado em 433 MHz (driver sx127x).")
                 return
             except Exception as exc:
-                print(f"[WARN] Falha ao iniciar sx127x ({exc}) — fallback nativo.")
+                if "unexpected keyword argument 'pins'" in str(exc):
+                    print("[INFO] API sx127x legada detectada - tentando compatibilidade.")
+                else:
+                    print(f"[WARN] Falha no sx127x padrao ({exc}) - tentando compatibilidade.")
+                try:
+                    self._lora = self._init_legacy_sx127x()
+                    self._backend = "sx127x"
+                    print("[LoRa] SX1278 inicializado em 433 MHz (sx127x legacy compat).")
+                    return
+                except Exception as legacy_exc:
+                    print(f"[WARN] Falha na compatibilidade sx127x ({legacy_exc}) - fallback nativo.")
 
         if self._init_native():
             self._backend = "native"
             print("[LoRa] SX1278 inicializado em 433 MHz (driver nativo SPI).")
         else:
             print("[LoRa] Modo MOCK ativo (sem resposta do SX1278).")
+
+    def _legacy_transfer(self, pin, address, value=0x00):
+        response = bytearray(1)
+        pin.value(0)
+        self._spi.write(bytes([address]))
+        self._spi.write_readinto(bytes([value]), response)
+        pin.value(1)
+        return response
+
+    def _init_legacy_sx127x(self):
+        legacy_params = {
+            "frequency"      : int(LORA_PARAMS["frequency"]),
+            "tx_power_level" : int(LORA_PARAMS["output_power"]),
+            "signal_bandwidth": int(LORA_PARAMS["bandwidth"]),
+            "spreading_factor": int(LORA_PARAMS["spreading_factor"]),
+            "coding_rate"    : int(LORA_PARAMS["coding_rate"]),
+            "preamble_length" : 8,
+            "implicitHeader" : False,
+            "sync_word"      : 0x12,
+            "enable_CRC"     : bool(LORA_PARAMS["rx_crc"]),
+        }
+
+        radio = SX127x(parameters=legacy_params)
+        radio.pin_ss = self._cs
+        radio.pin_RxDone = None
+        radio.transfer = self._legacy_transfer
+        if hasattr(radio, "init"):
+            radio.init()
+        return radio
+
+    def _sx_received_packet(self):
+        if not self._lora:
+            return False
+
+        if hasattr(self._lora, "received_packet"):
+            return bool(self._lora.received_packet())
+
+        if hasattr(self._lora, "receivedPacket"):
+            return bool(self._lora.receivedPacket())
+
+        return False
+
+    def _sx_read_payload(self):
+        if not self._lora or not hasattr(self._lora, "read_payload"):
+            return None
+
+        try:
+            return self._lora.read_payload(with_header=False)
+        except TypeError:
+            return self._lora.read_payload()
 
     def _native_write_reg(self, reg, value):
         self._cs.value(0)
@@ -309,8 +368,10 @@ class LoRaRadio:
         Retorna a mensagem decodificada ou None quando não há nenhum pacote.
         """
         try:
-            if self._backend == "sx127x" and self._lora and self._lora.received_packet():
-                payload = self._lora.read_payload(with_header=False)
+            if self._backend == "sx127x" and self._sx_received_packet():
+                payload = self._sx_read_payload()
+                if payload is None:
+                    return None
                 msg = bytes(payload).decode("utf-8", "ignore").strip()
                 print(f"[LoRa RX] ← {msg}")
                 return msg
@@ -344,6 +405,7 @@ class CommandStation:
         self.led_yellow = Pin(PIN_LED_YELLOW, Pin.OUT, value=0)
         self.led_red    = Pin(PIN_LED_RED,    Pin.OUT, value=0)
         self.buzzer     = Pin(PIN_BUZZER,     Pin.OUT, value=0)
+        self.led_link   = Pin(PIN_LED_LINK,   Pin.OUT, value=0)
         self.button     = Pin(PIN_BUTTON,     Pin.IN,  Pin.PULL_UP)
         self.lora       = LoRaRadio()
 
@@ -422,6 +484,8 @@ class CommandStation:
         if self._link_ok != link_was_ok:
             status = "OK" if self._link_ok else "PERDIDO"
             print(f"[CMD] Link com ignicao: {status}")
+
+        self.led_link.value(1 if self._link_ok else 0)
 
     def _blink_tick(self):
         """Alterna LED amarelo e buzzer em BLINK_INTERVAL_MS."""
