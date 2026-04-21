@@ -33,7 +33,7 @@ Conectada fisicamente ao ignitor do foguete.
 - Abortar procedimento se comando for interrompido
 
 **Componentes:**
-- 1x Raspberry Pi Pico
+- 1x ESP32-C3 SuperMini
 - 1x Módulo LoRa SX1278 433 MHz
 - 2x LEDs: amarelo (conectado), vermelho (ignição iminente)
 - 1x Buzzer ativo
@@ -46,7 +46,8 @@ Conectada fisicamente ao ignitor do foguete.
 
 | Componente | Quantidade | Referência | Especificação | Link |
 |------------|------------|------------|---------------|------|
-| Raspberry Pi Pico | 2 | MCU1, MCU2 | RP2040 | [Raspberry Pi](https://www.raspberrypi.com/products/raspberry-pi-pico/) |
+| Raspberry Pi Pico | 1 | MCU1 | RP2040 | [Raspberry Pi](https://www.raspberrypi.com/products/raspberry-pi-pico/) |
+| ESP32-C3 SuperMini | 1 | MCU2 | RISC-V 32 bits | [ESP32-C3 SuperMini](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/hw-reference/esp32c3/user-guide-supermini.html) |
 | Módulo LoRa SX1278 | 2 | LORA1, LORA2 | 433 MHz | [Hoperf](https://www.hoperf.com/) |
 | LED Amarelo 5mm | 2 | LED_Y1, LED_Y2 | 20 mA | - |
 | LED Vermelho 5mm | 2 | LED_R1, LED_R2 | 20 mA | - |
@@ -59,9 +60,9 @@ Conectada fisicamente ao ignitor do foguete.
 | Antena LoRa | 2 | ANT1, ANT2 | 433 MHz | - |
 | Módulo TP4056 | 2 | CHG1, CHG2 | Carregador Li-ion/LiPo 1 célula (4,2 V), entrada 5 V, corrente de carga ajustável (até 1 A), proteção recomendada (DW01A+8205A) | - |
 
-## Pinagem Raspberry Pi Pico
+## Pinagem
 
-### Estação de Comando
+### Estação de Comando - Raspberry Pi Pico
 | GPIO Pico | Conexão | Descrição |
 |-----------|---------|-----------|
 | GP0 | LoRa SPI RX | SPI MISO |
@@ -76,18 +77,19 @@ Conectada fisicamente ao ignitor do foguete.
 | GP19 | Buzzer | Alerta sonoro |
 | GP14 | Chave geral | Liga/desliga de alimentação |
 
-### Estação de Ignição
-| GPIO Pico | Conexão | Descrição |
-|-----------|---------|-----------|
-| GP0 | LoRa SPI RX | SPI MISO |
-| GP1 | LoRa SPI CS | Chip Select |
-| GP2 | LoRa SPI SCK | SPI Clock |
-| GP3 | LoRa SPI TX | SPI MOSI |
-| GP4 | LoRa RESET | Reset |
-| GP11 | LED Amarelo | Status: conectado com comando |
-| GP12 | LED Vermelho | Status: ignição iminente |
-| GP19 | Buzzer | Contagem regressiva |
-| GP26 | Gate Ignitor | Comando Relé/ignitor |
+### Estação de Ignição - ESP32-C3 SuperMini
+| GPIO | Conexão | Descrição |
+|------|---------|-----------|
+| GPIO0 | LoRa SPI RX | SPI MISO |
+| GPIO1 | LoRa SPI CS | Chip Select |
+| GPIO2 | LoRa SPI SCK | SPI Clock |
+| GPIO3 | LoRa SPI TX | SPI MOSI |
+| GPIO4 | LoRa RESET | Reset |
+| GPIO5 | LoRa DIO0 | Interrupção do rádio |
+| GPIO6 | LED Amarelo | Status: conectado com comando |
+| GPIO7 | LED Vermelho | Status: ignição iminente |
+| GPIO9 | Buzzer | Contagem regressiva |
+| GPIO10 | Gate Ignitor | Comando Relé/ignitor |
 
 
 ## Sequência de Operação
@@ -156,24 +158,28 @@ Conectada fisicamente ao ignitor do foguete.
 
 ## Galeria de Componentes
 
-### Raspberry Pi Pico
-<img src="./images/pipico.png" width="220" alt="Raspberry Pi Pico"/>
+### Raspberry Pi Pico (Estação de Comando)
+![Raspberry Pi Pico](images/pipico.png)
 
 Microcontrolador dual-core ARM Cortex-M0+ (RP2040), 264KB SRAM, 2MB Flash.
 
+### ESP32-C3 SuperMini (Estação de Ignição)
+![ESP32-C3 SuperMini](images/esp32-c3-supermini.png)
+
+Microcontrolador RISC-V 32 bits, 400KB SRAM, 4MB Flash. Wi-Fi + Bluetooth LE integrado, usado na Estação de Ignição.
+
 ### Módulo LoRa RA-02 / SX1278
-<img src="./images/lora.png" width="220" alt="Módulo LoRa RA-02 SX1278"/>
+![Módulo LoRa](images/lora.png)
 
 Transceptor LoRa de longo alcance operando em **433 MHz**. Chip Semtech SX1278.
 
 ### Botão Liga/Desliga
-<img src="./images/power-button.avif" width="220" alt="Botão Liga/Desliga"/>
+![Botão Liga/Desliga](images/power-button.avif)
 
 Botão de potência **12V 20A** para controle de energia das estações.
 
 ### Botão de Ignição
-
-<img src="./images/ignition-button.png" width="220" alt="Botão de Ignição"/>
+![Botão de Ignição](images/ignition-button.png)
 
 Botão momentâneo (Momentary Reset), **22mm**, vermelho, **3-9V (5V)**. Usado exclusivamente na Estação de Comando para iniciar a sequência de ignição.
 

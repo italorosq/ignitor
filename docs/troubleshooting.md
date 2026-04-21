@@ -37,6 +37,7 @@ Monitorar serial (115200 baud) ao ligar:
 [LoRa] SX1278 inicializado em 433 MHz.
 ```
 Se não aparecer "LoRa init": problema no módulo ou conexões SPI.
+Se o módulo inicializa, mas não há PING/PONG, a primeira verificação deve ser a antena instalada em ambas as placas.
 
 ### 5. Teste de Conexão
 Com ambas estações ligadas, verificar no serial:
@@ -81,12 +82,14 @@ print(btn.value())  # Deve mostrar 0 (solto) ou 1 (pressionado)
 1. CRC dos pacotes com erro
 2. Frequência LoRa descasada entre estações
 3. Interferência no canal
+4. Antena ausente, solta ou conectada no conector errado
 
 **Solução:**
 1. Confirmar que ambas estações usam mesma frequência em `software/estacao_*.py`
 2. Verificar logs de CRC no serial: `[ERROR] CRC mismatch`
 3. Testar em ambiente sem interferência (distante de Wi-Fi 2.4 GHz)
 4. Aumentar spreading factor (SF 7 → 10) para mais robustez
+5. Confirmar antenas firmes nas duas pontas antes de energizar novamente
 
 ### Contagem aborta antes de 5 segundos
 

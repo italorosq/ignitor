@@ -2,35 +2,34 @@
 
 ## Matriz de Testes
 
-| ID | Tipo | Descrição | Critério de Sucesso | Status |
-|----|------|-----------|---------------------|--------|
-| LORA-01 | Comunicação | PING/PONG bidirecional | PONG < 500 ms | ⏳ Pendente |
-| LORA-02 | Comunicação | RSSI a 50 m | RSSI > -80 dBm | ⏳ Pendente |
-| LORA-03 | Comunicação | RSSI a 500 m | RSSI > -120 dBm | ⏳ Pendente |
-| IGN-01 | Ignição | Sequência completa (5 s) | Ignitor aciona após 5 s | ⏳ Pendente |
-| IGN-02 | Ignição | Contagem de apitos | 5 apitos audíveis | ⏳ Pendente |
-| IGN-03 | Ignição | LEDs durante ignição | Vermelho pisca → sólido | ⏳ Pendente |
-| ABORT-01 | Segurança | Abort manual (botão solto) | Ignitor não aciona | ⏳ Pendente |
-| ABORT-02 | Segurança | Abort por timeout | Ignitor não aciona após > 500 ms sem ARM_CONFIRMED | ⏳ Pendente |
-| LED-02 | Interface | LED amarelo (conectado) | Acende com PING/PONG OK | ⏳ Pendente |
-| LED-03 | Interface | LED vermelho (ignição) | Comportamento correto | ⏳ Pendente |
-| BUZZ-01 | Interface | Buzzer contagem (Ignição) | 5 apitos separados | ⏳ Pendente |
-| BUZZ-02 | Interface | Buzzer comando (Comando) | Pisca durante armamento | ⏳ Pendente |
+| ID | Tipo | Descrição | Critério | Status |
+|----|------|---------|---------|--------|
+| LORA-01 | LoRa | PING/PONG bidirecional | PONG < 500 ms | Pendente |
+| LORA-02 | LoRa | RSSI a 50 m | RSSI > -80 dBm | Pendente |
+| LORA-03 | LoRa | RSSI a 500 m | RSSI > -120 dBm | Pendente |
+| IGN-01 | Ignição | Sequência completa (5 s) | Relé aciona após 5 s | Pendente |
+| IGN-02 | Ignição | Contagem de apitos | 5 apitos audíveis | Pendente |
+| IGN-03 | Ignição | LEDs | Vermelho pisca → sólido | Pendente |
+| ABORT-01 | Segurança | Abort manual | Botão solto cancela | Pendente |
+| ABORT-02 | Segurança | Abort por timeout | Perda > 500 ms cancela | Pendente |
 
-## Registro de Sessões de Teste
+**Status**: Pendente | Passou | Falhou
 
-### Formato
-| Data | ID Teste | Resultado | Distância | RSSI | Observações | Evidências |
-|------|----------|-----------|-----------|------|-------------|------------|
-| - | - | - | - | - | - | - |
+## Registro de Sessões
 
-### Histórico
-| Data | ID Teste | Resultado | Distância | RSSI | Observações | Evidências |
-|------|----------|-----------|-----------|------|-------------|------------|
-| *Aguardando testes* | - | - | - | - | - | - |
+| Data | ID | Resultado | Distância | RSSI | Observações |
+|------|----|---------|---------|------|-----------|
+| - | - | - | - | - | - |
 
-## Notas
-- **Status:** ⏳ Pendente | ✅ Passou | ❌ Falhou
-- Logs CSV devem ser salvos em `test/logs/` (não versionado)
-- Vídeos/fotos grandes devem ser linkados externamente (Google Drive, etc.)
-- Atualizar esta tabela após cada sessão de testes
+- Logs salvos em `test/logs/` (não versionado)
+- Vídeos/fotos grandes linkados externamente
+
+## Procedimento
+
+Após cada sessão:
+
+1. Preencher registro acima
+2. Salvar logs em `test/logs/sessao_YYYYMMDD.csv`
+3. Linkar evidências no registro
+
+Consulte [test/README.md](../test/README.md) para procedimentos detalhados.

@@ -24,12 +24,18 @@ import utime
 #  Driver LoRa (SX127x): prioridade para biblioteca externa,
 #  com fallback para driver nativo em SPI se sx127x.py nao existir.
 # ─────────────────────────────────────────────────────────────────
-try:
-    from sx127x import SX127x
-    SX127X_DRIVER_AVAILABLE = True
-except Exception as exc:
+USE_SX127X_DRIVER = False
+
+if USE_SX127X_DRIVER:
+    try:
+        from sx127x import SX127x
+        SX127X_DRIVER_AVAILABLE = True
+    except Exception as exc:
+        SX127X_DRIVER_AVAILABLE = False
+        print("[WARN] sx127x indisponivel ({}) - usando driver nativo SX1278.".format(exc))
+else:
     SX127X_DRIVER_AVAILABLE = False
-    print("[WARN] sx127x indisponivel ({}) - usando driver nativo SX1278.".format(exc))
+    print("[BOOT] Driver nativo SX1278 selecionado (sx127x desativado).")
 
 
 # ╔══════════════════════════════════════════════════════════════╗
@@ -362,6 +368,10 @@ class LoRaRadio:
             print(f"[WARN] Falha no envio LoRa ({self._backend}): {exc}")
         print(f"[LoRa TX] → {message}")
 
+    @property
+    def backend(self):
+        return self._backend
+
     def receive(self):
         """
         Lê um pacote LoRa não bloqueante, se houver.
@@ -409,6 +419,7 @@ class CommandStation:
         self.led_link   = Pin(PIN_LED_LINK,   Pin.OUT, value=0)
         self.button     = Pin(PIN_BUTTON,     Pin.IN,  Pin.PULL_UP)
         self.lora       = LoRaRadio()
+        print(f"[CMD] Backend LoRa ativo: {self.lora.backend}")
 
         # Estado atual da máquina e estado anterior reservado para futura expansão.
         self.state       = State.IDLE
@@ -436,6 +447,7 @@ class CommandStation:
         self._last_no_link_warn_ms = 0
         self._last_link_blink_ms = 0
         self._link_led_on = False
+        self._last_mock_warn_ms = 0
 
     # ─────────────────────────────────────────
     #  LEITURA COM DEBOUNCE
@@ -550,6 +562,11 @@ class CommandStation:
         # Apenas aguarda o início do armamento quando o botão é pressionado.
         now = utime.ticks_ms()
         self._refresh_link(now)
+
+        if self.lora.backend == "mock" and utime.ticks_diff(now, self._last_mock_warn_ms) >= 3000:
+            self._last_mock_warn_ms = now
+            print("[CMD] RADIO EM MOCK: verifique cabos SPI/energia do SX1278 no comando.")
+
         if self._link_ok:
             self.led_yellow.value(1)
 

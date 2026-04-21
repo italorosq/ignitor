@@ -11,6 +11,8 @@
 ### 1. Comunicação LoRa Básica
 **Objetivo:** Confirmar que as duas estações se comunicam de forma confiável.
 
+Antes de começar, confirme que as duas antenas LoRa estão conectadas. Sem antena, o módulo pode inicializar normalmente e ainda assim não fechar enlace.
+
 Checklist:
 - [ ] Estação de Comando envia `PING`, Estação de Ignição responde com `PONG`
 - [ ] LED amarelo acende em ambas estações quando conectadas
@@ -21,6 +23,7 @@ Checklist:
 2. Observar LEDs e monitor serial
 3. Afastar estações gradualmente (10 m, 50 m, 100 m, 500 m)
 4. Registrar RSSI e taxa de perda de pacotes
+5. Se não houver PING/PONG, conferir primeiro antenas, depois SPI e alimentação
 
 ### 2. Sequência de Ignição Completa
 **Objetivo:** Validar contagem regressiva de 5 segundos e acionamento do ignitor.
@@ -89,6 +92,8 @@ Checklist:
 ### 6. Teste de Alcance em Campo
 **Objetivo:** Determinar alcance máximo confiável.
 
+Não remover antenas durante o teste; antena ausente invalida a medição de alcance.
+
 Checklist:
 - [ ] Posicionar estações em LOS (linha de visão)
 - [ ] Aumentar distância: 50 m, 100 m, 200 m, 500 m, 1 km
@@ -99,7 +104,26 @@ Checklist:
 1. Usar tripé/suporte para estações
 2. Medir distância com GPS ou trena a laser
 3. Executar 10 ciclos de ignição (com carga dummy) em cada distância
-4. Registrar falhas em `docs/TESTES.md`
+4. Registrar falhas em `docs/README_TESTS.md`
+
+## Scripts MicroPython de Bancada
+
+Novos scripts na pasta `test/`:
+
+- `mp_lora_radio.py`: modulo comum de radio LoRa (sx127x + fallback nativo SPI)
+- `mp_teste_conexao.py`: teste de link com `PING/PONG`, RTT e taxa de sucesso
+- `mp_teste_envio_dados.py`: envio de payload `DATA` com `ACK`, retry e estatisticas
+
+### Execucao no Pico (duas placas)
+
+1. Copiar para cada Pico os arquivos `mp_lora_radio.py` e o script de teste desejado
+2. Ajustar `ROLE` no topo do script:
+	- Conexao: `initiator` em uma placa e `responder` na outra
+	- Envio de dados: `tx` em uma placa e `rx` na outra
+3. Executar o script no REPL/Thonny e observar os logs seriais
+4. Repetir o teste em diferentes distancias para validar estabilidade
+
+Obs.: os scripts usam a mesma configuracao do projeto (433 MHz, BW 125 kHz, SF7, CR 4/5).
 
 ## Como Executar
 
@@ -112,7 +136,7 @@ python run_tests.py --ignition    # sequência de ignição
 ```
 
 ### Testes Manuais
-Seguir procedimentos descritos acima. Documentar resultados em `docs/TESTES.md`.
+Seguir procedimentos descritos acima. Documentar resultados em `docs/README_TESTS.md`.
 
 ## Segurança nos Testes
 
@@ -125,7 +149,7 @@ Seguir procedimentos descritos acima. Documentar resultados em `docs/TESTES.md`.
 
 ## Registro de Resultados
 
-Após cada sessão de testes, preencher tabela em `docs/TESTES.md` com:
+Após cada sessão de testes, preencher tabela em `docs/README_TESTS.md` com:
 - Data
 - ID do teste
 - Resultado (pass/fail)

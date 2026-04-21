@@ -1,12 +1,23 @@
-# Guia de Instalação Detalhado
+# Guia de Instalação
 
-## Visão Geral
+> **Resumo**: Monte → Grave → Teste → Use
 
-Este guia orienta a montagem das duas estações do sistema de ignição:
-- **Estação de Comando** (operada remotamente)
-- **Estação de Ignição** (conectada ao foguete)
+## Índice
 
-## 1. Pré-requisitos de Ambiente
+| Seção | Tópico |
+|-------|--------|
+| [1](#1-pre-requisitos) | Pré-requisitos |
+| [2](#2-preparar) | Preparar ambiente |
+| [3](#3-montagem-de-hardware) | Montar hardware |
+| [4](#4-gravar-firmware) | Gravar firmware |
+| [5](#5-validando-operacao) | Validar operação |
+| [6](#6-cases-3d) | Cases 3D |
+| [7](#7-integracao-com-ignitor-real) | Integração com ignitor real |
+| [8](#8-troubleshooting) | Troubleshooting |
+
+---
+
+## 1. Pré-requisitos {#1-pre-requisitos}
 
 ### Software
 - Python 3.8+ (`pip install -r requirements.txt`)
@@ -18,7 +29,7 @@ Este guia orienta a montagem das duas estações do sistema de ignição:
 - Fonte de bancada 3.3-5 V ou baterias
 - Ferro de solda (montagem em protoboard ou PCB)
 
-## 2. Clonar e Preparar
+## 2. Preparar {#2-preparar}
 
 ```bash
 git clone https://github.com/Serra-Rocketry/Serra-Rocketry-Ignitor.git
@@ -26,7 +37,7 @@ cd Serra-Rocketry-Ignitor
 pip install -r requirements.txt
 ```
 
-## 3. Montagem de Hardware
+## 3. Montagem de Hardware {#3-montagem-de-hardware}
 
 ### 3.1. Estação de Comando
 
@@ -81,7 +92,7 @@ Antes de energizar:
 - Verificar que antenas estão conectadas
 - Não energizar nenhum módulo LoRa sem a antena instalada
 
-## 4. Configuração do Firmware
+## 4. Gravar Firmware {#4-gravar-firmware}
 
 ### 4.1. Ajustar Parâmetros
 
@@ -116,7 +127,7 @@ ampy --port /dev/ttyACM1 put software/estacao_ignicao.py main.py
 ampy --port /dev/ttyUSB0 put software/estacao_ignicao_esp.py main.py
 ```
 
-## 5. Validar Operação
+## 5. Validando Operação {#5-validando-operacao}
 
 ### 5.1. Teste Inicial (sem ignitor)
 
@@ -147,14 +158,14 @@ ampy --port /dev/ttyUSB0 put software/estacao_ignicao_esp.py main.py
 3. Executar sequência completa de ignição
 4. Se sucesso, aumentar distância gradualmente
 
-## 6. Montagem nos Cases 3D
+## 6. Cases 3D {#6-cases-3d}
 
 1. Imprimir cases: `hardware/3d_models/case_command.stl` e `case_ignition.stl`
 2. Fixar componentes com parafusos M3 ou cola quente
 3. Garantir que antenas ficam externas ao case
 4. Posicionar LEDs e botões nos furos frontais
 
-## 7. Integração com Ignitor Real
+## 7. Integração com Ignitor Real {#7-integracao-com-ignitor-real}
 
 ⚠️ **ATENÇÃO: Realizar apenas em local seguro e com supervisão!**
 
@@ -165,7 +176,7 @@ ampy --port /dev/ttyUSB0 put software/estacao_ignicao_esp.py main.py
 5. Operador permanece com Estação de Comando em posição segura
 6. Executar sequência de ignição conforme procedimento operacional
 
-## 8. Troubleshooting Inicial
+## 8. Troubleshooting {#8-troubleshooting}
 
 | Problema | Possível Causa | Solução |
 |----------|----------------|---------|

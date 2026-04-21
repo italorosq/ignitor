@@ -1,24 +1,15 @@
 # ==============================================================================
 #   ESTAÇÃO DE IGNIÇÃO DE FOGUETES - RECEPTOR/ATUADOR # type: ignore
-#   Hardware: Raspberry Pi Pico + LoRa SX1278 (433 MHz) # type: ignore
+#   Hardware: ESP32-C3 SuperMini + LoRa SX1278 (433 MHz) # type: ignore
 #   Protocolo: SPI
 # ==============================================================================
 #
 #   MAPEAMENTO DE PINOS: # type: ignore
-#   ─────────────────────────────────────────────────────
-#   SX1278 (LoRa)         Pico
-#   ─────────────────────────────────────────────────────
-#   SCK        ──────────  GP2 - 4
-#   MOSI       ──────────  GP3 - 5
-#   MISO       ──────────  GP0 - 1
-#   NSS (CS)   ──────────  GP1 - 2
-#   RESET      ──────────  GP4 - 6
-#   ─────────────────────────────────────────────────────
-#   Relê               ──  GP26   (Ativo em ALTO - NAO INVERTER)
-#   Buzzer             ──  GP19
-#   LED Vermelho       ──  GP12   (Contagem / Erro)
-#   LED Amarelo        ──  GP11   (Conectado / Ativo)
-#   ─────────────────────────────────────────────────────
+#   ESP32-C3 SuperMini (fixo):
+#   - LoRa SPI: SCK=GPIO4, MOSI=GPIO6, MISO=GPIO5, CS=GPIO7, RESET=GPIO3, DIO0=GPIO21
+#   - Ignicao: RELE=GPIO10, BUZZER=GPIO1, LED_VERMELHO=GPIO0, LED_AMARELO=GPIO20
+#   - LED_LINK interno: GPIO8 (pisca no boot, fixo ao conectar)
+#   (se sua placa usar outra serigrafia, ajuste os PIN_*_NUM abaixo)
 #
 #   LÓGICA DE SEGURANÇA:
 #   - O Relê é inicializado em BAIXO e SÓ é ativado após
@@ -33,32 +24,60 @@
 import utime
 from machine import Pin, SPI
 
-try:
-    from sx127x import SX127x
-    SX127X_DRIVER_AVAILABLE = True
-except Exception as exc:
+# No ESP32-C3 deste projeto, preferimos o driver nativo (sem dependencias extras)
+# para evitar erros de import do pacote legado sx127x.
+USE_SX127X_DRIVER = False
+
+if USE_SX127X_DRIVER:
+    try:
+        from sx127x import SX127x
+        SX127X_DRIVER_AVAILABLE = True
+    except Exception as exc:
+        SX127X_DRIVER_AVAILABLE = False
+        print("[WARN] sx127x indisponivel na Ignicao ({}) - usando driver nativo SX1278.".format(exc))
+else:
     SX127X_DRIVER_AVAILABLE = False
-    print("[WARN] sx127x indisponivel na Ignicao ({}) - usando driver nativo SX1278.".format(exc))
+    print("[BOOT] Driver nativo SX1278 selecionado (sx127x desativado).")
 
 # =============================================================================
-#  DEFINIÇÃO DE PINOS
+#  DEFINIÇÃO DE PINOS (ESP32-C3 SuperMini)
 # =============================================================================
-SPI_SCK  = 2
-SPI_MOSI = 3
-SPI_MISO = 0
-SPI_DIO0 = 15  # opcional no driver de biblioteca
+# Se o firmware da sua placa mapear SPI em outro peripheral, troque a ordem.
+SPI_ID_CANDIDATES = (1, 2)
+SPI_SCK  = 4
+SPI_MOSI = 6
+SPI_MISO = 5
+SPI_DIO0 = 21
+
+PIN_LORA_CS_NUM    = 7
+PIN_LORA_RESET_NUM = 3
+
+PIN_RELE_NUM         = 10
+PIN_BUZZER_NUM       = 1
+PIN_LED_VERMELHO_NUM = 0
+PIN_LED_AMARELO_NUM  = 20
+PIN_LED_LINK_NUM     = 8   # LED interno do ESP32-C3 SuperMini
+
+# Em algumas placas o LED interno pode ser ativo em nivel baixo.
+LED_LINK_ACTIVE_LOW  = False
 
 # Pinos de controle do SX1278
-LORA_CS    = Pin(1, Pin.OUT, value=1)  # NSS: HIGH = modulo desmarcado
-LORA_RESET = Pin(4, Pin.OUT, value=1)  # RESET: LOW por 10ms para resetar
+LORA_CS    = Pin(PIN_LORA_CS_NUM, Pin.OUT, value=1)  # NSS: HIGH = modulo desmarcado
+LORA_RESET = Pin(PIN_LORA_RESET_NUM, Pin.OUT, value=1)  # RESET: LOW por 10ms para resetar
 LORA_DIO0  = Pin(SPI_DIO0, Pin.IN)
 
 # Atuadores e Indicadores
-PIN_RELE         = Pin(26, Pin.OUT, value=0)  # Rele: garantido BAIXO no boot
-PIN_BUZZER       = Pin(19, Pin.OUT, value=0)
-PIN_LED_VERMELHO = Pin(12, Pin.OUT, value=0)  # Vermelho: Pisca em contagem/erro, ON ignicao
-PIN_LED_AMARELO  = Pin(11, Pin.OUT, value=0)  # Amarelo: ON quando conectado/ativo
-PIN_LED_LINK     = Pin(25, Pin.OUT, value=0)  # LED onboard: status de conexao
+PIN_RELE         = Pin(PIN_RELE_NUM, Pin.OUT, value=0)  # Rele: garantido BAIXO no boot
+PIN_BUZZER       = Pin(PIN_BUZZER_NUM, Pin.OUT, value=0)
+PIN_LED_VERMELHO = Pin(PIN_LED_VERMELHO_NUM, Pin.OUT, value=0)  # Vermelho: Pisca em contagem/erro, ON ignicao
+PIN_LED_AMARELO  = Pin(PIN_LED_AMARELO_NUM, Pin.OUT, value=0)  # Amarelo: ON quando conectado/ativo
+PIN_LED_LINK     = Pin(PIN_LED_LINK_NUM, Pin.OUT, value=0)  # LED interno: status de conexao
+
+def _set_led_link(ligado):
+    if LED_LINK_ACTIVE_LOW:
+        PIN_LED_LINK.value(0 if ligado else 1)
+    else:
+        PIN_LED_LINK.value(1 if ligado else 0)
 
 LORA_PARAMS = {
     "frequency"         : 433e6,
@@ -111,13 +130,24 @@ IRQ_TX_DONE = 0x08  # Transmissao concluida
 #  INICIALIZACAO DO BARRAMENTO SPI
 # =============================================================================
 
-spi = SPI(0,
-          baudrate=1_000_000,
-          polarity=0,
-          phase=0,
-          sck=Pin(SPI_SCK),
-          mosi=Pin(SPI_MOSI),
-          miso=Pin(SPI_MISO))
+def _init_spi():
+    last_exc = None
+    for spi_id in SPI_ID_CANDIDATES:
+        try:
+            return SPI(spi_id,
+                       baudrate=1_000_000,
+                       polarity=0,
+                       phase=0,
+                       sck=Pin(SPI_SCK),
+                       mosi=Pin(SPI_MOSI),
+                       miso=Pin(SPI_MISO))
+        except Exception as exc:
+            last_exc = exc
+
+    raise RuntimeError("Falha ao iniciar SPI (ids {}): {}".format(SPI_ID_CANDIDATES, last_exc))
+
+
+spi = _init_spi()
 
 lora_driver = None
 lora_backend = "native"
@@ -395,7 +425,7 @@ def desligar_tudo():
     PIN_BUZZER.value(0)
     PIN_LED_VERMELHO.value(0)
     PIN_LED_AMARELO.value(0)
-    PIN_LED_LINK.value(0)
+    _set_led_link(False)
 
 # =============================================================================
 #  MAQUINA DE ESTADOS - LOGICA PRINCIPAL
@@ -448,7 +478,7 @@ def executar():
     t_ultimo_ping  = utime.ticks_add(t_inicio_teste, -INTERVALO_PING_BOOT_MS)
     t_ultimo_pisca_link = t_inicio_teste
     led_link_estado = False
-    PIN_LED_LINK.value(0)
+    _set_led_link(False)
     conexao_ok     = False
 
     while utime.ticks_diff(utime.ticks_ms(), t_inicio_teste) < 5000:
@@ -457,7 +487,7 @@ def executar():
         if utime.ticks_diff(agora_teste, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
             t_ultimo_pisca_link = agora_teste
             led_link_estado = not led_link_estado
-            PIN_LED_LINK.value(1 if led_link_estado else 0)
+            _set_led_link(led_link_estado)
 
         if utime.ticks_diff(agora_teste, t_ultimo_ping) >= INTERVALO_PING_BOOT_MS:
             t_ultimo_ping = agora_teste
@@ -482,7 +512,7 @@ def executar():
     if conexao_ok:
         # Estado "Conectado": Amarelo ON, Vermelho OFF
         PIN_LED_AMARELO.value(1)
-        PIN_LED_LINK.value(1)
+        _set_led_link(True)
         led_link_estado = True
         buzzer_bip(200)
         print("[OK] Conexao com a Base estabelecida.")
@@ -532,12 +562,12 @@ def executar():
                 print("[LINK] Conexao com a Base: PERDIDA")
 
         if link_ok:
-            PIN_LED_LINK.value(1)
+            _set_led_link(True)
             led_link_estado = True
         elif utime.ticks_diff(agora, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
             t_ultimo_pisca_link = agora
             led_link_estado = not led_link_estado
-            PIN_LED_LINK.value(1 if led_link_estado else 0)
+            _set_led_link(led_link_estado)
 
         # ------------------------------------------------------------------
         #  ESTADO: AGUARDANDO (Conectado)
