@@ -52,14 +52,16 @@ pip install -r requirements.txt
 ### 3.2. Estação de Ignição
 
 **Componentes necessários:**
-- 1x Raspberry Pi Pico
+- 1x Raspberry Pi Pico (ou 1x ESP32-C3 SuperMini)
 - 1x Módulo LoRa 433 MHz (RA-02 / SX1278)
 - 2x LEDs (amarelo, vermelho) + 2x resistores 220Ω
 - 1x Buzzer ativo 5V
 - 1x MOSFET ou relé para ignitor
 - Bateria e regulador (se necessário)
 
-**Conexões:** Ver pinagem detalhada em `hardware/README.md`.
+**Conexões:**
+- Pico: ver pinagem detalhada em `hardware/README.md`.
+- ESP32-C3: seguir a pinagem no topo de `software/estacao_ignicao_esp.py`.
 
 **Checklist:**
 1. Soldar headers no Raspberry Pi Pico
@@ -77,6 +79,7 @@ Antes de energizar:
 - Verificar curto-circuitos com multímetro
 - Confirmar polaridade da bateria
 - Verificar que antenas estão conectadas
+- Não energizar nenhum módulo LoRa sem a antena instalada
 
 ## 4. Configuração do Firmware
 
@@ -85,7 +88,8 @@ Antes de energizar:
 Os scripts oficiais estão em:
 
 - `software/estacao_comando.py`
-- `software/estacao_ignicao.py`
+- `software/estacao_ignicao.py` (ignição em Pico)
+- `software/estacao_ignicao_esp.py` (ignição em ESP32-C3)
 
 Parâmetros (frequência, tempos e pinagem) ficam no topo desses arquivos.
 Confirme frequência em 433 MHz e pinagem conforme `hardware/README.md`.
@@ -96,7 +100,7 @@ Confirme frequência em 433 MHz e pinagem conforme `hardware/README.md`.
 1. Abrir Thonny IDE
 2. Conectar Raspberry Pi Pico via USB (segurar BOOTSEL ao conectar)
 3. Instalar MicroPython: Tools → Options → Interpreter → Install or update MicroPython
-4. Abrir `software/estacao_comando.py` (ou `software/estacao_ignicao.py`)
+4. Abrir `software/estacao_comando.py` (comando) e o script da ignição conforme hardware (`software/estacao_ignicao.py` ou `software/estacao_ignicao_esp.py`)
 5. Clicar em Run → Save to Raspberry Pi Pico
 6. Repetir para a outra estação
 
@@ -107,6 +111,9 @@ ampy --port /dev/ttyACM0 put software/estacao_comando.py main.py
 
 # Para Estação de Ignição
 ampy --port /dev/ttyACM1 put software/estacao_ignicao.py main.py
+
+# Para Estação de Ignição em ESP32-C3
+ampy --port /dev/ttyUSB0 put software/estacao_ignicao_esp.py main.py
 ```
 
 ## 5. Validar Operação
@@ -119,9 +126,10 @@ ampy --port /dev/ttyACM1 put software/estacao_ignicao.py main.py
 2. Energizar a Estação de Ignição
    - Após 1-2 s, LED amarelo do comando deve estabilizar ligado
    - Monitor serial mostra mensagens `PING` e `PONG`
+   - Se o enlace não subir, a primeira checagem deve ser se as duas antenas estão conectadas e apertadas
 
 3. Testar sequência de ignição (com carga dummy)
-   - Conectar LED/lâmpada ao GP26 da Estação de Ignição
+   - Conectar LED/lâmpada ao GP26 (Pico) ou GPIO10 (ESP32-C3) da Estação de Ignição
    - Pressionar e segurar botão de ignição na Estação de Comando
    - Observar: LEDs vermelhos piscam, buzzer emite 5 apitos
    - Ao final, LED/lâmpada conectada ao GP26 acende por 2 s
@@ -152,23 +160,24 @@ ampy --port /dev/ttyACM1 put software/estacao_ignicao.py main.py
 
 1. Conectar ignitor aos terminais da Estação de Ignição (saída do MOSFET/relé)
 2. Confirmar continuidade com multímetro
-3. Posicionar Estação de Ignição junto ao foguete (≥ 10 m de distância)
-4. Operador permanece com Estação de Comando em posição segura
-5. Executar sequência de ignição conforme procedimento operacional
+3. Confirmar que a antena LoRa da Estação de Ignição está conectada antes de energizar
+4. Posicionar Estação de Ignição junto ao foguete (≥ 10 m de distância)
+5. Operador permanece com Estação de Comando em posição segura
+6. Executar sequência de ignição conforme procedimento operacional
 
 ## 8. Troubleshooting Inicial
 
 | Problema | Possível Causa | Solução |
 |----------|----------------|---------|
 | LED amarelo não acende | LoRa não comunica | Confirmar antenas, frequência, conexões SPI |
-| Buzzer não soa | GPIO mal conectado | Verificar GP19, trocar buzzer |
-| Ignitor não aciona | MOSFET/relé com problema | Testar GP26 com LED, verificar gate driver |
+| Buzzer não soa | GPIO mal conectado | Verificar GP19 (Pico) ou GPIO1 (ESP32-C3), trocar buzzer |
+| Ignitor não aciona | MOSFET/relé com problema | Testar GP26 (Pico) ou GPIO10 (ESP32-C3) com LED, verificar gate driver |
 
-Ver mais em `docs/TROUBLESHOOTING.md`.
+Ver mais em `docs/troubleshooting.md`.
 
 ## 9. Próximos Passos
 
 - Executar plano de testes completo: `test/README.md`
-- Registrar resultados em `docs/TESTES.md`
+- Registrar resultados em `docs/README_TESTS.md`
 - Calibrar alcance LoRa conforme necessidade
 - Imprimir cases finais após validação

@@ -4,7 +4,7 @@
 
 O sistema usa protocolo textual simples entre Estação de Comando e Estação de Ignição via LoRa.
 
-Este documento descreve o comportamento atualmente implementado no firmware MicroPython em [../software/estacao_comando.py](../software/estacao_comando.py) e [../software/estacao_ignicao.py](../software/estacao_ignicao.py).
+Este documento descreve o comportamento atualmente implementado no firmware MicroPython em [../software/estacao_comando.py](../software/estacao_comando.py), [../software/estacao_ignicao.py](../software/estacao_ignicao.py) e [../software/estacao_ignicao_esp.py](../software/estacao_ignicao_esp.py).
 
 ## Camada Física
 
@@ -66,3 +66,4 @@ Na Estação de Ignição:
 1. A versão atual não usa pacote binário com CRC explícito no payload da aplicação.
 2. A validação de erro de pacote no lado LoRa é feita via flags do rádio.
 3. O protocolo textual foi mantido por decisão de projeto para simplificar a bancada inicial.
+4. As variantes de ignição para Pico e ESP32-C3 compartilham o mesmo protocolo de mensagens.
