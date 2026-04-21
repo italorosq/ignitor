@@ -59,6 +59,7 @@ ACK_TIMEOUT_MS     = 2_000   # aguarda ACK por este tempo após ARM_CONFIRMED
 RETRANSMIT_MS      = 200     # intervalo entre re-envios do ARM_CONFIRMED
 PING_INTERVAL_MS   = 1_000   # intervalo de PING para teste de conexao
 LINK_TIMEOUT_MS    = 3_000   # sem PONG neste tempo = sem conexao
+LINK_BLINK_MS      = 250     # pisca LED de link enquanto desconectado
 FINALIZE_DELAY_MS  = 3_000   # espera apos ignicao concluida
 
 # ── Mensagens LoRa ───────────────────────────────────────────────
@@ -433,6 +434,8 @@ class CommandStation:
         self._last_ping_ms = 0
         self._last_pong_ms = None
         self._last_no_link_warn_ms = 0
+        self._last_link_blink_ms = 0
+        self._link_led_on = False
 
     # ─────────────────────────────────────────
     #  LEITURA COM DEBOUNCE
@@ -484,8 +487,13 @@ class CommandStation:
         if self._link_ok != link_was_ok:
             status = "OK" if self._link_ok else "PERDIDO"
             print(f"[CMD] Link com ignicao: {status}")
-
-        self.led_link.value(1 if self._link_ok else 0)
+        if self._link_ok:
+            self.led_link.value(1)
+            self._link_led_on = True
+        elif utime.ticks_diff(now, self._last_link_blink_ms) >= LINK_BLINK_MS:
+            self._last_link_blink_ms = now
+            self._link_led_on = not self._link_led_on
+            self.led_link.value(1 if self._link_led_on else 0)
 
     def _blink_tick(self):
         """Alterna LED amarelo e buzzer em BLINK_INTERVAL_MS."""

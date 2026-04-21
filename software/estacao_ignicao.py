@@ -414,6 +414,7 @@ TIMEOUT_LINK_LED_MS = 3000
 INTERVALO_PISCA_MS  = 250
 INTERVALO_BUZZER_MS = 500
 INTERVALO_PING_BOOT_MS = 700
+INTERVALO_PISCA_LINK_MS = 500
 
 MSG_ARM   = "ARM_CONFIRMED"
 MSG_ABORT = "ABORT"
@@ -446,10 +447,18 @@ def executar():
 
     t_inicio_teste = utime.ticks_ms()
     t_ultimo_ping  = utime.ticks_add(t_inicio_teste, -INTERVALO_PING_BOOT_MS)
+    t_ultimo_pisca_link = t_inicio_teste
+    led_link_estado = False
+    PIN_LED_LINK.value(0)
     conexao_ok     = False
 
     while utime.ticks_diff(utime.ticks_ms(), t_inicio_teste) < 5000:
         agora_teste = utime.ticks_ms()
+
+        if utime.ticks_diff(agora_teste, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
+            t_ultimo_pisca_link = agora_teste
+            led_link_estado = not led_link_estado
+            PIN_LED_LINK.value(1 if led_link_estado else 0)
 
         if utime.ticks_diff(agora_teste, t_ultimo_ping) >= INTERVALO_PING_BOOT_MS:
             t_ultimo_ping = agora_teste
@@ -474,6 +483,8 @@ def executar():
     if conexao_ok:
         # Estado "Conectado": Amarelo ON, Vermelho OFF
         PIN_LED_AMARELO.value(1)
+        PIN_LED_LINK.value(1)
+        led_link_estado = True
         buzzer_bip(200)
         print("[OK] Conexao com a Base estabelecida.")
     else:
@@ -513,7 +524,13 @@ def executar():
             t_ultimo_link is not None
             and utime.ticks_diff(agora, t_ultimo_link) <= TIMEOUT_LINK_LED_MS
         )
-        PIN_LED_LINK.value(1 if link_ok else 0)
+        if link_ok:
+            PIN_LED_LINK.value(1)
+            led_link_estado = True
+        elif utime.ticks_diff(agora, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
+            t_ultimo_pisca_link = agora
+            led_link_estado = not led_link_estado
+            PIN_LED_LINK.value(1 if led_link_estado else 0)
 
         # ------------------------------------------------------------------
         #  ESTADO: AGUARDANDO (Conectado)
