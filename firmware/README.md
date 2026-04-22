@@ -1,25 +1,55 @@
 # Firmware - Serra Rocketry Ignitor
 
-> Firmware oficial em MicroPython.
+Repositorio de firmware e arquivos auxiliares do projeto.
 
-## Arquivos
+## Estrutura Atual
 
-| Placa | Arquivo | Salvar como |
-| --- | --- | --- |
-| Comando (Pico) | [micropython/estacao_comando.py](./micropython/estacao_comando.py) | `main.py` |
-| Ignição (Pico) | [micropython/estacao_ignicao.py](./micropython/estacao_ignicao.py) | `main.py` |
-| Ignição (ESP32-C3) | [micropython/estacao_ignicao_esp.py](./micropython/estacao_ignicao_esp.py) | `main.py` |
+```text
+firmware/
+├── micropython/
+│   ├── estacao_comando.py
+│   ├── estacao_ignicao.py
+│   ├── estacao_ignicao_esp.py
+│   ├── sx127x.py
+│   └── config_lora.py
+└── data/
+    ├── index.html
+    ├── script.js
+    ├── style.css
+    └── hammer.min.js
+```
 
-Pinagem: [hardware/README.md#pinagem](../hardware/README.md#pinagem)
+## Firmware Oficial (MicroPython)
 
-## Gravar
+| Estacao | Arquivo | Placa alvo | Salvar como |
+| --- | --- | --- | --- |
+| Comando | [micropython/estacao_comando.py](./micropython/estacao_comando.py) | Raspberry Pi Pico | `main.py` |
+| Ignicao (principal) | [micropython/estacao_ignicao_esp.py](./micropython/estacao_ignicao_esp.py) | ESP32-C3 SuperMini | `main.py` |
+| Ignicao (legado) | [micropython/estacao_ignicao.py](./micropython/estacao_ignicao.py) | Raspberry Pi Pico | `main.py` |
 
-Consulte [docs/INSTALL.md#4-gravar-firmware](../docs/INSTALL.md#4-gravar-firmware).
+Arquivos de suporte:
 
-## Legado
+- [micropython/sx127x.py](./micropython/sx127x.py)
+- [micropython/config_lora.py](./micropython/config_lora.py)
 
-- `code.ino` - Template Arduino para ESP32/ESP8266 (não faz parte do fluxo oficial MicroPython)
-- `config.example.h` - Configuração de exemplo para o template Arduino
+Pinagem completa e BOM:
+
+- [../hardware/README.md](../hardware/README.md#pinagem)
+
+## Pasta data
+
+A pasta [data](./data) contem arquivos web auxiliares para experimentos e interfaces locais.
+Ela nao substitui os scripts MicroPython de operacao das estacoes.
+
+## Gravacao nas Placas
+
+Guia rapido de envio:
+
+- [../docs/README_ENVIO.md](../docs/README_ENVIO.md)
+
+Guia de instalacao completo:
+
+- [../docs/INSTALL.md](../docs/INSTALL.md#4-gravar-firmware)
 
 ## Debug Serial
 
@@ -27,7 +57,7 @@ Consulte [docs/INSTALL.md#4-gravar-firmware](../docs/INSTALL.md#4-gravar-firmwar
 screen /dev/ttyACM0 115200
 ```
 
-Logs esperados:
+Exemplo de logs esperados:
 
 ```text
 [LoRa] SX1278 inicializado em 433 MHz.
@@ -36,4 +66,8 @@ Logs esperados:
 [CMD] IGNITION_COMPLETE recebido.
 ```
 
-> **⚠️ Segurança**: Sempre testar com carga dummy (LED/lâmpada) no pino do relé antes de usar ignitor real.
+## Seguranca
+
+- Sempre conectar antena LoRa antes de energizar.
+- Testar primeiro com carga dummy (LED/lampada).
+- Manter distancia segura durante qualquer teste operacional.
