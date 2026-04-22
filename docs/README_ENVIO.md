@@ -1,41 +1,27 @@
-# README - Envio de Codigo para RP (Raspberry Pi Pico) e ESP32-C3
+# Envio de Firmware para Pico e ESP32-C3
 
-Este guia mostra como enviar os codigos MicroPython para as placas do projeto.
+Este guia mostra como enviar os scripts MicroPython para as placas do projeto.
 
-## Arquivos que vao para cada Pico
+## Arquivos por Placa
 
 ### Pico da Estacao de Comando
 
-- `software/config_lora.py`
-- `software/sx127x.py`
-- `software/estacao_comando.py` (deve ser salvo como `main.py` no Pico)
+- `firmware/micropython/estacao_comando.py` (salvar como `main.py`)
+- `firmware/micropython/sx127x.py` (opcional)
+- `firmware/micropython/config_lora.py` (opcional)
 
 ### Pico da Estacao de Ignicao
 
-- `software/config_lora.py`
-- `software/sx127x.py`
-- `software/estacao_ignicao.py` (deve ser salvo como `main.py` no Pico)
+- `firmware/micropython/estacao_ignicao.py` (salvar como `main.py`)
+- `firmware/micropython/sx127x.py` (opcional)
+- `firmware/micropython/config_lora.py` (opcional)
 
-### ESP32-C3 da Estacao de Ignicao (alternativa)
+### ESP32-C3 da Estacao de Ignicao
 
-- `software/sx127x.py` (opcional; o script tem fallback nativo)
-- `software/estacao_ignicao_esp.py` (deve ser salvo como `main.py` no ESP32-C3)
+- `firmware/micropython/estacao_ignicao_esp.py` (salvar como `main.py`)
+- `firmware/micropython/sx127x.py` (opcional, existe fallback nativo)
 
-## Pre-requisitos
-
-- Linux com Python 3
-- Dependencias instaladas:
-
-```bash
-pip install -r requirements.txt
-```
-
-- MicroPython instalado no Pico
-- Cabo USB de dados
-
-## 1. Descobrir a porta serial no Linux
-
-Com o Pico conectado:
+## 1. Descobrir Porta Serial
 
 ```bash
 ls /dev/ttyACM* /dev/ttyUSB*
@@ -44,90 +30,74 @@ ls /dev/ttyACM* /dev/ttyUSB*
 Exemplo comum:
 
 - Comando: `/dev/ttyACM0`
-- Ignicao: `/dev/ttyACM1`
+- Ignicao Pico: `/dev/ttyACM1`
+- Ignicao ESP32-C3: `/dev/ttyUSB0`
 
-## 2. Envio via terminal (ampy)
+## 2. Envio com ampy
 
-A partir da raiz do repositorio:
-
-### 2.1 Pico da Estacao de Comando
+### 2.1 Estacao de Comando (Pico)
 
 ```bash
-ampy --port /dev/ttyACM0 put software/config_lora.py
-ampy --port /dev/ttyACM0 put software/sx127x.py
-ampy --port /dev/ttyACM0 put software/estacao_comando.py main.py
+ampy --port /dev/ttyACM0 put firmware/micropython/estacao_comando.py main.py
 ampy --port /dev/ttyACM0 ls
 ```
 
-### 2.2 Estacao de Ignicao em Raspberry Pi Pico
+### 2.2 Estacao de Ignicao (Pico)
 
 ```bash
-ampy --port /dev/ttyACM1 put software/config_lora.py
-ampy --port /dev/ttyACM1 put software/sx127x.py
-ampy --port /dev/ttyACM1 put software/estacao_ignicao.py main.py
+ampy --port /dev/ttyACM1 put firmware/micropython/estacao_ignicao.py main.py
 ampy --port /dev/ttyACM1 ls
 ```
 
-### 2.3 Estacao de Ignicao em ESP32-C3 SuperMini
+### 2.3 Estacao de Ignicao (ESP32-C3)
 
 ```bash
-ampy --port /dev/ttyUSB0 put software/sx127x.py
-ampy --port /dev/ttyUSB0 put software/estacao_ignicao_esp.py main.py
+ampy --port /dev/ttyUSB0 put firmware/micropython/estacao_ignicao_esp.py main.py
 ampy --port /dev/ttyUSB0 ls
 ```
 
-## 3. Envio via Thonny (alternativa)
+## 3. Envio com Thonny
 
-1. Abrir o Thonny.
-2. Selecionar interpretador MicroPython (Raspberry Pi Pico).
-3. Abrir os arquivos em `software/`.
-4. Salvar no dispositivo:
-   - `config_lora.py`
-   - `sx127x.py`
-   - `estacao_comando.py` como `main.py` no Pico de comando
-   - `estacao_ignicao.py` (Pico) ou `estacao_ignicao_esp.py` (ESP32-C3) como `main.py` na ignicao
+1. Abrir Thonny.
+2. Selecionar interpretador MicroPython da placa.
+3. Abrir arquivo em `firmware/micropython/`.
+4. Salvar no dispositivo como `main.py`.
 
-## 4. Ver logs seriais
-
-Para acompanhar o boot e os logs:
+## 4. Logs Seriais
 
 ```bash
 screen /dev/ttyACM0 115200
 ```
 
-Troque a porta para a estacao de ignicao quando necessario.
+Trocar a porta conforme a placa conectada.
 
-## 5. Antena e enlace LoRa
+## 5. Regra Importante de Antena
 
-Antes de ligar qualquer placa ou gravar firmware para teste, confira se as duas antenas LoRa estão rosqueadas/conectadas nos módulos SX1278. O rádio pode inicializar mesmo sem antena, mas o enlace PING/PONG não vai fechar corretamente.
+Antes de energizar ou testar, confirme as duas antenas LoRa conectadas e apertadas. Sem antena, o radio pode inicializar, mas o enlace PING/PONG nao fecha de forma confiavel.
 
-## 6. Erros comuns
+## 6. Erros Comuns
 
-### Permissao negada na porta serial
-
-Se aparecer erro de permissao:
+### Permissao negada na serial
 
 ```bash
 sudo usermod -aG dialout $USER
 ```
 
-Depois, saia e entre novamente na sessao.
+Depois, encerre e reabra a sessao.
 
-### Pico nao aparece em `/dev/ttyACM*`
+### Placa nao aparece em `/dev/ttyACM*` ou `/dev/ttyUSB*`
 
-- Trocar o cabo USB (muitos cabos so carregam).
+- Trocar cabo USB (dados, nao apenas carga).
 - Testar outra porta USB.
-- Regravar o firmware MicroPython no Pico.
+- Regravar MicroPython na placa.
 
-## Creditos da biblioteca LoRa
+## Creditos da Biblioteca LoRa
 
-Este projeto usa/adapta a biblioteca `SX127x` para MicroPython:
+Projeto baseado/adaptado de:
 
-- Projeto: [SX127x driver for (Micro)Python on ESP8266/ESP32/Raspberry_Pi](https://github.com/Wei1234c/SX127x_driver_for_MicroPython_on_ESP8266)
-- Autor principal: Wei Lin (`Wei1234c`)
-- Licenca original: GPL-3.0
+- [SX127x driver for (Micro)Python on ESP8266/ESP32/Raspberry_Pi](https://github.com/Wei1234c/SX127x_driver_for_MicroPython_on_ESP8266)
 
-Arquivos relacionados no projeto:
+Arquivos locais relacionados:
 
-- `software/sx127x.py`
-- `software/config_lora.py`
+- `firmware/micropython/sx127x.py`
+- `firmware/micropython/config_lora.py`

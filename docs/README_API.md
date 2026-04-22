@@ -4,8 +4,8 @@
 
 ## Camada Física
 
-| Parâmetro | Valor |
-|----------|------|
+| Parametro | Valor |
+| --- | --- |
 | Frequência | 433 MHz |
 | Largura de banda | 125 kHz |
 | Spreading Factor | 7 |
@@ -14,8 +14,8 @@
 
 ## Mensagens
 
-| Mensagem | Direção | Uso |
-|----------|---------|-----|
+| Mensagem | Direcao | Uso |
+| --- | --- | --- |
 | PING | Comando → Ignição | Teste de conexão |
 | PONG | Ignição → Comando | Resposta ao PING |
 | ARM_CONFIRMED | Comando → Ignição | Comando mantido (retransmitido a cada 200 ms) |
@@ -25,7 +25,7 @@
 
 ## Diagrama de Estados
 
-```
+```text
         ┌──────────┐
         │  IDLE    │
         └────┬─────┘
@@ -45,8 +45,8 @@
 
 ## Timeouts
 
-| Parâmetro | Valor |
-|----------|------|
+| Parametro | Valor |
+| --- | --- |
 | Retransmissão ARM_CONFIRMED | 200 ms |
 | Timeout de comando (Ignição) | 500 ms |
 | Timeout de link (Comando) | 3000 ms |
@@ -59,4 +59,4 @@
 - Soltar botão envia `ABORT` imediatamente
 - Verificação final antes de acionar relé
 
-Consulte [software/estacao_ignicao_esp.py](../software/estacao_ignicao_esp.py) para implementação de referência.
+Consulte [../firmware/micropython/estacao_ignicao_esp.py](../firmware/micropython/estacao_ignicao_esp.py) para implementacao de referencia.

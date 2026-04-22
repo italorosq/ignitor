@@ -5,16 +5,16 @@
 ## Arquivos
 
 | Placa | Arquivo | Salvar como |
-|-------|--------|-------------|
-| Comando (Pico) | [software/estacao_comando.py](../software/estacao_comando.py) | `main.py` |
-| Ignição (Pico) | [software/estacao_ignicao.py](../software/estacao_ignicao.py) | `main.py` |
-| Ignição (ESP32-C3) | [software/estacao_ignicao_esp.py](../software/estacao_ignicao_esp.py) | `main.py` |
+| --- | --- | --- |
+| Comando (Pico) | [micropython/estacao_comando.py](./micropython/estacao_comando.py) | `main.py` |
+| Ignição (Pico) | [micropython/estacao_ignicao.py](./micropython/estacao_ignicao.py) | `main.py` |
+| Ignição (ESP32-C3) | [micropython/estacao_ignicao_esp.py](./micropython/estacao_ignicao_esp.py) | `main.py` |
 
 Pinagem: [hardware/README.md#pinagem](../hardware/README.md#pinagem)
 
 ## Gravar
 
-Consulte [docs/INSTALL.md#4-gravando-firmware](../docs/INSTALL.md#4-gravando-firmware).
+Consulte [docs/INSTALL.md#4-gravar-firmware](../docs/INSTALL.md#4-gravar-firmware).
 
 ## Legado
 
@@ -29,7 +29,7 @@ screen /dev/ttyACM0 115200
 
 Logs esperados:
 
-```
+```text
 [LoRa] SX1278 inicializado em 433 MHz.
 [CMD] Link com ignicao: OK
 [CMD] ACK recebido da base de ignicao.

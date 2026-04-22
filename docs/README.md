@@ -1,33 +1,28 @@
-# Documentação do Ignitor
+# Documentacao do Ignitor
 
-Guias práticos para montar, operar e fazer manutenção.
+Guias praticos para montar, operar, testar e manter o sistema.
 
-## Por onde Começar
+## Fluxo Recomendado
 
-```
-Montar hardware → Gravar firmware → Testar → Usar
-```
+Montar hardware -> Gravar firmware -> Testar -> Operar.
 
-| O que Você Precisa | Guía |
-|-----------------|------|
-| Montar as estações | [INSTALL.md](./INSTALL.md#3-montagem-de-hardware) |
-| Gravar firmware | [INSTALL.md#4-gravando-firmware](./INSTALL.md#4-gravando-firmware) |
-| Testar em bancada | [INSTALL.md#5-validando-operacao](./INSTALL.md#5-validando-operacao) |
-| Testar em campo | [test/README.md](../test/README.md) |
-| Diagnosticar problemas | [troubleshooting.md](./troubleshooting.md) |
-| Entender protocolo | [README_API.md](./README_API.md) |
-| Registrar testes | [README_TESTS.md](./README_TESTS.md) |
+| Etapa | Documento |
+| --- | --- |
+| Montagem | [INSTALL.md](./INSTALL.md#3-montagem-de-hardware) |
+| Envio de firmware | [README_ENVIO.md](./README_ENVIO.md) |
+| Testes de bancada/campo | [../test/README.md](../test/README.md) |
+| Troubleshooting | [troubleshooting.md](./troubleshooting.md) |
+| Protocolo | [README_API.md](./README_API.md) |
+| Registro de resultados | [README_TESTS.md](./README_TESTS.md) |
 
-## Referências Rápidas
+## Referencias Rapidas
 
-- **Pinagem**: [hardware/README.md#pinagem](../hardware/README.md#pinagem)
-- **BOM**: [hardware/README.md#lista-de-componentes-bom](../hardware/README.md#lista-de-componentes-bom)
-- **Estados LEDs**: [hardware/README.md#estados-dos-leds](../hardware/README.md#estados-dos-leds)
-- **Sequência**: [hardware/README.md#sequência-de-operação](../hardware/README.md#sequência-de-operação)
+- Pinagem: [../hardware/README.md#pinagem](../hardware/README.md#pinagem)
+- BOM: [../hardware/README.md#lista-de-componentes-bom](../hardware/README.md#lista-de-componentes-bom)
+- Sequencia operacional: [../hardware/README.md#sequencia-de-operacao](../hardware/README.md#sequencia-de-operacao)
 
-## Avisos
+## Avisos Importantes
 
-> **⚠️ Segurança**:
-> - Sempre use carga dummy (lâmpada/LED) durante testes
-> - Não energize módulos LoRa sem antenas
-> - Mantenha distância ≥ 10 m do foguete
+- Sempre usar carga dummy (lampada/LED) durante testes.
+- Nunca energizar modulo LoRa sem antena conectada.
+- Manter distancia minima de 10 m do foguete em testes de campo.

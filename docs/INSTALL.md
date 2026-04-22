@@ -1,194 +1,117 @@
-# Guia de Instalação
+# Guia de Instalacao
 
-> **Resumo**: Monte → Grave → Teste → Use
+Resumo: monte -> grave -> teste -> opere.
 
-## Índice
+## Indice
 
-| Seção | Tópico |
-|-------|--------|
-| [1](#1-pre-requisitos) | Pré-requisitos |
-| [2](#2-preparar) | Preparar ambiente |
-| [3](#3-montagem-de-hardware) | Montar hardware |
+| Secao | Topico |
+| --- | --- |
+| [1](#1-pre-requisitos) | Pre-requisitos |
+| [2](#2-preparar-ambiente) | Preparar ambiente |
+| [3](#3-montagem-de-hardware) | Montagem de hardware |
 | [4](#4-gravar-firmware) | Gravar firmware |
-| [5](#5-validando-operacao) | Validar operação |
-| [6](#6-cases-3d) | Cases 3D |
-| [7](#7-integracao-com-ignitor-real) | Integração com ignitor real |
-| [8](#8-troubleshooting) | Troubleshooting |
+| [5](#5-validar-operacao) | Validar operacao |
+| [6](#6-integracao-com-ignitor-real) | Integracao com ignitor real |
+| [7](#7-troubleshooting) | Troubleshooting |
 
----
-
-## 1. Pré-requisitos {#1-pre-requisitos}
+## 1. Pre-requisitos
 
 ### Software
-- Python 3.8+ (`pip install -r requirements.txt`)
-- Thonny IDE (recomendado para Raspberry Pi Pico) ou VS Code com extensão MicroPython
-- Ferramenta de flash: `picotool` ou via Thonny
+
+- Python 3.8+.
+- Dependencias do projeto: `pip install -r requirements.txt`.
+- Thonny IDE (recomendado) ou VS Code com extensao MicroPython.
 
 ### Hardware
-- Multímetro para verificação de continuidade
-- Fonte de bancada 3.3-5 V ou baterias
-- Ferro de solda (montagem em protoboard ou PCB)
 
-## 2. Preparar {#2-preparar}
+- Multimetro.
+- Fonte/bateria adequada.
+- Ferramentas de montagem (ferro de solda, estanho, etc.).
+
+## 2. Preparar Ambiente
 
 ```bash
-git clone https://github.com/Serra-Rocketry/Serra-Rocketry-Ignitor.git
-cd Serra-Rocketry-Ignitor
+git clone https://github.com/Serra-Rocketry/ignitor.git
+cd ignitor
 pip install -r requirements.txt
 ```
 
-## 3. Montagem de Hardware {#3-montagem-de-hardware}
+## 3. Montagem de Hardware
 
-### 3.1. Estação de Comando
+### 3.1 Estacao de Comando
 
-**Componentes necessários:**
-- 1x Raspberry Pi Pico
-- 1x Módulo LoRa 433 MHz (RA-02 / SX1278)
-- 2x LEDs (amarelo, vermelho) + 2x resistores 220Ω
-- 1x Buzzer ativo 5V
-- 2x Botões tácteis (power, ignição)
-- Bateria e regulador (se necessário)
+- 1x Raspberry Pi Pico.
+- 1x SX1278 433 MHz.
+- 2x LEDs + resistores.
+- 1x buzzer.
+- 1x botao de ignicao.
 
-**Conexões:** Ver pinagem detalhada em `hardware/README.md`.
+Pinagem detalhada: [../hardware/README.md](../hardware/README.md#pinagem).
 
-**Checklist:**
-1. Soldar headers no Raspberry Pi Pico (se necessário)
-2. Conectar módulo LoRa via SPI (GP0-GP4)
-3. Conectar LEDs de status aos GP11 (amarelo) e GP12 (vermelho)
-4. Conectar buzzer ao GP19
-5. Conectar botão de ignição ao GP13 com pull-up interno
-6. Fixar antena no módulo LoRa **antes** de energizar
-7. Conectar bateria/fonte
+### 3.2 Estacao de Ignicao
 
-### 3.2. Estação de Ignição
+- 1x ESP32-C3 SuperMini (ou Pico, variante legada).
+- 1x SX1278 433 MHz.
+- 2x LEDs + resistores.
+- 1x buzzer.
+- 1x rele/MOSFET para ignitor.
 
-**Componentes necessários:**
-- 1x Raspberry Pi Pico (ou 1x ESP32-C3 SuperMini)
-- 1x Módulo LoRa 433 MHz (RA-02 / SX1278)
-- 2x LEDs (amarelo, vermelho) + 2x resistores 220Ω
-- 1x Buzzer ativo 5V
-- 1x MOSFET ou relé para ignitor
-- Bateria e regulador (se necessário)
+Pinagem detalhada: [../hardware/README.md](../hardware/README.md#pinagem).
 
-**Conexões:**
-- Pico: ver pinagem detalhada em `hardware/README.md`.
-- ESP32-C3: seguir a pinagem no topo de `software/estacao_ignicao_esp.py`.
+### 3.3 Checklist Antes de Energizar
 
-**Checklist:**
-1. Soldar headers no Raspberry Pi Pico
-2. Conectar módulo LoRa via SPI (GP0-GP4)
-3. Conectar LEDs aos GP11 (amarelo) e GP12 (vermelho)
-4. Conectar buzzer ao GP19
-5. Conectar MOSFET/relé ao GP26 (gate do ignitor)
-6. Isolar circuito do ignitor com diodo flyback (se usar relé)
-7. Fixar antena no módulo LoRa **antes** de energizar
-8. Conectar bateria/fonte
+1. Verificar curto e polaridade com multimetro.
+2. Confirmar conexoes SPI.
+3. Confirmar antenas LoRa conectadas e apertadas.
+4. Nao energizar SX1278 sem antena.
 
-### 3.3. Teste de Continuidade
+## 4. Gravar Firmware
 
-Antes de energizar:
-- Verificar curto-circuitos com multímetro
-- Confirmar polaridade da bateria
-- Verificar que antenas estão conectadas
-- Não energizar nenhum módulo LoRa sem a antena instalada
+Scripts oficiais:
 
-## 4. Gravar Firmware {#4-gravar-firmware}
+- `firmware/micropython/estacao_comando.py`
+- `firmware/micropython/estacao_ignicao.py` (Pico)
+- `firmware/micropython/estacao_ignicao_esp.py` (ESP32-C3)
+- `firmware/micropython/sx127x.py` (compatibilidade)
+- `firmware/micropython/config_lora.py` (compatibilidade)
 
-### 4.1. Ajustar Parâmetros
+### 4.1 Envio com `ampy`
 
-Os scripts oficiais estão em:
-
-- `software/estacao_comando.py`
-- `software/estacao_ignicao.py` (ignição em Pico)
-- `software/estacao_ignicao_esp.py` (ignição em ESP32-C3)
-
-Parâmetros (frequência, tempos e pinagem) ficam no topo desses arquivos.
-Confirme frequência em 433 MHz e pinagem conforme `hardware/README.md`.
-
-### 4.2. Compilar e Gravar
-
-#### Usando Thonny:
-1. Abrir Thonny IDE
-2. Conectar Raspberry Pi Pico via USB (segurar BOOTSEL ao conectar)
-3. Instalar MicroPython: Tools → Options → Interpreter → Install or update MicroPython
-4. Abrir `software/estacao_comando.py` (comando) e o script da ignição conforme hardware (`software/estacao_ignicao.py` ou `software/estacao_ignicao_esp.py`)
-5. Clicar em Run → Save to Raspberry Pi Pico
-6. Repetir para a outra estação
-
-#### Usando linha de comando:
 ```bash
-# Para Estação de Comando
-ampy --port /dev/ttyACM0 put software/estacao_comando.py main.py
+# Estacao de Comando (Pico)
+ampy --port /dev/ttyACM0 put firmware/micropython/estacao_comando.py main.py
 
-# Para Estação de Ignição
-ampy --port /dev/ttyACM1 put software/estacao_ignicao.py main.py
+# Estacao de Ignicao (Pico)
+ampy --port /dev/ttyACM1 put firmware/micropython/estacao_ignicao.py main.py
 
-# Para Estação de Ignição em ESP32-C3
-ampy --port /dev/ttyUSB0 put software/estacao_ignicao_esp.py main.py
+# Estacao de Ignicao (ESP32-C3)
+ampy --port /dev/ttyUSB0 put firmware/micropython/estacao_ignicao_esp.py main.py
 ```
 
-## 5. Validando Operação {#5-validando-operacao}
+## 5. Validar Operacao
 
-### 5.1. Teste Inicial (sem ignitor)
+1. Ligar estacao de comando.
+2. Ligar estacao de ignicao.
+3. Confirmar `PING/PONG` no serial e LED amarelo de link.
+4. Executar teste com carga dummy no lugar do ignitor.
 
-1. Energizar **apenas** a Estação de Comando
-   - LED amarelo permanece apagado (sem conexão)
+Se o enlace nao subir, checar antena primeiro.
 
-2. Energizar a Estação de Ignição
-   - Após 1-2 s, LED amarelo do comando deve estabilizar ligado
-   - Monitor serial mostra mensagens `PING` e `PONG`
-   - Se o enlace não subir, a primeira checagem deve ser se as duas antenas estão conectadas e apertadas
+## 6. Integracao com Ignitor Real
 
-3. Testar sequência de ignição (com carga dummy)
-   - Conectar LED/lâmpada ao GP26 (Pico) ou GPIO10 (ESP32-C3) da Estação de Ignição
-   - Pressionar e segurar botão de ignição na Estação de Comando
-   - Observar: LEDs vermelhos piscam, buzzer emite 5 apitos
-   - Ao final, LED/lâmpada conectada ao GP26 acende por 2 s
+Realizar apenas em ambiente seguro e com procedimento validado.
 
-### 5.2. Teste de Abort
+1. Confirmar continuidade do ignitor.
+2. Confirmar antena conectada antes de energizar.
+3. Posicionar operador a distancia segura (>= 10 m).
+4. Executar sequencia completa.
 
-1. Iniciar sequência de ignição
-2. Soltar botão após 2-3 segundos
-3. Confirmar que carga dummy **não** aciona
+## 7. Troubleshooting
 
-### 5.3. Teste de Alcance
+| Problema | Possivel causa | Acao |
+| --- | --- | --- |
+| Sem link LoRa | Antena ausente/solta | Reapertar antenas e reiniciar |
+| Buzzer sem som | Ligacao incorreta | Verificar pino de buzzer da placa |
+| Ignitor nao aciona | Rele/MOSFET | Testar saida com carga dummy |
 
-1. Posicionar estações a 50 m de distância (LOS)
-2. Confirmar LEDs amarelos permanecem acesos
-3. Executar sequência completa de ignição
-4. Se sucesso, aumentar distância gradualmente
-
-## 6. Cases 3D {#6-cases-3d}
-
-1. Imprimir cases: `hardware/3d_models/case_command.stl` e `case_ignition.stl`
-2. Fixar componentes com parafusos M3 ou cola quente
-3. Garantir que antenas ficam externas ao case
-4. Posicionar LEDs e botões nos furos frontais
-
-## 7. Integração com Ignitor Real {#7-integracao-com-ignitor-real}
-
-⚠️ **ATENÇÃO: Realizar apenas em local seguro e com supervisão!**
-
-1. Conectar ignitor aos terminais da Estação de Ignição (saída do MOSFET/relé)
-2. Confirmar continuidade com multímetro
-3. Confirmar que a antena LoRa da Estação de Ignição está conectada antes de energizar
-4. Posicionar Estação de Ignição junto ao foguete (≥ 10 m de distância)
-5. Operador permanece com Estação de Comando em posição segura
-6. Executar sequência de ignição conforme procedimento operacional
-
-## 8. Troubleshooting {#8-troubleshooting}
-
-| Problema | Possível Causa | Solução |
-|----------|----------------|---------|
-| LED amarelo não acende | LoRa não comunica | Confirmar antenas, frequência, conexões SPI |
-| Buzzer não soa | GPIO mal conectado | Verificar GP19 (Pico) ou GPIO1 (ESP32-C3), trocar buzzer |
-| Ignitor não aciona | MOSFET/relé com problema | Testar GP26 (Pico) ou GPIO10 (ESP32-C3) com LED, verificar gate driver |
-
-Ver mais em `docs/troubleshooting.md`.
-
-## 9. Próximos Passos
-
-- Executar plano de testes completo: `test/README.md`
-- Registrar resultados em `docs/README_TESTS.md`
-- Calibrar alcance LoRa conforme necessidade
-- Imprimir cases finais após validação
+Detalhes: [troubleshooting.md](./troubleshooting.md).

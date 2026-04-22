@@ -1,91 +1,71 @@
 # Serra Rocketry Ignitor
 
-Sistema de ignição remota para foguetes experimentais.
+Sistema de ignicao remota para foguetes experimentais.
 
-## O que é
+## Visao Geral
 
-Duas estações independentes que se comunicam via LoRa 433 MHz:
+Duas estacoes independentes se comunicam via LoRa 433 MHz:
 
-| Estação | Função | MCU |
-|---------|-------|-----|
-| **Comando** | Operador segura do foguete | Raspberry Pi Pico |
-| **Ignição** | Aciona o ignitor | ESP32-C3 SuperMini |
+| Estacao | Funcao | MCU |
+| --- | --- | --- |
+| Comando | Operacao remota e seguranca | Raspberry Pi Pico |
+| Ignicao | Acionamento do ignitor | ESP32-C3 SuperMini ou Raspberry Pi Pico |
 
-## Sequência de Ignição
+## Sequencia de Ignicao
 
-```
-1. Operador segura botão por 5 s
-2. Comando transmite ARM_CONFIRMED
-3. Ignição faz contagem regressiva (5 bipes)
-4. Relé aciona por 2 s
-5. Ignição envia IGNITION_COMPLETE
-```
+1. Operador segura o botao por 5 s.
+2. Comando transmite `ARM_CONFIRMED` continuamente.
+3. Ignicao executa contagem regressiva (5 bipes).
+4. Rele aciona por 2 s.
+5. Ignicao envia `IGNITION_COMPLETE`.
 
 ## Comece Aqui
 
-| Passo | Guía |
-|-------|------|
+| Passo | Guia |
+| --- | --- |
 | 1. Montar | [docs/INSTALL.md](./docs/INSTALL.md) |
-| 2. Gravar firmware | [docs/INSTALL.md#4-gravando-firmware](./docs/INSTALL.md#4-gravando-firmware) |
+| 2. Gravar firmware | [docs/README_ENVIO.md](./docs/README_ENVIO.md) |
 | 3. Testar | [test/README.md](./test/README.md) |
-| 4. Problemas? | [docs/troubleshooting.md](./docs/troubleshooting.md) |
+| 4. Diagnosticar problemas | [docs/troubleshooting.md](./docs/troubleshooting.md) |
 
-## Arquitetura
+## Estrutura do Repositorio
 
-### Estação de Comando
-- Botão de ignição (segurar 5 s)
-- LEDs: amarelo (conectado), vermelho (ignição iminente)
-- Buzzer de feedback
-- LoRa 433 MHz
+```text
+ignitor/
+├── docs/                 # Guias e referencias
+├── firmware/
+│   ├── micropython/      # Scripts oficiais (.py)
+│   └── data/             # Arquivos web/auxiliares
+├── hardware/             # BOM, pinagem e materiais fisicos
+├── software/             # Legado/compatibilidade
+└── test/                 # Scripts e procedimentos de teste
+```
 
-### Estação de Ignição
-- LEDs de status
-- Buzzer de contagem regressiva
-- Relé para ignitor
-- LoRa 433 MHz
-
-### Componentes Principais
+## Componentes Principais
 
 | Qtd | Componente | Uso |
-|-----|-----------|-----|
-| 1 | Raspberry Pi Pico | Estação de Comando |
-| 1 | ESP32-C3 SuperMini | Estação de Ignição |
-| 2 | Módulo LoRa SX1278 | Comunicação 433 MHz |
-| 2 | LED amarelo 5mm | Status conectado |
-| 2 | LED vermelho 5mm | Status ignição |
+| --- | --- | --- |
+| 1 | Raspberry Pi Pico | Estacao de Comando |
+| 1 | ESP32-C3 SuperMini | Estacao de Ignicao (principal) |
+| 2 | Modulo LoRa SX1278 | Comunicacao 433 MHz |
+| 2 | LED amarelo 5mm | Status de link |
+| 2 | LED vermelho 5mm | Status de ignicao |
 | 2 | Buzzer ativo 5V | Feedback sonoro |
-| 1 | Botão ignição 22mm | Acionamento |
-| 1 | Relé | Acionar ignitor |
-| 2 | Módulo TP4056 | Carregador bateria |
+| 1 | Botao de ignicao 22 mm | Acionamento |
+| 1 | Rele/MOSFET | Saida para ignitor |
+| 2 | Modulo TP4056 | Carga de bateria |
 
-Pinagem completa e BOM: [hardware/README.md](./hardware/README.md)
+Pinagem completa e BOM: [hardware/README.md](./hardware/README.md).
 
-## Arquivo do Repositório
+## Regras de Seguranca
 
-```
-ignitor/
-├── docs/          # Guias de documentação
-├── hardware/      # Pinagem, BOM, esquemáticos
-├── software/     # Firmware MicroPython
-└── test/        # Procedimentos de teste
-```
+- Botao de ignicao deve ser momentaneo (sem trava).
+- O comando precisa ser mantido pelos 5 s completos.
+- Perda de sinal por mais de 500 ms deve abortar.
+- Sempre usar carga dummy antes de ignitor real.
+- Sempre conectar antena LoRa antes de energizar.
+- Manter distancia minima de 10 m entre operador e foguete.
 
-## Segurança
-
-- Botão de ignição deve ser **momentâneo** (sem trava)
-- Manter comando por toda a janela de 5 s
-- Em perda de sinal > 500 ms, ignição aborta
-- Sempre testar com **carga dummy** antes de ignitor real
-- Manter distância ≥ 10 m entre operador e foguete
-
-## Status do Projeto
-
-- [x] Arquitetura definida
-- [x] Hardware documentado
-- [ ] Firmware validado
-- [ ] Testes de campo concluídos
-- [ ] Cases 3D finalizados
-
-## Equipe
+## Projeto
 
 Projeto da [Serra Rocketry](https://github.com/Serra-Rocketry).
