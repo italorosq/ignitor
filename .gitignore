@@ -3,6 +3,11 @@
 *.bin
 .pio/
 
+# KiCad
+*.lck
+.history/
+_restore_backup_*/
+
 # Configurações pessoais
 config.h
 credentials.h
