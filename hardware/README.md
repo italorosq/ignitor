@@ -36,11 +36,14 @@ O sistema possui duas estacoes independentes conectadas por LoRa 433 MHz:
 | GP3 | LoRa MOSI |
 | GP4 | LoRa RESET |
 | GP15 | LoRa DIO0 |
-| GP11 | LED amarelo |
-| GP12 | LED vermelho |
-| GP13 | Botao ignicao |
-| GP19 | Buzzer |
+| GP12 | Buzzer |
+| GP13 | Botao de ignicao |
+| GP16 | LED do botao |
+| GP18 | LED vermelho |
+| GP19 | LED amarelo |
 | GP25 | LED onboard (link) |
+
+> O LED do botao (GP16) espelha o status de link LoRa: pisca quando sem conexao, fica fixo quando o link esta estabelecido. Ao final de um ciclo de ignicao bem-sucedido, o buzzer toca uma melodia via PWM.
 
 ### Estacao de Ignicao - ESP32-C3 SuperMini
 
