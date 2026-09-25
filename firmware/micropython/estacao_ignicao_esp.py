@@ -1,14 +1,14 @@
 # ==============================================================================
 #   ESTAÇÃO DE IGNIÇÃO DE FOGUETES - RECEPTOR/ATUADOR # type: ignore
-#   Hardware: ESP32-C3 SuperMini + LoRa SX1278 (433 MHz) # type: ignore
+#   Hardware: ESP32 NodeMCU-32S (ESP32-WROOM-32) + LoRa SX1278 (433 MHz) # type: ignore
 #   Protocolo: SPI
 # ==============================================================================
 #
 #   MAPEAMENTO DE PINOS: # type: ignore
-#   ESP32-C3 SuperMini (fixo):
-#   - LoRa SPI: SCK=GPIO4, MOSI=GPIO6, MISO=GPIO5, CS=GPIO7, RESET=GPIO3, DIO0=GPIO21
-#   - Ignicao: RELE=GPIO10, BUZZER=GPIO1, LED_VERMELHO=GPIO0, LED_AMARELO=GPIO20
-#   - LED_LINK interno: GPIO8 (pisca no boot, fixo ao conectar)
+#   ESP32 NodeMCU-32S (placa SMD rev 2.1):
+#   - LoRa SPI: SCK=GPIO18, MOSI=GPIO23, MISO=GPIO19, CS=GPIO5, RESET=GPIO17, DIO0=GPIO16
+#   - Ignicao: RELE=GPIO32, BUZZER=GPIO14, LED_VERMELHO=GPIO26, LED_AMARELO=GPIO25
+#   - LED_LINK interno: GPIO2 (pisca no boot, fixo ao conectar)
 #   (se sua placa usar outra serigrafia, ajuste os PIN_*_NUM abaixo)
 #
 #   LÓGICA DE SEGURANÇA:
@@ -24,7 +24,7 @@
 import utime
 from machine import Pin, SPI
 
-# No ESP32-C3 deste projeto, preferimos o driver nativo (sem dependencias extras)
+# No ESP32 deste projeto, preferimos o driver nativo (sem dependencias extras)
 # para evitar erros de import do pacote legado sx127x.
 USE_SX127X_DRIVER = False
 
@@ -40,29 +40,29 @@ else:
     print("[BOOT] Driver nativo SX1278 selecionado (sx127x desativado).")
 
 # =============================================================================
-#  DEFINIÇÃO DE PINOS (ESP32-C3 SuperMini)
+#  DEFINIÇÃO DE PINOS (ESP32 NodeMCU-32S)
 # =============================================================================
-# Se o firmware da sua placa mapear SPI em outro peripheral, troque a ordem.
-SPI_ID_CANDIDATES = (1, 2)
-SPI_SCK  = 4
-SPI_MOSI = 6
-SPI_MISO = 5
-SPI_DIO0 = 21
+# No ESP32 classico o VSPI (id 2) ja usa os pinos 18/19/23 por padrao.
+SPI_ID_CANDIDATES = (2, 1)
+SPI_SCK  = 18
+SPI_MOSI = 23
+SPI_MISO = 19
+SPI_DIO0 = 16
 
-PIN_LORA_CS_NUM    = 7
-PIN_LORA_RESET_NUM = 3
+PIN_LORA_CS_NUM    = 5
+PIN_LORA_RESET_NUM = 17
 
-PIN_RELE_NUM         = 10
-PIN_BUZZER_NUM       = 1
-PIN_LED_VERMELHO_NUM = 0
-PIN_LED_AMARELO_NUM  = 20
-PIN_LED_LINK_NUM     = 8   # LED interno do ESP32-C3 SuperMini
+PIN_RELE_NUM         = 32
+PIN_BUZZER_NUM       = 14
+PIN_LED_VERMELHO_NUM = 26
+PIN_LED_AMARELO_NUM  = 25
+PIN_LED_LINK_NUM     = 2   # LED interno do NodeMCU-32S
 
 # Em algumas placas o LED interno pode ser ativo em nivel baixo.
 LED_LINK_ACTIVE_LOW  = False
 
-# Ajuste para 0 caso seu modulo de rele seja acionado em nivel baixo.
-RELE_ACTIVE_LEVEL    = 1
+# Modulo SRD-05VDC-SL-C e Active LOW: IN=BAIXO liga o rele, IN=ALTO desliga.
+RELE_ACTIVE_LEVEL    = 0
 RELE_INACTIVE_LEVEL  = 0 if RELE_ACTIVE_LEVEL else 1
 
 # Pinos de controle do SX1278
@@ -289,6 +289,7 @@ def lora_init(frequency=433_000_000):
 
     # Verifica identidade do chip: SX1276/77/78/79 retornam 0x12
     version = _spi_read(REG_VERSION)
+    print("[BOOT] SX1278 REG_VERSION=0x{:02X} (esperado 0x12)".format(version))
     if version != 0x12:
         return False  # SPI com defeito ou modulo nao conectado
 
@@ -466,13 +467,11 @@ def executar():
     buzzer_bip(500)
 
     print("[BOOT] Inicializando modulo LoRa SX1278...")
-    if not lora_init(frequency=433_000_000):
+    while not lora_init(frequency=433_000_000):
         print("[ERRO] Modulo LoRa nao detectado! Verifique o cabeamento SPI.")
-        # Trava indicando estado de Erro (Amarelo OFF, Vermelho PISCA)
-        while True:
-            sinalizar_erro(5)
-            utime.sleep_ms(1000)
-
+        sinalizar_erro(5)
+        print("[ERRO] Tentando reinicializar LoRa em 5s...")
+        utime.sleep_ms(5000)
     print("[BOOT] LoRa OK. Modo de recepcao ativo.")
     lora_receive_mode()
 

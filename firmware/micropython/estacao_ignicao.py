@@ -14,7 +14,7 @@
 #   NSS (CS)   ──────────  GP1 - 2
 #   RESET      ──────────  GP4 - 6
 #   ─────────────────────────────────────────────────────
-#   Relê               ──  GP26   (Ativo em ALTO - NAO INVERTER)
+#   Relê               ──  GP26   (Ativo em BAIXO - INVERTER)
 #   Buzzer             ──  GP19
 #   LED Vermelho       ──  GP12   (Contagem / Erro)
 #   LED Amarelo        ──  GP11   (Conectado / Ativo)
@@ -33,12 +33,20 @@
 import utime
 from machine import Pin, SPI
 
-try:
-    from sx127x import SX127x
-    SX127X_DRIVER_AVAILABLE = True
-except Exception as exc:
+# Driver nativo (polling por SPI) - nao depende de DIO0 e verifica o REG_VERSION.
+# Mantido consistente com estacao_comando.py e estacao_ignicao_esp.py.
+USE_SX127X_DRIVER = False
+
+if USE_SX127X_DRIVER:
+    try:
+        from sx127x import SX127x
+        SX127X_DRIVER_AVAILABLE = True
+    except Exception as exc:
+        SX127X_DRIVER_AVAILABLE = False
+        print("[WARN] sx127x indisponivel na Ignicao ({}) - usando driver nativo SX1278.".format(exc))
+else:
     SX127X_DRIVER_AVAILABLE = False
-    print("[WARN] sx127x indisponivel na Ignicao ({}) - usando driver nativo SX1278.".format(exc))
+    print("[BOOT] Driver nativo SX1278 selecionado (sx127x desativado).")
 
 # =============================================================================
 #  DEFINIÇÃO DE PINOS
@@ -46,15 +54,15 @@ except Exception as exc:
 SPI_SCK  = 2
 SPI_MOSI = 3
 SPI_MISO = 0
-SPI_DIO0 = 15  # opcional no driver de biblioteca
+SPI_DIO0 = 21  # opcional no driver de biblioteca
 
 # Pinos de controle do SX1278
 LORA_CS    = Pin(1, Pin.OUT, value=1)  # NSS: HIGH = modulo desmarcado
 LORA_RESET = Pin(4, Pin.OUT, value=1)  # RESET: LOW por 10ms para resetar
 LORA_DIO0  = Pin(SPI_DIO0, Pin.IN)
 
-# Ajuste para 0 caso seu modulo de rele seja acionado em nivel baixo.
-RELE_ACTIVE_LEVEL    = 1
+# Modulo SRD-05VDC-SL-C e Active LOW: IN=BAIXO liga o rele, IN=ALTO desliga.
+RELE_ACTIVE_LEVEL    = 0
 RELE_INACTIVE_LEVEL  = 0 if RELE_ACTIVE_LEVEL else 1
 
 # Atuadores e Indicadores
@@ -259,6 +267,7 @@ def lora_init(frequency=433_000_000):
 
     # Verifica identidade do chip: SX1276/77/78/79 retornam 0x12
     version = _spi_read(REG_VERSION)
+    print("[BOOT] SX1278 REG_VERSION=0x{:02X} (esperado 0x12)".format(version))
     if version != 0x12:
         return False  # SPI com defeito ou modulo nao conectado
 
@@ -436,13 +445,11 @@ def executar():
     buzzer_bip(500)
 
     print("[BOOT] Inicializando modulo LoRa SX1278...")
-    if not lora_init(frequency=433_000_000):
+    while not lora_init(frequency=433_000_000):
         print("[ERRO] Modulo LoRa nao detectado! Verifique o cabeamento SPI.")
-        # Trava indicando estado de Erro (Amarelo OFF, Vermelho PISCA)
-        while True:
-            sinalizar_erro(5)
-            utime.sleep_ms(1000)
-
+        sinalizar_erro(5)
+        print("[ERRO] Tentando reinicializar LoRa em 5s...")
+        utime.sleep_ms(5000)
     print("[BOOT] LoRa OK. Modo de recepcao ativo.")
     lora_receive_mode()
 
