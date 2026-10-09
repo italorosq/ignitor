@@ -1,14 +1,17 @@
 # ==============================================================================
 #   ESTAÇÃO DE IGNIÇÃO DE FOGUETES - RECEPTOR/ATUADOR # type: ignore
-#   Hardware: ESP32 NodeMCU-32S (ESP32-WROOM-32) + LoRa SX1278 (433 MHz) # type: ignore
+#   Hardware: ESP32 DevKit V1, 30 pinos (ESP32-WROOM-32) + LoRa SX1278 (433 MHz) # type: ignore
 #   Protocolo: SPI
 # ==============================================================================
 #
-#   MAPEAMENTO DE PINOS: # type: ignore
-#   ESP32 NodeMCU-32S (placa SMD rev 2.1):
-#   - LoRa SPI: SCK=GPIO18, MOSI=GPIO23, MISO=GPIO19, CS=GPIO5, RESET=GPIO17, DIO0=GPIO16
-#   - Ignicao: RELE=GPIO32, BUZZER=GPIO14, LED_VERMELHO=GPIO26, LED_AMARELO=GPIO25
-#   - LED_LINK interno: GPIO2 (pisca no boot, fixo ao conectar)
+#   MAPEAMENTO DE PINOS (oficial do projeto): # type: ignore
+#   - LoRa SPI (hardware VSPI): SCK=GPIO18, MOSI=GPIO23, MISO=GPIO19,
+#     CS(NSS)=GPIO4, RESET=GPIO16, DIO0=GPIO17
+#   - Interface: STATUS_LED=GPIO25, BUTTON_IN=GPIO27 (active-low), BUZZER=GPIO14
+#   - Atuador (mantido): RELE=GPIO32 (ativo em baixo)
+#   - Expansao (somente entrada, sem pull interno): EXP_IN1=GPIO36, EXP_IN2=GPIO39
+#   - ADC1 (somente entrada): ADC1_IN1=GPIO34, ADC1_IN2=GPIO35
+#   - I2C reservado p/ OLED futuro (sem driver no projeto): SDA=GPIO21, SCL=GPIO22
 #   (se sua placa usar outra serigrafia, ajuste os PIN_*_NUM abaixo)
 #
 #   LÓGICA DE SEGURANÇA:
@@ -40,26 +43,36 @@ else:
     print("[BOOT] Driver nativo SX1278 selecionado (sx127x desativado).")
 
 # =============================================================================
-#  DEFINIÇÃO DE PINOS (ESP32 NodeMCU-32S)
+#  DEFINIÇÃO DE PINOS (ESP32 DevKit V1, 30 pinos — mapa oficial do projeto)
 # =============================================================================
 # No ESP32 classico o VSPI (id 2) ja usa os pinos 18/19/23 por padrao.
 SPI_ID_CANDIDATES = (2, 1)
 SPI_SCK  = 18
 SPI_MOSI = 23
 SPI_MISO = 19
-SPI_DIO0 = 16
 
-PIN_LORA_CS_NUM    = 5
-PIN_LORA_RESET_NUM = 17
+PIN_LORA_CS_NUM    = 4    # NSS: pull-up externo, HIGH = modulo desmarcado
+PIN_LORA_RESET_NUM = 16   # HIGH = operacao normal; pulso LOW reseta
+PIN_LORA_DIO0_NUM  = 17   # entrada: IRQ do SX1278 (polling via SPI no driver nativo)
 
-PIN_RELE_NUM         = 32
-PIN_BUZZER_NUM       = 14
-PIN_LED_VERMELHO_NUM = 26
-PIN_LED_AMARELO_NUM  = 25
-PIN_LED_LINK_NUM     = 2   # LED interno do NodeMCU-32S
+PIN_RELE_NUM   = 32  # mantido: atuador existente, ativo em baixo
+PIN_BUZZER_NUM = 14
+PIN_STATUS_NUM = 25  # STATUS_LED unico da placa DevKit
+PIN_BUTTON_NUM = 27  # BUTTON_IN, active-low (pull-up interno)
 
-# Em algumas placas o LED interno pode ser ativo em nivel baixo.
-LED_LINK_ACTIVE_LOW  = False
+# Expansao: SOMENTE ENTRADA. GPIO36/39 nao tem pull-up/pull-down interno,
+# por isso nunca usar INPUT_PULLUP/INPUT_PULLDOWN aqui.
+PIN_EXP_IN1_NUM = 36
+PIN_EXP_IN2_NUM = 39
+
+# ADC1: somente entrada, permanece em ADC1.
+PIN_ADC1_IN1_NUM = 34
+PIN_ADC1_IN2_NUM = 35
+
+# I2C reservado p/ OLED futuro (SDA=21, SCL=22). Sem driver no projeto,
+# por isso ficam so como constantes.
+PIN_I2C_SDA_NUM = 21
+PIN_I2C_SCL_NUM = 22
 
 # Modulo SRD-05VDC-SL-C e Active LOW: IN=BAIXO liga o rele, IN=ALTO desliga.
 RELE_ACTIVE_LEVEL    = 0
@@ -68,23 +81,20 @@ RELE_INACTIVE_LEVEL  = 0 if RELE_ACTIVE_LEVEL else 1
 # Pinos de controle do SX1278
 LORA_CS    = Pin(PIN_LORA_CS_NUM, Pin.OUT, value=1)  # NSS: HIGH = modulo desmarcado
 LORA_RESET = Pin(PIN_LORA_RESET_NUM, Pin.OUT, value=1)  # RESET: LOW por 10ms para resetar
-LORA_DIO0  = Pin(SPI_DIO0, Pin.IN)
+LORA_DIO0  = Pin(PIN_LORA_DIO0_NUM, Pin.IN)
 
 # Atuadores e Indicadores
-PIN_RELE         = Pin(PIN_RELE_NUM, Pin.OUT, value=RELE_INACTIVE_LEVEL)
-PIN_BUZZER       = Pin(PIN_BUZZER_NUM, Pin.OUT, value=0)
-PIN_LED_VERMELHO = Pin(PIN_LED_VERMELHO_NUM, Pin.OUT, value=0)  # Vermelho: Pisca em contagem/erro, ON ignicao
-PIN_LED_AMARELO  = Pin(PIN_LED_AMARELO_NUM, Pin.OUT, value=0)  # Amarelo: ON quando conectado/ativo
-PIN_LED_LINK     = Pin(PIN_LED_LINK_NUM, Pin.OUT, value=0)  # LED interno: status de conexao
+PIN_RELE   = Pin(PIN_RELE_NUM, Pin.OUT, value=RELE_INACTIVE_LEVEL)
+PIN_BUZZER = Pin(PIN_BUZZER_NUM, Pin.OUT, value=0)
+PIN_STATUS = Pin(PIN_STATUS_NUM, Pin.OUT, value=0)  # STATUS: ON conectado/armado, pisca em contagem/erro
+
+# Entradas: botao (active-low) e expansao (somente entrada, sem pull interno)
+PIN_BUTTON  = Pin(PIN_BUTTON_NUM, Pin.IN, Pin.PULL_UP)
+PIN_EXP_IN1 = Pin(PIN_EXP_IN1_NUM, Pin.IN)
+PIN_EXP_IN2 = Pin(PIN_EXP_IN2_NUM, Pin.IN)
 
 def _set_rele(ligado):
     PIN_RELE.value(RELE_ACTIVE_LEVEL if ligado else RELE_INACTIVE_LEVEL)
-
-def _set_led_link(ligado):
-    if LED_LINK_ACTIVE_LOW:
-        PIN_LED_LINK.value(0 if ligado else 1)
-    else:
-        PIN_LED_LINK.value(1 if ligado else 0)
 
 LORA_PARAMS = {
     "frequency"         : 433e6,
@@ -418,22 +428,20 @@ def buzzer_bip(duracao_ms=100):
     PIN_BUZZER.value(0)
 
 def sinalizar_erro(n=3):
-    # Estado Erro: Amarelo OFF, Vermelho PISCA
-    PIN_LED_AMARELO.value(0)
+    # Estado Erro: STATUS PISCA
+    PIN_STATUS.value(0)
     for _ in range(n):
-        PIN_LED_VERMELHO.value(1)
+        PIN_STATUS.value(1)
         buzzer_bip(150)
         utime.sleep_ms(150)
-        PIN_LED_VERMELHO.value(0)
+        PIN_STATUS.value(0)
         utime.sleep_ms(150)
 
 def desligar_tudo():
-    # Estado Desligado: Todos os atuadores e LEDs OFF
+    # Estado Desligado: rele, buzzer e STATUS OFF
     _set_rele(False)
     PIN_BUZZER.value(0)
-    PIN_LED_VERMELHO.value(0)
-    PIN_LED_AMARELO.value(0)
-    _set_led_link(False)
+    PIN_STATUS.value(0)
 
 # =============================================================================
 #  MAQUINA DE ESTADOS - LOGICA PRINCIPAL
@@ -447,11 +455,11 @@ ESTADO_COMPLETO   = "COMPLETO"   # Ciclo concluido
 TEMPO_CONTAGEM_MS   = 5000
 TEMPO_IGNICAO_MS    = 2000
 TIMEOUT_SINAL_MS    = 500
-TIMEOUT_LINK_LED_MS = 3000
+TIMEOUT_LINK_MS = 3000
 INTERVALO_PISCA_MS  = 250
 INTERVALO_BUZZER_MS = 500
 INTERVALO_PING_BOOT_MS = 700
-INTERVALO_PISCA_LINK_MS = 500
+INTERVALO_PISCA_STATUS_MS = 500
 
 MSG_ARM   = "ARM_CONFIRMED"
 MSG_ABORT = "ABORT"
@@ -482,18 +490,18 @@ def executar():
 
     t_inicio_teste = utime.ticks_ms()
     t_ultimo_ping  = utime.ticks_add(t_inicio_teste, -INTERVALO_PING_BOOT_MS)
-    t_ultimo_pisca_link = t_inicio_teste
-    led_link_estado = False
-    _set_led_link(False)
+    t_ultimo_pisca_status = t_inicio_teste
+    led_status_estado = False
+    PIN_STATUS.value(0)
     conexao_ok     = False
 
     while utime.ticks_diff(utime.ticks_ms(), t_inicio_teste) < 5000:
         agora_teste = utime.ticks_ms()
 
-        if utime.ticks_diff(agora_teste, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
-            t_ultimo_pisca_link = agora_teste
-            led_link_estado = not led_link_estado
-            _set_led_link(led_link_estado)
+        if utime.ticks_diff(agora_teste, t_ultimo_pisca_status) >= INTERVALO_PISCA_STATUS_MS:
+            t_ultimo_pisca_status = agora_teste
+            led_status_estado = not led_status_estado
+            PIN_STATUS.value(led_status_estado)
 
         if utime.ticks_diff(agora_teste, t_ultimo_ping) >= INTERVALO_PING_BOOT_MS:
             t_ultimo_ping = agora_teste
@@ -516,14 +524,13 @@ def executar():
         utime.sleep_ms(10)
 
     if conexao_ok:
-        # Estado "Conectado": Amarelo ON, Vermelho OFF
-        PIN_LED_AMARELO.value(1)
-        _set_led_link(True)
-        led_link_estado = True
+        # Estado "Conectado": STATUS ON
+        PIN_STATUS.value(1)
+        led_status_estado = True
         buzzer_bip(200)
         print("[OK] Conexao com a Base estabelecida.")
     else:
-        # Estado "Erro": Amarelo OFF, Vermelho PISCA
+        # Estado "Erro": STATUS PISCA
         sinalizar_erro(4)
         print("[AVISO] Sem resposta da Base. Continuando sem confirmacao de link.")
 
@@ -535,7 +542,7 @@ def executar():
     t_inicio_ignicao     = 0
     t_ultimo_pisca       = 0
     t_ultimo_buz         = 0
-    led_vermelho_estado  = False
+    led_status_estado    = False
     link_reportado_ok    = None
 
     print("[LOOP] Aguardando ARM_CONFIRMED...")
@@ -558,7 +565,7 @@ def executar():
 
         link_ok = (
             t_ultimo_link is not None
-            and utime.ticks_diff(agora, t_ultimo_link) <= TIMEOUT_LINK_LED_MS
+            and utime.ticks_diff(agora, t_ultimo_link) <= TIMEOUT_LINK_MS
         )
         if link_ok != link_reportado_ok:
             link_reportado_ok = link_ok
@@ -568,19 +575,18 @@ def executar():
                 print("[LINK] Conexao com a Base: PERDIDA")
 
         if link_ok:
-            _set_led_link(True)
-            led_link_estado = True
-        elif utime.ticks_diff(agora, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
-            t_ultimo_pisca_link = agora
-            led_link_estado = not led_link_estado
-            _set_led_link(led_link_estado)
+            PIN_STATUS.value(1)
+            led_status_estado = True
+        elif utime.ticks_diff(agora, t_ultimo_pisca_status) >= INTERVALO_PISCA_STATUS_MS:
+            t_ultimo_pisca_status = agora
+            led_status_estado = not led_status_estado
+            PIN_STATUS.value(led_status_estado)
 
         # ------------------------------------------------------------------
         #  ESTADO: AGUARDANDO (Conectado)
         # ------------------------------------------------------------------
         if estado == ESTADO_AGUARDANDO:
-            PIN_LED_AMARELO.value(1)   # Amarelo ON
-            PIN_LED_VERMELHO.value(0)  # Vermelho OFF
+            PIN_STATUS.value(1)  # STATUS ON
             PIN_BUZZER.value(0)
 
             if mensagem_recebida == MSG_ARM:
@@ -596,7 +602,7 @@ def executar():
         #  ESTADO: CONTAGEM REGRESSIVA (Ignição Iminente)
         # ------------------------------------------------------------------
         elif estado == ESTADO_CONTAGEM:
-            PIN_LED_AMARELO.value(1)  # Amarelo ON
+            PIN_STATUS.value(1)  # STATUS ON
 
             if mensagem_recebida == MSG_ARM:
                 t_ultimo_arm = agora
@@ -609,16 +615,16 @@ def executar():
                 print("[SEGURANCA] {}! Resetando contagem.".format(motivo))
                 desligar_tudo()
                 
-                # Entra no estado de Erro (Amarelo OFF, Vermelho PISCA)
+                # Entra no estado de Erro (STATUS PISCA)
                 sinalizar_erro(6)
                 
                 estado = ESTADO_AGUARDANDO
                 continue
 
-            # Pisca o LED Vermelho
+            # Pisca o STATUS
             if utime.ticks_diff(agora, t_ultimo_pisca) >= INTERVALO_PISCA_MS:
-                led_vermelho_estado = not led_vermelho_estado
-                PIN_LED_VERMELHO.value(led_vermelho_estado)
+                led_status_estado = not led_status_estado
+                PIN_STATUS.value(led_status_estado)
                 t_ultimo_pisca = agora
 
             if utime.ticks_diff(agora, t_ultimo_buz) >= INTERVALO_BUZZER_MS:
@@ -650,9 +656,8 @@ def executar():
                 print("[IGNICAO] Contagem completa! Acionando rele...")
                 PIN_BUZZER.value(0)
                 
-                # Ignição Ativa: Amarelo ON, Vermelho ON
-                PIN_LED_VERMELHO.value(1)
-                PIN_LED_AMARELO.value(1)
+                # Ignição Ativa: STATUS ON
+                PIN_STATUS.value(1)
                 
                 _set_rele(True)
                 t_inicio_ignicao = agora
@@ -672,10 +677,10 @@ def executar():
                 print("[TX] '{}' enviado para a Base.".format(MSG_DONE))
 
                 for _ in range(5):
-                    _toggle_pin(PIN_LED_VERMELHO)
+                    _toggle_pin(PIN_STATUS)
                     buzzer_bip(80)
                     utime.sleep_ms(80)
-                PIN_LED_VERMELHO.value(0)
+                PIN_STATUS.value(0)
 
                 estado = ESTADO_COMPLETO
                 print("[OK] Sequencia de ignicao concluida.")
