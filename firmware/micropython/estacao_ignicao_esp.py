@@ -7,11 +7,13 @@
 #   MAPEAMENTO DE PINOS (oficial do projeto): # type: ignore
 #   - LoRa SPI (hardware VSPI): SCK=GPIO18, MOSI=GPIO23, MISO=GPIO19,
 #     CS(NSS)=GPIO4, RESET=GPIO16, DIO0=GPIO17
-#   - Interface: STATUS_LED=GPIO25, BUTTON_IN=GPIO27 (active-low), BUZZER=GPIO14
+#   - Interface: STATUS_LED=GPIO25, BUTTON_IN=GPIO27 (active-low, aborta a
+#     contagem), BUZZER=GPIO14
 #   - Atuador (mantido): RELE=GPIO32 (ativo em baixo)
 #   - Expansao (somente entrada, sem pull interno): EXP_IN1=GPIO36, EXP_IN2=GPIO39
-#   - ADC1 (somente entrada): ADC1_IN1=GPIO34, ADC1_IN2=GPIO35
-#   - I2C reservado p/ OLED futuro (sem driver no projeto): SDA=GPIO21, SCL=GPIO22
+#   - ADC1 (somente entrada): ADC1_IN1=GPIO34, ADC1_IN2=GPIO35 (leitura periodica)
+#   - I2C: SDA=GPIO21, SCL=GPIO22 — OLED SSD1306 128x64 de status (opcional:
+#     se ausente no barramento, o firmware segue sem display)
 #   (se sua placa usar outra serigrafia, ajuste os PIN_*_NUM abaixo)
 #
 #   LÓGICA DE SEGURANÇA:
@@ -25,7 +27,7 @@
 # ==============================================================================
 
 import utime
-from machine import Pin, SPI
+from machine import Pin, SPI, I2C, ADC
 
 # No ESP32 deste projeto, preferimos o driver nativo (sem dependencias extras)
 # para evitar erros de import do pacote legado sx127x.
@@ -69,10 +71,17 @@ PIN_EXP_IN2_NUM = 39
 PIN_ADC1_IN1_NUM = 34
 PIN_ADC1_IN2_NUM = 35
 
-# I2C reservado p/ OLED futuro (SDA=21, SCL=22). Sem driver no projeto,
-# por isso ficam so como constantes.
+# I2C do OLED de status (SSD1306 128x64). Opcional: ausencia nao trava o boot.
 PIN_I2C_SDA_NUM = 21
 PIN_I2C_SCL_NUM = 22
+OLED_ADDR = 0x3C
+OLED_W = 128
+OLED_H = 64
+
+# Intervalos das leituras periodicas (nao-bloqueantes)
+INTERVALO_ADC_MS  = 1000
+INTERVALO_OLED_MS = 500
+DEBOUNCE_BTN_MS   = 50
 
 # Modulo SRD-05VDC-SL-C e Active LOW: IN=BAIXO liga o rele, IN=ALTO desliga.
 RELE_ACTIVE_LEVEL    = 0
@@ -92,6 +101,35 @@ PIN_STATUS = Pin(PIN_STATUS_NUM, Pin.OUT, value=0)  # STATUS: ON conectado/armad
 PIN_BUTTON  = Pin(PIN_BUTTON_NUM, Pin.IN, Pin.PULL_UP)
 PIN_EXP_IN1 = Pin(PIN_EXP_IN1_NUM, Pin.IN)
 PIN_EXP_IN2 = Pin(PIN_EXP_IN2_NUM, Pin.IN)
+
+# Barramento I2C + OLED de status. Qualquer falha aqui desabilita so o
+# display (OLED_OK=False); o resto da estacao continua operando.
+oled = None
+OLED_OK = False
+try:
+    from ssd1306 import SSD1306_I2C
+    _i2c = I2C(0, scl=Pin(PIN_I2C_SCL_NUM), sda=Pin(PIN_I2C_SDA_NUM), freq=400000)
+    if OLED_ADDR in _i2c.scan():
+        oled = SSD1306_I2C(OLED_W, OLED_H, _i2c, OLED_ADDR)
+        OLED_OK = True
+        print("[BOOT] OLED SSD1306 encontrado em 0x{:02X}.".format(OLED_ADDR))
+    else:
+        print("[BOOT] OLED ausente no I2C — seguindo sem display.")
+except Exception as exc:
+    print("[BOOT] I2C/OLED indisponivel ({}) — seguindo sem display.".format(exc))
+
+# ADC1 (somente entrada). ATTN_11DB ~= 0–3,3 V; leitura crua 0–4095.
+ADC1 = None
+ADC2 = None
+ADC_OK = False
+try:
+    ADC1 = ADC(Pin(PIN_ADC1_IN1_NUM))
+    ADC1.atten(ADC.ATTN_11DB)
+    ADC2 = ADC(Pin(PIN_ADC1_IN2_NUM))
+    ADC2.atten(ADC.ATTN_11DB)
+    ADC_OK = True
+except Exception as exc:
+    print("[BOOT] ADC indisponivel ({}) — leituras zeradas.".format(exc))
 
 def _set_rele(ligado):
     PIN_RELE.value(RELE_ACTIVE_LEVEL if ligado else RELE_INACTIVE_LEVEL)
@@ -444,6 +482,57 @@ def desligar_tudo():
     PIN_STATUS.value(0)
 
 # =============================================================================
+#  ENTRADAS E PERIFERICOS (botao, ADC, expansao, OLED)
+# =============================================================================
+
+def ler_adc_mv():
+    # Retorna (adc1_mv, adc2_mv). Nunca levanta excecao.
+    if not ADC_OK:
+        return (0, 0)
+    try:
+        return (ADC1.read() * 3300 // 4095, ADC2.read() * 3300 // 4095)
+    except Exception:
+        return (0, 0)
+
+_btn_estavel = 1
+_btn_tempo = 0
+_btn_consumido = True
+
+def botao_apertado():
+    # Borda de descida com debounce, nao-bloqueante: retorna True uma vez
+    # por aperto (so apos soltar libera o proximo).
+    global _btn_estavel, _btn_tempo, _btn_consumido
+    agora = utime.ticks_ms()
+    v = PIN_BUTTON.value()
+    if v != _btn_estavel:
+        _btn_estavel = v
+        _btn_tempo = agora
+        if v == 1:
+            _btn_consumido = False  # liberado ao soltar
+    if v == 0 and not _btn_consumido and utime.ticks_diff(agora, _btn_tempo) > DEBOUNCE_BTN_MS:
+        _btn_consumido = True
+        return True
+    return False
+
+def oled_mostra(estado, link_ok, adc1_mv, adc2_mv, exp1, exp2, msg):
+    # Atualiza o display de status. Em falha de barramento, desliga o OLED.
+    global OLED_OK
+    if not OLED_OK:
+        return
+    try:
+        oled.fill(0)
+        oled.text("IGNITOR ESP32", 0, 0)
+        oled.text("Est:" + estado[:10], 0, 12)
+        oled.text("Link:" + ("OK" if link_ok else "--"), 0, 24)
+        oled.text("A1:{} A2:{}".format(adc1_mv, adc2_mv), 0, 36)
+        oled.text("E1:{} E2:{}".format(exp1, exp2), 0, 48)
+        oled.text(str(msg or "")[:16], 0, 56)
+        oled.show()
+    except Exception as exc:
+        OLED_OK = False
+        print("[OLED] Falha no display ({}) — desabilitado.".format(exc))
+
+# =============================================================================
 #  MAQUINA DE ESTADOS - LOGICA PRINCIPAL
 # =============================================================================
 
@@ -544,6 +633,10 @@ def executar():
     t_ultimo_buz         = 0
     led_status_estado    = False
     link_reportado_ok    = None
+    t_ultimo_adc = 0
+    t_ultimo_oled = 0
+    adc1_mv = adc2_mv = 0
+    exp1 = exp2 = 1
 
     print("[LOOP] Aguardando ARM_CONFIRMED...")
 
@@ -581,6 +674,27 @@ def executar():
             t_ultimo_pisca_status = agora
             led_status_estado = not led_status_estado
             PIN_STATUS.value(led_status_estado)
+
+        # ------------------------------------------------------------------
+        #  LEITURAS PERIODICAS (ADC + botao + OLED) — nao-bloqueante
+        # ------------------------------------------------------------------
+        if utime.ticks_diff(agora, t_ultimo_adc) >= INTERVALO_ADC_MS:
+            t_ultimo_adc = agora
+            adc1_mv, adc2_mv = ler_adc_mv()
+            exp1, exp2 = PIN_EXP_IN1.value(), PIN_EXP_IN2.value()
+
+        if botao_apertado():
+            print("[BTN] Botao local pressionado.")
+            if estado == ESTADO_CONTAGEM:
+                # Reaproveita o caminho de ABORT existente (so cancela, nunca arma)
+                mensagem_recebida = MSG_ABORT
+            elif estado == ESTADO_AGUARDANDO:
+                buzzer_bip(100)
+
+        if OLED_OK and utime.ticks_diff(agora, t_ultimo_oled) >= INTERVALO_OLED_MS:
+            t_ultimo_oled = agora
+            oled_mostra(estado, link_ok, adc1_mv, adc2_mv, exp1, exp2,
+                        mensagem_recebida)
 
         # ------------------------------------------------------------------
         #  ESTADO: AGUARDANDO (Conectado)
