@@ -1,0 +1,15 @@
+* M10 - Integridade SPI 1 MHz (SCK) com parasitarios estimados do PCB (PTH).
+* Rota B.Cu 0.2mm, SCK/MISO ~60mm: R ~0.17 ohm, L ~60nH (sem plano de referencia
+* adjacente -> estimativa conservadora de L). C ~27pF. Driver ESP32 25 ohm / 10ns.
+Vdrv drv 0 PULSE(0 3.3 100n 10n 10n 500n 1u)
+Rd drv a 25
+Rtr a b 0.17
+Ltr b c 60n
+Ctr c 0 27p
+Rcv c rcv 2
+Cld rcv 0 12p
+
+.tran 0 2.5u 0 0.5n
+.meas TRAN v_rcv_max MAX V(rcv) FROM 100n TO 1.1u
+.meas TRAN v_rcv_min MIN V(rcv) FROM 100n TO 1.1u
+.end

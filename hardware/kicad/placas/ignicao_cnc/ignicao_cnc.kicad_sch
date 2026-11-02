@@ -1,0 +1,387 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "a458e973-2f3f-4941-a026-37b74a48edf4")
+	(paper "A5")
+	(title_block
+		(title "PCB IGNITOR SERRA ROCKETRY")
+		(date "2026-10-05")
+		(rev "V1")
+	)
+	(lib_symbols)
+	(sheet
+		(at 29.21 46.99)
+		(size 26.67 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "00758f45-d93e-4cf4-88d7-8df70201d85b")
+		(property "Sheetname" "rele"
+			(at 29.21 46.2784 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "rele.kicad_sch"
+			(at 29.21 57.7346 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "7")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 59.69 46.99)
+		(size 29.21 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "14ff497f-d977-4c03-ab02-bcde3eb4472e")
+		(property "Sheetname" "BUZZER"
+			(at 59.69 46.2784 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "BUZZER.kicad_sch"
+			(at 59.69 57.7346 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "8")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 121.92 31.75)
+		(size 27.94 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "1ce885c9-cc5a-4554-9243-17e0fefc16b8")
+		(property "Sheetname" "Botão"
+			(at 121.92 31.0384 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "botao.kicad_sch"
+			(at 121.92 42.4946 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 92.71 31.75)
+		(size 25.4 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "2e1fc7cb-62c7-47e9-8a14-1f6e060758ad")
+		(property "Sheetname" "lora"
+			(at 92.71 31.0384 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "LORA.kicad_sch"
+			(at 92.71 42.4946 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 92.71 46.99)
+		(size 25.4 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "639140e0-5af0-4112-a2d2-499239e3928e")
+		(property "Sheetname" "led_oled"
+			(at 92.71 46.2784 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "leds_oled.kicad_sch"
+			(at 92.71 57.7346 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "9")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 119.38 46.99)
+		(size 25.4 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "8723d3be-2d9b-46e1-8f2a-4d1920a0a70e")
+		(property "Sheetname" "EXPANSÃO"
+			(at 119.38 46.2784 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "EXPANSAO.kicad_sch"
+			(at 119.38 57.7346 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 59.69 31.75)
+		(size 26.67 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "ae61fd89-87c7-4b43-b598-ee873ba87de5")
+		(property "Sheetname" "Alimentação"
+			(at 59.69 31.0384 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "alimentacao.kicad_sch"
+			(at 59.69 42.4946 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 29.21 31.75)
+		(size 26.67 10.16)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "bc52cfe6-fe19-46d5-a598-69ef7c827bb3")
+		(property "Sheetname" "mcu_esp32"
+			(at 29.21 31.0384 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu_esp32.kicad_sch"
+			(at 29.21 42.4946 0)
+			(show_name yes)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ignicao_cnc"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

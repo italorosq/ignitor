@@ -1,4 +1,4 @@
-# Envio de Firmware para Pico e ESP32-C3
+# Envio de Firmware para Pico e ESP32
 
 Este guia mostra como enviar os scripts MicroPython para as placas do projeto.
 
@@ -16,10 +16,12 @@ Este guia mostra como enviar os scripts MicroPython para as placas do projeto.
 - `firmware/micropython/sx127x.py` (opcional)
 - `firmware/micropython/config_lora.py` (opcional)
 
-### ESP32-C3 da Estacao de Ignicao
+### ESP32 (DevKit V1) da Estacao de Ignicao
 
 - `firmware/micropython/estacao_ignicao_esp.py` (salvar como `main.py`)
 - `firmware/micropython/sx127x.py` (opcional, existe fallback nativo)
+- `firmware/micropython/ssd1306.py` (opcional: OLED de status)
+- `firmware/micropython/logo_serra.py` (opcional: logo na tela de sucesso)
 
 ## 1. Descobrir Porta Serial
 
@@ -31,7 +33,7 @@ Exemplo comum:
 
 - Comando: `/dev/ttyACM0`
 - Ignicao Pico: `/dev/ttyACM1`
-- Ignicao ESP32-C3: `/dev/ttyUSB0`
+- Ignicao ESP32: `/dev/ttyUSB0`
 
 ## 2. Envio com ampy
 
@@ -49,7 +51,7 @@ ampy --port /dev/ttyACM1 put firmware/micropython/estacao_ignicao.py main.py
 ampy --port /dev/ttyACM1 ls
 ```
 
-### 2.3 Estacao de Ignicao (ESP32-C3)
+### 2.3 Estacao de Ignicao (ESP32 DevKit V1)
 
 ```bash
 ampy --port /dev/ttyUSB0 put firmware/micropython/estacao_ignicao_esp.py main.py

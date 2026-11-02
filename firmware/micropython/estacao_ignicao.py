@@ -18,6 +18,8 @@
 #   Buzzer             ──  GP19
 #   LED Vermelho       ──  GP12   (Contagem / Erro)
 #   LED Amarelo        ──  GP11   (Conectado / Ativo)
+#   LED do botao (J9)  ──  GP16   (espelha LINK na conexao, espelha VERMELHO na ignicao)
+#   LED Link onboard   ──  GP25
 #   ─────────────────────────────────────────────────────
 #
 #   LÓGICA DE SEGURANÇA:
@@ -71,9 +73,24 @@ PIN_BUZZER       = Pin(19, Pin.OUT, value=0)
 PIN_LED_VERMELHO = Pin(12, Pin.OUT, value=0)  # Vermelho: Pisca em contagem/erro, ON ignicao
 PIN_LED_AMARELO  = Pin(11, Pin.OUT, value=0)  # Amarelo: ON quando conectado/ativo
 PIN_LED_LINK     = Pin(25, Pin.OUT, value=0)  # LED onboard: status de conexao
+PIN_LED_BTN_NUM  = 16  # LED do botao (J9 LED_BTN_K): espelha LINK + VERMELHO
+PIN_LED_BTN      = Pin(PIN_LED_BTN_NUM, Pin.OUT, value=0)
 
 def _set_rele(ligado):
     PIN_RELE.value(RELE_ACTIVE_LEVEL if ligado else RELE_INACTIVE_LEVEL)
+
+def _set_link_pair(v):
+    # Conectando: LED onboard + LED do botao juntos.
+    PIN_LED_LINK.value(1 if v else 0)
+    PIN_LED_BTN.value(1 if v else 0)
+
+def _set_vermelho_pair(v):
+    # Ignicao/erro: VERMELHO + LED do botao juntos.
+    PIN_LED_VERMELHO.value(1 if v else 0)
+    PIN_LED_BTN.value(1 if v else 0)
+
+def _toggle_vermelho_pair():
+    _set_vermelho_pair(not PIN_LED_VERMELHO.value())
 
 LORA_PARAMS = {
     "frequency"         : 433e6,
@@ -396,13 +413,13 @@ def buzzer_bip(duracao_ms=100):
     PIN_BUZZER.value(0)
 
 def sinalizar_erro(n=3):
-    # Estado Erro: Amarelo OFF, Vermelho PISCA
+    # Estado Erro: Amarelo OFF, Vermelho + LED do botao PISCAM juntos
     PIN_LED_AMARELO.value(0)
     for _ in range(n):
-        PIN_LED_VERMELHO.value(1)
+        _set_vermelho_pair(1)
         buzzer_bip(150)
         utime.sleep_ms(150)
-        PIN_LED_VERMELHO.value(0)
+        _set_vermelho_pair(0)
         utime.sleep_ms(150)
 
 def desligar_tudo():
@@ -412,6 +429,7 @@ def desligar_tudo():
     PIN_LED_VERMELHO.value(0)
     PIN_LED_AMARELO.value(0)
     PIN_LED_LINK.value(0)
+    PIN_LED_BTN.value(0)
 
 # =============================================================================
 #  MAQUINA DE ESTADOS - LOGICA PRINCIPAL
@@ -462,7 +480,7 @@ def executar():
     t_ultimo_ping  = utime.ticks_add(t_inicio_teste, -INTERVALO_PING_BOOT_MS)
     t_ultimo_pisca_link = t_inicio_teste
     led_link_estado = False
-    PIN_LED_LINK.value(0)
+    _set_link_pair(0)
     conexao_ok     = False
 
     while utime.ticks_diff(utime.ticks_ms(), t_inicio_teste) < 5000:
@@ -471,7 +489,7 @@ def executar():
         if utime.ticks_diff(agora_teste, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
             t_ultimo_pisca_link = agora_teste
             led_link_estado = not led_link_estado
-            PIN_LED_LINK.value(1 if led_link_estado else 0)
+            _set_link_pair(led_link_estado)
 
         if utime.ticks_diff(agora_teste, t_ultimo_ping) >= INTERVALO_PING_BOOT_MS:
             t_ultimo_ping = agora_teste
@@ -494,9 +512,9 @@ def executar():
         utime.sleep_ms(10)
 
     if conexao_ok:
-        # Estado "Conectado": Amarelo ON, Vermelho OFF
+        # Estado "Conectado": Amarelo ON, Vermelho OFF, Link + BTN ON
         PIN_LED_AMARELO.value(1)
-        PIN_LED_LINK.value(1)
+        _set_link_pair(1)
         led_link_estado = True
         buzzer_bip(200)
         print("[OK] Conexao com a Base estabelecida.")
@@ -546,12 +564,12 @@ def executar():
                 print("[LINK] Conexao com a Base: PERDIDA")
 
         if link_ok:
-            PIN_LED_LINK.value(1)
+            _set_link_pair(1)
             led_link_estado = True
         elif utime.ticks_diff(agora, t_ultimo_pisca_link) >= INTERVALO_PISCA_LINK_MS:
             t_ultimo_pisca_link = agora
             led_link_estado = not led_link_estado
-            PIN_LED_LINK.value(1 if led_link_estado else 0)
+            _set_link_pair(led_link_estado)
 
         # ------------------------------------------------------------------
         #  ESTADO: AGUARDANDO (Conectado)
@@ -586,17 +604,17 @@ def executar():
                 motivo = "ABORT recebido" if abort_recebido else "Sinal perdido (>500ms)"
                 print("[SEGURANCA] {}! Resetando contagem.".format(motivo))
                 desligar_tudo()
-                
+
                 # Entra no estado de Erro (Amarelo OFF, Vermelho PISCA)
                 sinalizar_erro(6)
-                
+
                 estado = ESTADO_AGUARDANDO
                 continue
 
-            # Pisca o LED Vermelho
+            # Pisca LED Vermelho + LED do botao juntos na contagem
             if utime.ticks_diff(agora, t_ultimo_pisca) >= INTERVALO_PISCA_MS:
                 led_vermelho_estado = not led_vermelho_estado
-                PIN_LED_VERMELHO.value(led_vermelho_estado)
+                _set_vermelho_pair(led_vermelho_estado)
                 t_ultimo_pisca = agora
 
             if utime.ticks_diff(agora, t_ultimo_buz) >= INTERVALO_BUZZER_MS:
@@ -627,11 +645,11 @@ def executar():
 
                 print("[IGNICAO] Contagem completa! Acionando rele...")
                 PIN_BUZZER.value(0)
-                
-                # Ignição Ativa: Amarelo ON, Vermelho ON
-                PIN_LED_VERMELHO.value(1)
+
+                # Ignicao Ativa: Amarelo ON, Vermelho + BTN ON
+                _set_vermelho_pair(1)
                 PIN_LED_AMARELO.value(1)
-                
+
                 _set_rele(True)
                 t_inicio_ignicao = agora
                 estado = ESTADO_IGNICAO
@@ -650,10 +668,10 @@ def executar():
                 print("[TX] '{}' enviado para a Base.".format(MSG_DONE))
 
                 for _ in range(5):
-                    _toggle_pin(PIN_LED_VERMELHO)
+                    _toggle_vermelho_pair()
                     buzzer_bip(80)
                     utime.sleep_ms(80)
-                PIN_LED_VERMELHO.value(0)
+                _set_vermelho_pair(0)
 
                 estado = ESTADO_COMPLETO
                 print("[OK] Sequencia de ignicao concluida.")

@@ -1,70 +1,97 @@
 # Serra Rocketry Ignitor
 
-Sistema de ignicao remota para foguetes experimentais.
+[![CI](https://github.com/italorosq/ignitor/actions/workflows/ci.yml/badge.svg)](https://github.com/italorosq/ignitor/actions/workflows/ci.yml)
 
-## Visao Geral
+Sistema de ignição remota para foguetes experimentais. Duas estações
+independentes se comunicam por LoRa 433 MHz:
 
-Duas estacoes independentes se comunicam via LoRa 433 MHz:
-
-| Estacao | Funcao | MCU |
+| Estação | Função | MCU |
 | --- | --- | --- |
-| Comando | Operacao remota e seguranca | Raspberry Pi Pico |
-| Ignicao | Acionamento do ignitor | ESP32-C3 SuperMini ou Raspberry Pi Pico |
+| Comando | Operação remota e segurança | Raspberry Pi Pico |
+| Ignição | Acionamento do ignitor | ESP32 DevKit V1 (ESP32-WROOM-32) ou Pico (legado) |
 
-## Sequencia de Ignicao
+## Estado atual
 
-1. Operador segura o botao por 5 s.
+> **Leia [`docs/ESTADO_DO_PROJETO.md`](./docs/ESTADO_DO_PROJETO.md) antes de
+> fabricar qualquer placa.**
+
+| Placa | Dimensão | Estado |
+| --- | --- | --- |
+| Ignição SMD | 75×75 mm | **Candidata — não fabricar** (5 curtos, 3 desconexões, 27 erros de DRC) |
+| Ignição PTH | 75×80 mm | Funcional; limpeza de serigrafia/paridade pendente |
+| Ignição CNC | 50×90 mm | Em projeto (0 trilhas; relayout 90×100 não executado) |
+| Comando | — | Projeto removido; gerbers históricos em `hardware/gerbers/legado/` |
+
+O firmware principal da ignição (ESP32) está implementado com botão, OLED,
+ADC, expansão e sequência de ignição. Os testes estáticos passam
+(`pytest test/`).
+
+## Sequência de ignição
+
+1. Operador segura o botão por 5 s.
 2. Comando transmite `ARM_CONFIRMED` continuamente.
-3. Ignicao executa contagem regressiva (5 bipes).
-4. Rele aciona por 2 s.
-5. Ignicao envia `IGNITION_COMPLETE`.
+3. Ignição executa contagem regressiva (5 bipes).
+4. Relé + Q1 acionam por 2 s.
+5. Ignição envia `IGNITION_COMPLETE`.
 
-## Comece Aqui
+## Comece aqui
 
 | Passo | Guia |
 | --- | --- |
-| 1. Montar | [docs/INSTALL.md](./docs/INSTALL.md) |
-| 2. Gravar firmware | [docs/README_ENVIO.md](./docs/README_ENVIO.md) |
-| 3. Testar | [test/README.md](./test/README.md) |
-| 4. Diagnosticar problemas | [docs/troubleshooting.md](./docs/troubleshooting.md) |
+| 1. Entender | [docs/ARQUITETURA.md](./docs/ARQUITETURA.md) |
+| 2. Montar | [docs/INSTALL.md](./docs/INSTALL.md) |
+| 3. Gravar firmware | [docs/README_ENVIO.md](./docs/README_ENVIO.md) |
+| 4. Testar | [test/README.md](./test/README.md) |
+| 5. Diagnosticar | [docs/troubleshooting.md](./docs/troubleshooting.md) |
+| 6. Contribuir | [CONTRIBUTING.md](./CONTRIBUTING.md) |
 
-## Estrutura do Repositorio
+## Estrutura do repositório
 
 ```text
 ignitor/
-├── docs/                 # Guias e referencias
+├── docs/                 # arquitetura, estado, instalação, protocolo, histórico
 ├── firmware/
-│   ├── micropython/      # Scripts oficiais (.py)
-│   └── data/             # Arquivos web/auxiliares
-├── hardware/             # BOM, pinagem e materiais fisicos
-├── software/             # Legado/compatibilidade
-└── test/                 # Scripts e procedimentos de teste
+│   └── micropython/      # firmware oficial das estações
+├── hardware/
+│   ├── kicad/
+│   │   ├── placas/       # ignicao_smd, ignicao_pth, ignicao_cnc
+│   │   ├── shared/lib/   # símbolos, footprints e modelos 3D
+│   │   └── spice/        # simulações LTspice
+│   ├── tools/kicad/      # automação de posicionamento, roteamento e fabricação
+│   ├── gerbers/legado/   # pacotes históricos de fabricação
+│   ├── 3d_models/        # cases (OpenSCAD é o modelo atual)
+│   ├── fritzing/         # diagramas de protoboard
+│   └── images/           # fotos e esquemas
+├── software/web/         # UI web legada
+├── test/                 # testes estáticos e scripts de bancada
+└── scripts/              # checagens de links e higiene do repositório
 ```
 
-## Componentes Principais
+## Componentes principais
 
 | Qtd | Componente | Uso |
 | --- | --- | --- |
-| 1 | Raspberry Pi Pico | Estacao de Comando |
-| 1 | ESP32-C3 SuperMini | Estacao de Ignicao (principal) |
-| 2 | Modulo LoRa SX1278 | Comunicacao 433 MHz |
-| 2 | LED amarelo 5mm | Status de link |
-| 2 | LED vermelho 5mm | Status de ignicao |
-| 2 | Buzzer ativo 5V | Feedback sonoro |
-| 1 | Botao de ignicao 22 mm | Acionamento |
-| 1 | Rele/MOSFET | Saida para ignitor |
-| 2 | Modulo TP4056 | Carga de bateria |
+| 1 | Raspberry Pi Pico | Estação de Comando |
+| 1 | ESP32 DevKit V1 (30 pinos) | Estação de Ignição (principal) |
+| 2 | Módulo LoRa SX1278 433 MHz | Comunicação |
+| 2 | LED amarelo 5 mm | Status de link |
+| 2 | LED vermelho 5 mm | Status de ignição |
+| 2 | Buzzer ativo | Feedback sonoro |
+| 1 | Botão de ignição 22 mm | Acionamento |
+| 1 | Relé + MOSFETs Q1/Q2 | Saída para ignitor |
+| 2 | TP4056 | Carga de bateria |
 
-Pinagem completa e BOM: [hardware/README.md](./hardware/README.md).
+BOM completa e pinagem: [hardware/README.md](./hardware/README.md).
 
-## Regras de Seguranca
+## Segurança
 
-- Botao de ignicao deve ser momentaneo (sem trava).
+- Botão de ignição deve ser momentâneo (sem trava).
 - O comando precisa ser mantido pelos 5 s completos.
 - Perda de sinal por mais de 500 ms deve abortar.
 - Sempre usar carga dummy antes de ignitor real.
 - Sempre conectar antena LoRa antes de energizar.
-- Manter distancia minima de 10 m entre operador e foguete.
+- Manter distância mínima de 10 m entre operador e foguete.
+- Não fabricar a SMD enquanto o DRC tiver curtos ou desconexões.
 
 ## Projeto
 

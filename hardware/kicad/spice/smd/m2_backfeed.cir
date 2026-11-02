@@ -1,0 +1,21 @@
+* M2 - Bloqueio de backfeed USB -> rail (D1=SS34), variante SMD
+* von=0: buck desligado (saida em ~0V via Rbuck, caso pior); von=1: buck em 5V.
+* i_d1 = corrente pelo diodo (deve ser ~0 no bloqueio).
+.include ../models/ss34.lib
+.include ../models/ldo_devkit.lib
+
+.step param von list 0 1
+Vusb vin 0 5
+Vbuck buck 0 {5*von}
+Rbuck buck r5 0.1
+Vsense r5 rail 0
+D1 rail vin SS34
+Xldo vin 0 v3v3 LDO_DEVKIT
+Iesp v3v3 0 120m
+
+.tran 0 2m 0 5u
+.meas TRAN i_d1 AVG I(Vsense) FROM 1m TO 2m
+.meas TRAN v_rail AVG V(rail) FROM 1m TO 2m
+.meas TRAN v_3v3 AVG V(v3v3) FROM 1m TO 2m
+.meas TRAN i_vusb AVG I(Vusb) FROM 1m TO 2m
+.end

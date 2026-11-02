@@ -1,8 +1,8 @@
 # Ferramental de PCB do projeto Ignitor
 
-Scripts Python usados para posicionar, rotear e acabar as placas dos 4 projetos
-KiCad. Todos dependem do **Python embutido do KiCad 10**, que é o único que tem
-o módulo `pcbnew`:
+Scripts Python usados para posicionar, rotear e acabar as placas dos 3 projetos
+KiCad ativos (`hardware/kicad/placas/`). Todos dependem do **Python embutido do
+KiCad 10**, que é o único que tem o módulo `pcbnew`:
 
 ```powershell
 & "C:\Program Files\KiCad\10.0\bin\python.exe" -u <script>.py <args>
@@ -30,10 +30,17 @@ Nenhum script depende do KiCad aberto: todos trabalham direto nos arquivos.
 
 | Script | O que faz |
 | --- | --- |
-| `route.py` | Pipeline completo: exporta DSN, roda o Freerouting, importa o SES, refaz o preenchimento. |
+| `route.py` | Pipeline completo: exporta DSN, roda o Freerouting, importa o SES, refaz o preenchimento. 4º argumento opcional = argumentos extras do Freerouting (ex.: `"--router.layers.routable=false,true"` para 1 face, `-mt 1` sempre recomendado: o otimizador multi-thread do 2.4.1 gera violações). |
 | `widen.py` | Engrossa as trilhas de alimentação (VSYS, EXT_5V) para uma largura dada. |
 | `strip_sexp.py` | Remove blocos S-expression de nível 1 do `.kicad_pcb` (ex.: `zone`). Evita a API SWIG, que degrada após a primeira remoção. |
 | `batch.py` / `evaluate.py` | Rodam o pipeline em várias sementes / avaliam placas já roteadas. **Não rodar o `batch`** — ele dispara o Freerouting N vezes e abre N janelas Java. |
+
+## cnc/
+
+| Script | O que faz |
+| --- | --- |
+| `fill_gaps.py` | Fecha as ligações que o Freerouting deixa em aberto numa placa (ex.: `ignicao_cnc`): roda o DRC, lê os itens desconectados e liga cada par com um A* numa grade de 0,1 mm, na largura pedida com fallback de neck-down (1,0 → 0,8 → 0,6 → 0,5 mm) e no isolamento da netclass + 0,06 mm de margem (a grade senão fura o clearance). Ordem por comprimento crescente (evita que trilhas longas emparedem as curtas); máscaras por camada (F.Cu não bloqueia B.Cu) e custo de congestionamento (trilha busca o centro do corredor). Roda uma passada por invocação — alterne `--layer B.Cu` e `--layer F.Cu`. Diagnóstico `[espaco fechado]` = sem caminho no mapa atual (normalmente precisa remover a trilha que fecha o pino e rodar de novo). |
+| `islands.py` | Para placa de 1 face que não fecha: para cada par desconectado, estende a trilha dos dois lados o mais perto possível um do outro (A* `best_effort`) e coloca uma **ilha de solda** (`ignitor:JUMPER_ILHA`, pad PTH 1,8 mm / furo 0,9) no ponto de parada, para o usuário fechar com fio jumper. Se um lado já está colado no próprio pad (`<1,5 mm`), o fio solda direto no pad e não cria ilha. Impede ilha em cima de outro furo (folga 0,25 mm) e imprime a tabela de jumpers (rede, ilhas/pads, comprimento de fio). |
 
 ## plano-terra/
 
@@ -66,12 +73,17 @@ Nenhum script depende do KiCad aberto: todos trabalham direto nos arquivos.
 | `update_parts.py` | Atualiza MPN/LCSC/BOM Comments de cada componente no esquema. |
 | `dump_mcu.py` | Mostra rótulos globais, fios e power symbols de uma folha. |
 
+## biblioteca/
+
+| Script | O que faz |
+| --- | --- |
+| `extrair_biblioteca.py` | Regera a biblioteca compartilhada (`hardware/kicad/shared/lib`): recorta os simbolos usados de cada `.kicad_sym` de origem (seguindo `extends`), copia os `.kicad_mod` usados e os modelos 3D, reescreve as tabelas `sym-lib-table`/`fp-lib-table` dos projetos e corrige os caminhos `(model ...)` das PCBs. `--check` valida que todo `lib_id`, footprint e modelo resolve localmente. Nao precisa do `pcbnew` — roda com qualquer Python 3. |
+
 ## fabricacao/
 
 | Script | O que faz |
 | --- | --- |
-| `gen_jlc.py` | Gera o BOM e o CPL no formato da JLCPCB, só com os SMD, expandindo `R1-R3` em `R1,R2,R3`. |
-| `check_fps.py` | (duplicado) valida footprints contra a biblioteca. |
+| `gen_jlc_package.py` | Gera o pacote completo da JLCPCB com `kicad-cli`: Gerbers X2, drill PTH/NPTH, mapas, BOM e CPL no formato do Fabrication Toolkit. Uso: `python gen_jlc_package.py <pasta-do-projeto>`. É o gerador canônico; o antigo `gen_jlc.py` (baseado em CSV do gerber antigo) foi removido. |
 
 ## limpeza/
 
@@ -79,7 +91,7 @@ Nenhum script depende do KiCad aberto: todos trabalham direto nos arquivos.
 | --- | --- |
 | `dedup_mh.py` | Remove footprints duplicados (mesma referência e mesma posição). |
 | `fix_nc.py` | Remove flags de no-connect sobre pontos que têm fio. Valida o balanceamento de parênteses antes de gravar. |
-| `set_netclasses.py` | Escreve as netclasses (Default, Power, IGN) nos `.kicad_pro`. |
+| `set_netclasses.py` | Escreve as netclasses (Default, Power, IGN) nos `.kicad_pro`. O perfil `pcbcnc` escreve a variante CNC: Default 1,0 mm / folga 0,4, GND 1,0, IGN 2,5; regras da placa (min_track_width 0,6, anular 0,1, min_groove 0,2) e `solder_mask_bridge: ignore` (sem máscara na placa caseira). |
 | `set_spokes.py` | Baixa o `min_resolved_spokes` para 1 (senão o DRC acusa `starved_thermal`). |
 
 ## diagnostico/

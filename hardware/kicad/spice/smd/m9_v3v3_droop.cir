@@ -1,0 +1,21 @@
+* M9 - Droop do rail 3V3 na entrada do RA-02/OLED (sem decap local; Ltrilha 150nH).
+* Degrau de carga do RA-02: 12mA -> 105mA (TX) em 100ns. Cloc = decap local (param).
+.include ../models/ss34.lib
+.include ../models/ldo_devkit.lib
+
+.step param Cloc list 0 100n 10u
+Vbuck b 0 5
+Rb b vin 0.1
+C1 vin 0 100u
+D1 vin vin_d SS34
+Xldo vin_d 0 v3v3 LDO_DEVKIT
+Ll v3v3 v3u 150n
+Rl v3u u1v 50m
+Cloc u1v 0 {Cloc}
+Ira u1v 0 PWL(0 12m  0.5m 12m  0.5001m 105m  1.5m 105m  1.5001m 12m  2.5m 12m)
+Ioled u1v 0 25m
+
+.tran 0 3m 0 50n
+.meas TRAN v3_min MIN V(v3v3) FROM 0.49m TO 1.5m
+.meas TRAN u1_min MIN V(u1v) FROM 0.49m TO 1.5m
+.end

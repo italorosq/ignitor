@@ -1,9 +1,19 @@
-# Software (Legado)
+# Software
 
-Esta pasta foi mantida por compatibilidade historica.
+Esta pasta reúne software que **não é firmware embarcado**.
 
-Os scripts oficiais de firmware MicroPython foram movidos para:
+```text
+software/
+└── web/     # UI web legada (contador/temporizador) para experimentos locais
+```
 
-- `../firmware/micropython/`
+## web/
 
-Nao adicione novos firmwares aqui.
+A pasta [`web/`](./web/) veio de `firmware/data/` e contém uma interface web
+legada (`index.html`, `script.js`, `style.css`, `hammer.min.js`). Ela não é
+gravada no Pico/ESP32 e não substitui os scripts MicroPython de operação.
+
+## Firmware
+
+O firmware oficial continua em [`../firmware/micropython/`](../firmware/micropython/).
+Não adicione firmware novo aqui.

@@ -1,3 +1,10 @@
+# Dependencias para gravar/ler o firmware das placas (Pico e ESP32).
+#
+# Nota: o terminal serial `screen` citado em docs/README_ENVIO.md e o binario
+# do sistema, NAO o pacote PyPI de mesmo nome (que e uma extensao C e quebra
+# o `pip install -r requirements.txt`). Instale pelo gerenciador da distro:
+#   Debian/Ubuntu: sudo apt install screen
+#   macOS:         brew install screen
+
 adafruit-ampy>=1.1.0
 pyserial>=3.5
-screen>=1.0.1

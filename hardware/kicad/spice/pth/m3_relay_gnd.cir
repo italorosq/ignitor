@@ -1,0 +1,21 @@
+* M3 - Chave do GND do modulo rele (Q2, net GATE_1 = GPIO13 -> R 220 -> gate, 10k pulldown)
+* Carga: modulo rele SRD-05VDC (bobina ~71.4 ohm + 50mH) entre 5V_RELE_S e o dreno.
+.include ../models/irlz44n.lib
+.include ../models/relay_srd.lib
+
+Vgpio gp 0 PULSE(0 3.3 0.5m 100n 100n 2m 4m)
+Rg gp gg 220
+Rpd gg 0 10k
+Vsense drn d 0
+Xq2 d gg 0 IRLZ44N
+V5 s 0 5
+Xcoil s drn RELAY_COIL
+
+.tran 0 4m 0 100n
+.meas TRAN vgs_off FIND V(gg) AT 0.2m
+.meas TRAN vgs_on FIND V(gg) AT 1.5m
+.meas TRAN vds_on AVG V(d) FROM 1m TO 2m
+.meas TRAN icoil AVG I(Vsense) FROM 1m TO 2m
+.meas TRAN q2_p AVG V(d)*I(Vsense) FROM 1m TO 2m
+.meas TRAN ileak_off FIND I(Vsense) AT 0.2m
+.end

@@ -1,0 +1,24 @@
+* M1 - Entrada 5V + diodo serie + LDO do DevKit + cargas (variante SMD: D1=SS34)
+* Cargas no rail 3V3: ESP32 idle 75mA -> burst 185mA (RA-02 TX 105mA) -> 120mA; OLED 25mA
+.include ../models/ss34.lib
+.include ../models/ldo_devkit.lib
+
+Vbuck buck 0 5.0
+Rbuck buck r5 0.1
+C1 r5 0 100u
+C2 r5 0 10u
+C3 r5 0 100n
+D1 r5 vin SS34
+Xldo vin 0 v3v3 LDO_DEVKIT
+
+Iesp v3v3 0 PWL(0 0.075  0.5m 0.075  0.501m 0.185  1.5m 0.185  1.501m 0.120  2.5m 0.120)
+Ioled v3v3 0 25m
+
+.tran 0 3m 0 1u
+.meas TRAN v3v3_min MIN V(v3v3) FROM 0.2m TO 3m
+.meas TRAN v3v3_at_burst MIN V(v3v3) FROM 0.6m TO 1.5m
+.meas TRAN vin_min MIN V(vin) FROM 0.2m TO 3m
+.meas TRAN d1_vf AVG V(r5)-V(vin) FROM 0.2m TO 3m
+.meas TRAN d1_p AVG (V(r5)-V(vin))*I(D1) FROM 0.2m TO 3m
+.meas TRAN ibuck AVG I(Vbuck) FROM 1m TO 2.5m
+.end

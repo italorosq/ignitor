@@ -1,0 +1,24 @@
+﻿* Auto-generated testbench for decoupling analysis: +5V_RELE rail
+* 3 capacitor(s) in parallel, series R-L-C model
+* Model: ESR/ESL from pdn_impedance (package-based)
+
+R_esr_C3 rail n_esr_0 37.9m
+L_par_C3 n_esr_0 n_lpar_0 500p
+C3 n_lpar_0 0 100n
+R_esr_C2 rail n_esr_1 5m
+L_par_C2 n_esr_1 n_lpar_1 500p
+C2 n_lpar_1 0 10u
+R_esr_C1 rail n_esr_2 5m
+L_par_C1 n_esr_2 n_lpar_2 500p
+C1 n_lpar_2 0 100u
+
+* 1A AC current source into the rail node — V(rail) = Z(f)
+IAC 0 rail DC 0 AC 1
+
+.ac dec 200 100 100Meg
+.meas ac z_min MIN mag(V(rail))
+.meas ac f_at_zmin WHEN mag(V(rail))=z_min
+.meas ac z_at_1M FIND mag(V(rail)) AT 1Meg
+.meas ac z_at_100k FIND mag(V(rail)) AT 100k
+
+.end

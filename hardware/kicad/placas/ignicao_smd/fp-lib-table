@@ -1,0 +1,16 @@
+(fp_lib_table
+  (version 7)
+
+  (lib (name "ignitor") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/ignitor.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "Capacitor_THT") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/Capacitor_THT.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "Connector_JST") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/Connector_JST.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "Connector_PinHeader_2.54mm") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/Connector_PinHeader_2.54mm.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "Connector_PinSocket_2.54mm") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/Connector_PinSocket_2.54mm.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "Diode_THT") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/Diode_THT.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "LED_THT") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/LED_THT.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "PCM_Package_TO_SOT_THT_AKL") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/PCM_Package_TO_SOT_THT_AKL.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "PCM_SL_Development_Boards") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/PCM_SL_Development_Boards.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "Resistor_THT") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/Resistor_THT.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "TerminalBlock_Phoenix") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/TerminalBlock_Phoenix.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+  (lib (name "easyeda2kicad") (type "KiCad") (uri "${KIPRJMOD}/../../shared/lib/easyeda2kicad.pretty") (options "") (descr "Biblioteca local do projeto Ignitor"))
+)

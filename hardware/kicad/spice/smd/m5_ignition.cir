@@ -1,0 +1,23 @@
+* M5 - Saida de ignicao (Q1, net GATE_2 = GPIO33 -> R 220 -> gate, 10k pulldown)
+* Loop externo: bateria - e-match (1 ohm + 2uH de fiacao) - Q1 (baixo lado) - GND.
+* Vbatt: 2S LiPo (6.0/7.4/8.4V). Pulso real = 2s; aqui 20ms (regime capturado),
+* aquecimento calculado a parte (I^2*Rds * 2s).
+.include ../models/irlz44n.lib
+
+.step param Vbatt list 6.0 7.4 8.4
+Vbatt b 0 {Vbatt}
+Lw b w 2u
+Rem w dn 1.0
+Vsense dn d 0
+Xq1 d gg 0 IRLZ44N
+Vgpio gp 0 PULSE(0 3.3 5m 1u 1u 2 4)
+Rg gp gg 220
+Rpd gg 0 10k
+
+.tran 0 20m 0 1u
+.meas TRAN vgs_on FIND V(gg) AT 15m
+.meas TRAN i_peak MAX I(Vsense) FROM 5m TO 20m
+.meas TRAN i_steady AVG I(Vsense) FROM 15m TO 20m
+.meas TRAN vds_on AVG V(d) FROM 15m TO 20m
+.meas TRAN q1_p AVG V(d)*I(Vsense) FROM 5m TO 20m
+.end

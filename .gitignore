@@ -1,38 +1,78 @@
 # Builds
 *.hex
 *.bin
+*.uf2
+*.elf
+*.map
 .pio/
 
-# KiCad
-*.lck
-*.bak
-*.kicad_prl
-.history/
-_restore_backup_*/
-
-# Configurações pessoais
+# Configuracoes pessoais
 config.h
 credentials.h
 
-# Dados de teste grandes
-*.csv
-*.log
-data/raw/
-
-# Exceções: BOM/CPL/posição de fabricação
-!hardware/gerbers/**/*.csv
-!hardware/kicad/**/bom/**/*.csv
-
-test/logs/
-
-# IDEs
+# IDEs e editores
 .vscode/
 .idea/
+*.swp
+*~
 
-# Python cache
+# Python
 __pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
 
-# Artefatos genéricos
+# Ferramentas locais do agente
+.opencode/
+
+# Artefatos gerados por analises automatizadas
+analysis/
+**/analysis/
+
+# Saidas geradas do OpenSCAD (renderize com export.ps1)
+hardware/3d_models/openscad/out/
+
+# Auditoria local: relatorios e evidencias nao versionados
+AUDITORIA_PCB/
+
+# KiCad: estado local e backups
+*.lck
+*.bak
+*.kicad_prl
+*.kicad_prl.lock
+~*.lck
+.history/
+_restore_backup_*/
+*-backups/
+*_bk*.kicad_pcb
+*.kicad_pcb.lock
+
+# KiCad: banco local e intermediarios de roteamento/fabricacao
+**/jlcpcb/project.db
+**/smd_fr/
+*.dsn
+*.ses
+*.round-tracks-config
+
+# Dados de teste grandes e logs
+*.csv
+*.log
+*.raw
+*.op.raw
+*.fft
+*.db
+data/raw/
+test/logs/
+
+# Excecoes: BOM/CPL/posicao de fabricacao versionados
+!hardware/gerbers/**/*.csv
+!hardware/kicad/**/bom/**/*.csv
+!hardware/kicad/**/jlcpcb/**/*.csv
+!hardware/kicad/**/jlcpcb/production_files/*.csv
+
+# Artefatos binarios genericos
 *.d
 *.slo
 *.lo

@@ -1,4 +1,13 @@
-"""Pipeline de roteamento: DSN -> Freerouting -> SES -> placa roteada."""
+"""Pipeline de roteamento: DSN -> Freerouting -> SES -> placa roteada.
+
+Uso:
+    route.py <placa.kicad_pcb> <workdir> [passes] [args extras do Freerouting]
+
+O 4o argumento opcional (entre aspas) e repassado ao Freerouting, um argumento
+por espaco. Para placa de 1 face (fresagem caseira):
+
+    route.py pcbcnc.kicad_pcb work 100 "--router.layers.routable=false,true"
+"""
 
 import os
 import shutil
@@ -7,7 +16,7 @@ import sys
 
 import pcbnew
 
-JAR = r"C:\Users\italo\Documents\KiCad\10.0\3rdparty\plugins\app_freerouting_kicad-plugin\jar\freerouting-2.2.4.jar"
+JAR = r"C:\Users\italo\Documents\KiCad\10.0\3rdparty\plugins\app_freerouting_kicad-plugin\jar\freerouting-2.4.1.jar"
 
 
 def export_dsn(board_path, dsn_path):
@@ -18,10 +27,13 @@ def export_dsn(board_path, dsn_path):
     return os.path.getsize(dsn_path)
 
 
-def run_freerouting(dsn_path, ses_path, passes=100, timeout=1800):
+def run_freerouting(dsn_path, ses_path, passes=100, timeout=1800, extra_args=None):
     if os.path.exists(ses_path):
         os.remove(ses_path)
     cmd = ["java", "-jar", JAR, "-de", dsn_path, "-do", ses_path, "-mp", str(passes)]
+    if extra_args:
+        cmd.extend(extra_args)
+    print("    cmd:", " ".join(cmd[3:]))
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     tail = [l for l in p.stdout.splitlines() if "completed" in l or "unrouted" in l]
     for l in tail[-3:]:
@@ -52,6 +64,7 @@ def refill(board_path):
 if __name__ == "__main__":
     src, workdir = sys.argv[1], sys.argv[2]
     passes = int(sys.argv[3]) if len(sys.argv) > 3 else 100
+    extra = sys.argv[4].split() if len(sys.argv) > 4 else None
     tag = os.path.splitext(os.path.basename(src))[0]
 
     dsn = os.path.join(workdir, tag + ".dsn")
@@ -61,7 +74,7 @@ if __name__ == "__main__":
     print("[1] exportando DSN...")
     print("    DSN: %d bytes" % export_dsn(src, dsn))
     print("[2] roteando com Freerouting (mp=%d)..." % passes)
-    print("    SES: %d bytes" % run_freerouting(dsn, ses, passes))
+    print("    SES: %d bytes" % run_freerouting(dsn, ses, passes, extra_args=extra))
     print("[3] importando SES...")
     import_ses(src, ses, routed)
     print("[4] refazendo o preenchimento das zonas...")

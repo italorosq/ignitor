@@ -10,6 +10,12 @@
 | IGN-01 | Ignição | Sequência completa (5 s) | Relé aciona após 5 s | Pendente |
 | IGN-02 | Ignição | Contagem de apitos | 5 apitos audíveis | Pendente |
 | IGN-03 | Ignição | LEDs | Vermelho pisca → sólido | Pendente |
+| IGN-04 | Ignição | Sequência isolada (`mp_teste_ignicao.py`) | Contagem 5 s + abort + janela 2 s | Pendente |
+| TRX-01 | Segurança | Fail-safe dos gates no boot (`mp_teste_transistor.py`) | Q1/Q2 = 0 e IN inativo | Pendente |
+| TRX-02 | Segurança | Ordem de arme da cadeia | LED dummy só acende no passo 3 | Pendente |
+| TRX-03 | Segurança | Ordem de desarme / abort | Q1 → relé → Q2 | Pendente |
+| RELE-01 | Relé | Interlock sem Q2 (`mp_teste_rele.py`) | Sem clique com GATE_1 OFF | Pendente |
+| RELE-02 | Relé | 10 ciclos automáticos | 10 cliques sem falha | Pendente |
 | ABORT-01 | Segurança | Abort manual | Botão solto cancela | Pendente |
 | ABORT-02 | Segurança | Abort por timeout | Perda > 500 ms cancela | Pendente |
 

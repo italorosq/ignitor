@@ -1,0 +1,16 @@
+* M10 - Integridade SPI 1 MHz (SCK) com parasitarios estimados do PCB (SMD).
+* Traco 0.2mm, ~55mm: R ~0.15 ohm, L ~55nH (1 nH/mm), C ~25pF (0.45 pF/mm).
+* Driver ESP32: 3.3V, Ron ~25 ohm, borda ~10ns. Carga RA-02 + pad: ~12pF.
+* Eletricamente curto em 1 MHz (borda >> tempo de voo); esperado passar sem ringing.
+Vdrv drv 0 PULSE(0 3.3 100n 10n 10n 500n 1u)
+Rd drv a 25
+Rtr a b 0.15
+Ltr b c 55n
+Ctr c 0 25p
+Rcv c rcv 2
+Cld rcv 0 12p
+
+.tran 0 2.5u 0 0.5n
+.meas TRAN v_rcv_max MAX V(rcv) FROM 100n TO 1.1u
+.meas TRAN v_rcv_min MIN V(rcv) FROM 100n TO 1.1u
+.end

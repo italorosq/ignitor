@@ -50,7 +50,7 @@ Pinagem detalhada: [../hardware/README.md](../hardware/README.md#pinagem).
 
 ### 3.2 Estacao de Ignicao
 
-- 1x ESP32-C3 SuperMini (ou Pico, variante legada).
+- 1x ESP32 DevKit V1, 30 pinos (ESP32-WROOM-32) — ou Pico, variante legada.
 - 1x SX1278 433 MHz.
 - 2x LEDs + resistores.
 - 1x buzzer.
@@ -71,7 +71,7 @@ Scripts oficiais:
 
 - `firmware/micropython/estacao_comando.py`
 - `firmware/micropython/estacao_ignicao.py` (Pico)
-- `firmware/micropython/estacao_ignicao_esp.py` (ESP32-C3)
+- `firmware/micropython/estacao_ignicao_esp.py` (ESP32 DevKit V1)
 - `firmware/micropython/sx127x.py` (compatibilidade)
 - `firmware/micropython/config_lora.py` (compatibilidade)
 
@@ -84,7 +84,7 @@ ampy --port /dev/ttyACM0 put firmware/micropython/estacao_comando.py main.py
 # Estacao de Ignicao (Pico)
 ampy --port /dev/ttyACM1 put firmware/micropython/estacao_ignicao.py main.py
 
-# Estacao de Ignicao (ESP32-C3)
+# Estacao de Ignicao (ESP32 DevKit V1)
 ampy --port /dev/ttyUSB0 put firmware/micropython/estacao_ignicao_esp.py main.py
 ```
 

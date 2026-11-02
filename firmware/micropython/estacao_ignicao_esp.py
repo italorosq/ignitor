@@ -7,10 +7,16 @@
 #   MAPEAMENTO DE PINOS (oficial do projeto): # type: ignore
 #   - LoRa SPI (hardware VSPI): SCK=GPIO18, MOSI=GPIO23, MISO=GPIO19,
 #     CS(NSS)=GPIO4, RESET=GPIO16, DIO0=GPIO17
-#   - Interface: STATUS_LED=GPIO25, BUTTON_IN=GPIO27 (active-low, aborta a
-#     contagem), BUZZER=GPIO14
-#   - Atuador (mantido): RELE=GPIO32 (ativo em baixo)
-#   - Expansao (somente entrada, sem pull interno): EXP_IN1=GPIO36, EXP_IN2=GPIO39
+#   - Interface: STATUS_LED=GPIO25, LED_BTN=GPIO26 (espelha STATUS 1:1),
+#     LED_COUNT=GPIO12 (so contagem/ignicao), BUTTON_IN=GPIO27 (active-low,
+#     aborta a contagem), BUZZER=GPIO14
+#   - Atuador: RELE=GPIO32 (entrada IN do modulo rele, ativo em baixo)
+#   - Chaves de potencia (MOSFET IRLZ44N, gate ativo em ALTO): GATE_1=GPIO13
+#     (net GATE_1 -> R6 -> gate do Q2, que chaveia o GND do modulo rele) e
+#     GATE_2=GPIO33 (net GATE_2 -> R4 -> gate do Q1, chave de saida do ignitor).
+#     Ambas tem pull-down de 10k no gate: ficam OFF enquanto o ESP32 nao roda.
+#   - Expansao J12 (entradas): EXP_A=GPIO2, EXP_B=GPIO5, EXP_C=GPIO15
+#     (GPIO2/5/15 sao strapping - nao puxar para o nivel errado no reset)
 #   - ADC1 (somente entrada): ADC1_IN1=GPIO34, ADC1_IN2=GPIO35 (leitura periodica)
 #   - I2C: SDA=GPIO21, SCL=GPIO22 — OLED SSD1306 128x64 de status (opcional:
 #     se ausente no barramento, o firmware segue sem display)
@@ -24,8 +30,15 @@
 #   - O sistema usa ticks_ms() para temporização não-bloqueante,
 #     garantindo que o rádio continue sendo lido durante a contagem.
 #   - A estacao inicia diretamente apos energizacao pela chave geral.
+#
+#   FIM DE SEQUÊNCIA (COMPLETO):
+#   - Toca o tema do Mario no buzzer (não bloqueante: o rádio segue ativo) e
+#     mostra a logo da Serra Rocketry no OLED, se o logo_serra.py estiver na
+#     placa (sem ele, ou sem RAM sobrando, a tela cai para o status normal).
+#   - Volta ao repouso automaticamente ~3 s depois do fim do tema.
 # ==============================================================================
 
+import gc
 import utime
 from machine import Pin, SPI, I2C, ADC
 
@@ -57,15 +70,20 @@ PIN_LORA_CS_NUM    = 4    # NSS: pull-up externo, HIGH = modulo desmarcado
 PIN_LORA_RESET_NUM = 16   # HIGH = operacao normal; pulso LOW reseta
 PIN_LORA_DIO0_NUM  = 17   # entrada: IRQ do SX1278 (polling via SPI no driver nativo)
 
-PIN_RELE_NUM   = 32  # mantido: atuador existente, ativo em baixo
+PIN_RELE_NUM   = 32  # entrada IN do modulo rele (ativo em baixo)
+PIN_GATE_1_NUM = 13  # net GATE_1 -> R6 -> gate do Q2: liga o GND do modulo rele (ativo em ALTO)
+PIN_GATE_2_NUM = 33  # net GATE_2 -> R4 -> gate do Q1: chave de saida do ignitor (ativo em ALTO)
 PIN_BUZZER_NUM = 14
 PIN_STATUS_NUM = 25  # STATUS_LED unico da placa DevKit
+PIN_LED_BTN_NUM = 26  # LED do botao: espelha STATUS 1:1 (conectando + ignicao)
+PIN_LED_COUNT_NUM = 12  # LED extra: so pisca na contagem, ON na ignicao
 PIN_BUTTON_NUM = 27  # BUTTON_IN, active-low (pull-up interno)
 
-# Expansao: SOMENTE ENTRADA. GPIO36/39 nao tem pull-up/pull-down interno,
-# por isso nunca usar INPUT_PULLUP/INPUT_PULLDOWN aqui.
-PIN_EXP_IN1_NUM = 36
-PIN_EXP_IN2_NUM = 39
+# Expansao J12: entradas sem pull interno habilitado. GPIO2/5/15 sao
+# strapping: nao puxar para o nivel errado durante o reset.
+PIN_EXP_A_NUM = 2
+PIN_EXP_B_NUM = 5
+PIN_EXP_C_NUM = 15
 
 # ADC1: somente entrada, permanece em ADC1.
 PIN_ADC1_IN1_NUM = 34
@@ -94,13 +112,30 @@ LORA_DIO0  = Pin(PIN_LORA_DIO0_NUM, Pin.IN)
 
 # Atuadores e Indicadores
 PIN_RELE   = Pin(PIN_RELE_NUM, Pin.OUT, value=RELE_INACTIVE_LEVEL)
+# Gates dos MOSFETs de potencia: 0 = desligado. Os pull-downs R2/R3 de 10k
+# mantem OFF enquanto o GPIO ainda esta em alta impedancia no boot.
+PIN_GATE_1 = Pin(PIN_GATE_1_NUM, Pin.OUT, value=0)
+PIN_GATE_2 = Pin(PIN_GATE_2_NUM, Pin.OUT, value=0)
 PIN_BUZZER = Pin(PIN_BUZZER_NUM, Pin.OUT, value=0)
 PIN_STATUS = Pin(PIN_STATUS_NUM, Pin.OUT, value=0)  # STATUS: ON conectado/armado, pisca em contagem/erro
+PIN_LED_BTN = Pin(PIN_LED_BTN_NUM, Pin.OUT, value=0)  # LED do botao: sempre igual ao STATUS
+# GPIO12 e strapping MTDI (LOW no boot): inicia em 0. Exige pull-down 10k
+# externo para GND (LED apagado = aberto, nao puxa sozinho). Nunca pull-up.
+PIN_LED_COUNT = Pin(PIN_LED_COUNT_NUM, Pin.OUT, value=0)  # OFF fora, pisca na contagem, ON na ignicao
 
-# Entradas: botao (active-low) e expansao (somente entrada, sem pull interno)
+def _set_status_pair(v):
+    # Mantem STATUS e LED do botao sempre juntos (espelho 1:1).
+    PIN_STATUS.value(1 if v else 0)
+    PIN_LED_BTN.value(1 if v else 0)
+
+def _toggle_status_pair():
+    _set_status_pair(not PIN_STATUS.value())
+
+# Entradas: botao (active-low) e expansao J12 (sem pull interno)
 PIN_BUTTON  = Pin(PIN_BUTTON_NUM, Pin.IN, Pin.PULL_UP)
-PIN_EXP_IN1 = Pin(PIN_EXP_IN1_NUM, Pin.IN)
-PIN_EXP_IN2 = Pin(PIN_EXP_IN2_NUM, Pin.IN)
+PIN_EXP_A = Pin(PIN_EXP_A_NUM, Pin.IN)
+PIN_EXP_B = Pin(PIN_EXP_B_NUM, Pin.IN)
+PIN_EXP_C = Pin(PIN_EXP_C_NUM, Pin.IN)
 
 # Barramento I2C + OLED de status. Qualquer falha aqui desabilita so o
 # display (OLED_OK=False); o resto da estacao continua operando.
@@ -118,6 +153,15 @@ try:
 except Exception as exc:
     print("[BOOT] I2C/OLED indisponivel ({}) — seguindo sem display.".format(exc))
 
+# Logo da Serra Rocketry para a tela de sucesso (opcional): se o modulo faltar
+# ou o desenho falhar, a tela de fim cai para o status normal.
+try:
+    from logo_serra import LOGO_BYTES, LOGO_ALTURA, LOGO_LARGURA, LOGO_X
+    LOGO_OK = True
+except Exception as exc:
+    LOGO_OK = False
+    print("[BOOT] logo_serra.py ausente ({}) — sucesso sem logo.".format(exc))
+
 # ADC1 (somente entrada). ATTN_11DB ~= 0–3,3 V; leitura crua 0–4095.
 ADC1 = None
 ADC2 = None
@@ -133,6 +177,17 @@ except Exception as exc:
 
 def _set_rele(ligado):
     PIN_RELE.value(RELE_ACTIVE_LEVEL if ligado else RELE_INACTIVE_LEVEL)
+
+def _set_gate1(ligado):
+    # Q2 (net GATE_1): fecha o GND do modulo rele. Sem ele o modulo nem
+    # energiza, entao o contato do rele nao fecha — e a primeira chave da
+    # cadeia em serie.
+    PIN_GATE_1.value(1 if ligado else 0)
+
+def _set_gate2(ligado):
+    # Q1 (net GATE_2): chave de saida do ignitor (baixo lado). So fecha na
+    # janela de 2 s.
+    PIN_GATE_2.value(1 if ligado else 0)
 
 LORA_PARAMS = {
     "frequency"         : 433e6,
@@ -465,21 +520,83 @@ def buzzer_bip(duracao_ms=100):
     utime.sleep_ms(duracao_ms)
     PIN_BUZZER.value(0)
 
+# Tema do Mario no fim da sequencia (ritmo em unidades de 90 ms; o buzzer
+# ativo so tem liga/desliga, entao o que se ouve e o ritmo do tema).
+UNIDADE_MARIO_MS = 90
+UNIDADES_MARIO = (
+    (1, 1), (1, 1), (1, 2),            # E  E  _  E
+    (1, 2), (1, 1), (1, 2),            # _  C  E  _
+    (2, 2), (2, 4),                    # G  _  G4 _  _  _
+    (2, 3), (2, 2), (2, 3),            # C  _  _  G4 _  E  _  _
+    (2, 1), (2, 1), (2, 1), (2, 0),    # A  B  A# A
+)
+SEQUENCIA_MARIO = tuple(
+    (ligado * UNIDADE_MARIO_MS, desligado * UNIDADE_MARIO_MS)
+    for ligado, desligado in UNIDADES_MARIO
+)
+
+def _fases(sequencia):
+    fases = []
+    for ligado_ms, desligado_ms in sequencia:
+        fases.append((1, ligado_ms))
+        if desligado_ms > 0:
+            fases.append((0, desligado_ms))
+    return fases
+
+class Buzzer:
+    # Toca sequencias de (ligado_ms, desligado_ms) sem bloquear o loop:
+    # o radio continua sendo servido enquanto o tema toca.
+    def __init__(self, pin):
+        self.pin = pin
+        self._fases = []
+        self._indice = 0
+        self._prazo = 0
+
+    def tocar(self, sequencia, agora=None):
+        if agora is None:
+            agora = utime.ticks_ms()
+        self._fases = _fases(sequencia)
+        self._indice = 0
+        self.pin.value(self._fases[0][0])
+        self._prazo = utime.ticks_add(agora, self._fases[0][1])
+
+    def atualizar(self, agora):
+        if not self._fases:
+            return
+        if utime.ticks_diff(agora, self._prazo) < 0:
+            return
+        self._indice += 1
+        if self._indice >= len(self._fases):
+            self._fases = []
+            self.pin.value(0)
+            return
+        ligado, duracao = self._fases[self._indice]
+        self.pin.value(ligado)
+        self._prazo = utime.ticks_add(agora, duracao)
+
+    @property
+    def tocando(self):
+        return bool(self._fases)
+
 def sinalizar_erro(n=3):
-    # Estado Erro: STATUS PISCA
-    PIN_STATUS.value(0)
+    # Estado Erro: STATUS + LED do botao PISCAM juntos; COUNT fica OFF
+    _set_status_pair(0)
+    PIN_LED_COUNT.value(0)
     for _ in range(n):
-        PIN_STATUS.value(1)
+        _set_status_pair(1)
         buzzer_bip(150)
         utime.sleep_ms(150)
-        PIN_STATUS.value(0)
+        _set_status_pair(0)
         utime.sleep_ms(150)
 
 def desligar_tudo():
-    # Estado Desligado: rele, buzzer e STATUS OFF
+    # Estado Desligado: rele, gates de potencia, buzzer, STATUS, LED e COUNT OFF
     _set_rele(False)
+    _set_gate1(False)
+    _set_gate2(False)
     PIN_BUZZER.value(0)
-    PIN_STATUS.value(0)
+    _set_status_pair(0)
+    PIN_LED_COUNT.value(0)
 
 # =============================================================================
 #  ENTRADAS E PERIFERICOS (botao, ADC, expansao, OLED)
@@ -514,18 +631,33 @@ def botao_apertado():
         return True
     return False
 
-def oled_mostra(estado, link_ok, adc1_mv, adc2_mv, exp1, exp2, msg):
+def oled_mostra(estado, link_ok, adc1_mv, adc2_mv, exp_a, exp_b, exp_c, msg):
     # Atualiza o display de status. Em falha de barramento, desliga o OLED.
-    global OLED_OK
+    # No estado COMPLETO, mostra a logo (se disponivel e com RAM sobrando);
+    # falha no desenho da logo desliga so a logo, mantendo a tela viva.
+    global OLED_OK, LOGO_OK
     if not OLED_OK:
         return
+    if estado == ESTADO_COMPLETO and LOGO_OK and gc.mem_free() > LIMITE_LOGO_BYTES:
+        try:
+            oled.fill(0)
+            for pagina in range(LOGO_ALTURA // 8):
+                ini_logo = pagina * LOGO_LARGURA
+                ini_tela = pagina * OLED_W + LOGO_X
+                oled.buffer[ini_tela:ini_tela + LOGO_LARGURA] = LOGO_BYTES[ini_logo:ini_logo + LOGO_LARGURA]
+            oled.text("SUCESSO!", 32, 56)
+            oled.show()
+            return
+        except Exception as exc:
+            LOGO_OK = False
+            print("[OLED] Falha na logo ({}) — seguindo com o status.".format(exc))
     try:
         oled.fill(0)
         oled.text("IGNITOR ESP32", 0, 0)
         oled.text("Est:" + estado[:10], 0, 12)
         oled.text("Link:" + ("OK" if link_ok else "--"), 0, 24)
         oled.text("A1:{} A2:{}".format(adc1_mv, adc2_mv), 0, 36)
-        oled.text("E1:{} E2:{}".format(exp1, exp2), 0, 48)
+        oled.text("A:{} B:{} C:{}".format(exp_a, exp_b, exp_c), 0, 48)
         oled.text(str(msg or "")[:16], 0, 56)
         oled.show()
     except Exception as exc:
@@ -549,6 +681,8 @@ INTERVALO_PISCA_MS  = 250
 INTERVALO_BUZZER_MS = 500
 INTERVALO_PING_BOOT_MS = 700
 INTERVALO_PISCA_STATUS_MS = 500
+TEMPO_POS_MARIO_MS = 3000  # logo continua na tela apos o fim do tema
+LIMITE_LOGO_BYTES = 4096   # só tenta desenhar a logo com RAM livre acima disso
 
 MSG_ARM   = "ARM_CONFIRMED"
 MSG_ABORT = "ABORT"
@@ -559,6 +693,9 @@ def executar():
     # --- SETUP -------------------------------------------------------------
     print("[BOOT] Inicializando Estacao de Ignicao...")
     desligar_tudo()  # Estado "Desligado" na tabela
+    gc.collect()
+    print("[BOOT] RAM livre: {} bytes.".format(gc.mem_free()))
+    buzzer = Buzzer(PIN_BUZZER)
 
     print("[BOOT] Sinalizando energia...")
     buzzer_bip(500)
@@ -581,7 +718,8 @@ def executar():
     t_ultimo_ping  = utime.ticks_add(t_inicio_teste, -INTERVALO_PING_BOOT_MS)
     t_ultimo_pisca_status = t_inicio_teste
     led_status_estado = False
-    PIN_STATUS.value(0)
+    _set_status_pair(0)
+    PIN_LED_COUNT.value(0)
     conexao_ok     = False
 
     while utime.ticks_diff(utime.ticks_ms(), t_inicio_teste) < 5000:
@@ -590,7 +728,7 @@ def executar():
         if utime.ticks_diff(agora_teste, t_ultimo_pisca_status) >= INTERVALO_PISCA_STATUS_MS:
             t_ultimo_pisca_status = agora_teste
             led_status_estado = not led_status_estado
-            PIN_STATUS.value(led_status_estado)
+            _set_status_pair(led_status_estado)
 
         if utime.ticks_diff(agora_teste, t_ultimo_ping) >= INTERVALO_PING_BOOT_MS:
             t_ultimo_ping = agora_teste
@@ -613,8 +751,8 @@ def executar():
         utime.sleep_ms(10)
 
     if conexao_ok:
-        # Estado "Conectado": STATUS ON
-        PIN_STATUS.value(1)
+        # Estado "Conectado": STATUS + LED do botao ON
+        _set_status_pair(1)
         led_status_estado = True
         buzzer_bip(200)
         print("[OK] Conexao com a Base estabelecida.")
@@ -629,6 +767,7 @@ def executar():
     t_ultimo_arm         = 0
     t_ultimo_link        = utime.ticks_ms() if conexao_ok else None
     t_inicio_ignicao     = 0
+    t_inicio_completo    = 0
     t_ultimo_pisca       = 0
     t_ultimo_buz         = 0
     led_status_estado    = False
@@ -636,13 +775,14 @@ def executar():
     t_ultimo_adc = 0
     t_ultimo_oled = 0
     adc1_mv = adc2_mv = 0
-    exp1 = exp2 = 1
+    exp_a = exp_b = exp_c = 1
 
     print("[LOOP] Aguardando ARM_CONFIRMED...")
 
     # --- LOOP PRINCIPAL ----------------------------------------------------
     while True:
         agora = utime.ticks_ms()
+        buzzer.atualizar(agora)
 
         mensagem_recebida = None
         if lora_packet_available():
@@ -668,12 +808,12 @@ def executar():
                 print("[LINK] Conexao com a Base: PERDIDA")
 
         if link_ok:
-            PIN_STATUS.value(1)
+            _set_status_pair(1)
             led_status_estado = True
         elif utime.ticks_diff(agora, t_ultimo_pisca_status) >= INTERVALO_PISCA_STATUS_MS:
             t_ultimo_pisca_status = agora
             led_status_estado = not led_status_estado
-            PIN_STATUS.value(led_status_estado)
+            _set_status_pair(led_status_estado)
 
         # ------------------------------------------------------------------
         #  LEITURAS PERIODICAS (ADC + botao + OLED) — nao-bloqueante
@@ -681,7 +821,7 @@ def executar():
         if utime.ticks_diff(agora, t_ultimo_adc) >= INTERVALO_ADC_MS:
             t_ultimo_adc = agora
             adc1_mv, adc2_mv = ler_adc_mv()
-            exp1, exp2 = PIN_EXP_IN1.value(), PIN_EXP_IN2.value()
+            exp_a, exp_b, exp_c = PIN_EXP_A.value(), PIN_EXP_B.value(), PIN_EXP_C.value()
 
         if botao_apertado():
             print("[BTN] Botao local pressionado.")
@@ -693,19 +833,24 @@ def executar():
 
         if OLED_OK and utime.ticks_diff(agora, t_ultimo_oled) >= INTERVALO_OLED_MS:
             t_ultimo_oled = agora
-            oled_mostra(estado, link_ok, adc1_mv, adc2_mv, exp1, exp2,
+            oled_mostra(estado, link_ok, adc1_mv, adc2_mv, exp_a, exp_b, exp_c,
                         mensagem_recebida)
 
         # ------------------------------------------------------------------
         #  ESTADO: AGUARDANDO (Conectado)
         # ------------------------------------------------------------------
         if estado == ESTADO_AGUARDANDO:
-            PIN_STATUS.value(1)  # STATUS ON
+            _set_status_pair(1)  # STATUS + LED do botao ON
+            PIN_LED_COUNT.value(0)  # COUNT so acende na contagem/ignicao
             PIN_BUZZER.value(0)
 
             if mensagem_recebida == MSG_ARM:
                 lora_send(MSG_ACK)
                 print("[ARM] Sinal recebido! Iniciando contagem de 5s...")
+                # Q2 (net GATE_1) liga aqui: alimenta o modulo rele para ele
+                # estar pronto e assentado quando o contato tiver de fechar.
+                # O rele em si continua desenergizado (IN em baixo).
+                _set_gate1(True)
                 t_inicio_contagem = agora
                 t_ultimo_arm      = agora
                 t_ultimo_pisca    = agora
@@ -716,7 +861,7 @@ def executar():
         #  ESTADO: CONTAGEM REGRESSIVA (Ignição Iminente)
         # ------------------------------------------------------------------
         elif estado == ESTADO_CONTAGEM:
-            PIN_STATUS.value(1)  # STATUS ON
+            _set_status_pair(1)  # STATUS + LED do botao ON (base antes do pisca)
 
             if mensagem_recebida == MSG_ARM:
                 t_ultimo_arm = agora
@@ -728,17 +873,18 @@ def executar():
                 motivo = "ABORT recebido" if abort_recebido else "Sinal perdido (>500ms)"
                 print("[SEGURANCA] {}! Resetando contagem.".format(motivo))
                 desligar_tudo()
-                
+
                 # Entra no estado de Erro (STATUS PISCA)
                 sinalizar_erro(6)
-                
+
                 estado = ESTADO_AGUARDANDO
                 continue
 
-            # Pisca o STATUS
+            # Pisca STATUS + LED do botao + COUNT juntos na contagem (250 ms)
             if utime.ticks_diff(agora, t_ultimo_pisca) >= INTERVALO_PISCA_MS:
                 led_status_estado = not led_status_estado
-                PIN_STATUS.value(led_status_estado)
+                _set_status_pair(led_status_estado)
+                PIN_LED_COUNT.value(1 if led_status_estado else 0)
                 t_ultimo_pisca = agora
 
             if utime.ticks_diff(agora, t_ultimo_buz) >= INTERVALO_BUZZER_MS:
@@ -769,11 +915,16 @@ def executar():
 
                 print("[IGNICAO] Contagem completa! Acionando rele...")
                 PIN_BUZZER.value(0)
-                
-                # Ignição Ativa: STATUS ON
-                PIN_STATUS.value(1)
-                
+
+                # Ignicao Ativa: STATUS + LED do botao + COUNT ON
+                _set_status_pair(1)
+                PIN_LED_COUNT.value(1)
+
                 _set_rele(True)
+                # Q1 (net GATE_2) fecha DEPOIS do contato do rele: assim o
+                # MOSFET assume a comutacao e o contato nao abre/arqueia sob
+                # corrente.
+                _set_gate2(True)
                 t_inicio_ignicao = agora
                 estado = ESTADO_IGNICAO
 
@@ -784,30 +935,44 @@ def executar():
             decorrido_ignicao = utime.ticks_diff(agora, t_inicio_ignicao)
 
             if decorrido_ignicao >= TEMPO_IGNICAO_MS:
+                # Abre o MOSFET primeiro (ele corta a corrente), depois o rele.
+                _set_gate2(False)
                 _set_rele(False)
                 print("[IGNICAO] Rele desligado. Enviando telemetria...")
 
                 lora_send(MSG_DONE)
                 print("[TX] '{}' enviado para a Base.".format(MSG_DONE))
 
-                for _ in range(5):
-                    _toggle_pin(PIN_STATUS)
-                    buzzer_bip(80)
-                    utime.sleep_ms(80)
-                PIN_STATUS.value(0)
+                # Fim de sequencia: STATUS + LED do botao + COUNT acesos e o
+                # tema do Mario no buzzer, sem bloquear (o radio segue vivo).
+                _set_status_pair(1)
+                PIN_LED_COUNT.value(1)
+                buzzer.tocar(SEQUENCIA_MARIO, agora)
+                t_inicio_completo = agora
+                print("[OK] ==============================================")
+                print("[OK]  IGNICAO CONCLUIDA COM SUCESSO \\o/")
+                if LOGO_OK:
+                    print("[OK]  Mario no buzzer + logo na tela...")
+                else:
+                    print("[OK]  Mario no buzzer...")
+                print("[OK] ==============================================")
+                gc.collect()
 
                 estado = ESTADO_COMPLETO
-                print("[OK] Sequencia de ignicao concluida.")
 
         # ------------------------------------------------------------------
         #  ESTADO: COMPLETO
         # ------------------------------------------------------------------
         elif estado == ESTADO_COMPLETO:
+            # Nao bloqueia: o radio segue sendo servido (PING/PONG) enquanto o
+            # tema toca. Sai quando o Mario termina + TEMPO_POS_MARIO_MS.
             _set_rele(False)
-            utime.sleep_ms(3000)
-            desligar_tudo()  # Volta pro estado Desligado antes de resetar
-            estado = ESTADO_AGUARDANDO
-            print("[RESET] Sistema pronto para nova sequencia.")
+            if (not buzzer.tocando
+                    and utime.ticks_diff(agora, t_inicio_completo) >= TEMPO_POS_MARIO_MS):
+                desligar_tudo()  # Volta pro estado Desligado antes de resetar
+                gc.collect()
+                estado = ESTADO_AGUARDANDO
+                print("[RESET] Sistema pronto para nova sequencia.")
 
         utime.sleep_ms(5)
 

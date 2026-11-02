@@ -1,0 +1,23 @@
+* M6 - LEDs (variante PTH): D3=STATUS (GPIO25, R9 220), D4=LED_COUNT (GPIO12, R10 220),
+*      D_ext=LED do botao (GPIO26, R11 220 via J4). Sem canal SKIB na PTH.
+.include ../models/led.lib
+
+V3 3v3 0 3.3
+
+Vg25 g25 0 3.3
+R9 g25 n1 220
+D3 n1 0 LED_GEN
+
+Vg12 g12 0 3.3
+R10 g12 n2 220
+D4 n2 0 LED_GEN
+
+Vg26 g26 0 3.3
+R11 g26 n3 220
+Dbtn n3 0 LED_GEN
+
+.tran 0 1m 0 2u
+.meas TRAN i_stat FIND I(Vg25) AT 0.8m
+.meas TRAN i_count FIND I(Vg12) AT 0.8m
+.meas TRAN i_btn FIND I(Vg26) AT 0.8m
+.end

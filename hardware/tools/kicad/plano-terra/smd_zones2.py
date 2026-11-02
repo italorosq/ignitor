@@ -12,7 +12,7 @@ import pcbnew
 MM = 1e6
 SRC, OUT = sys.argv[1], sys.argv[2]
 
-X0, Y0, X1, Y1 = 120.5, 65.5, 204.5, 134.5
+X0, Y0, X1, Y1 = 140.7, 92.4, 234.7, 186.4
 
 
 def main():

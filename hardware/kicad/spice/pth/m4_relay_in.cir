@@ -1,0 +1,14 @@
+* M4 - Entrada IN do modulo rele acionada pelo GPIO32 (PTH) — mesma rede da SMD.
+.include ../models/led.lib
+
+.step param Rp list 1k 4k7 10k
+V5 s 0 5
+Vgpio gp 0 0
+Rs s a 1k
+Dled a gp LED_GEN
+Rpu s gp {Rp}
+
+.tran 0 1m 0 2u
+.meas TRAN i_gp FIND I(Vgpio) AT 0.8m
+.meas TRAN v_gp AVG V(gp) FROM 0.5m TO 1m
+.end

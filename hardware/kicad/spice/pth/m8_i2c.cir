@@ -1,0 +1,14 @@
+* M8 - Barramento I2C do OLED (open-drain) — PTH (mesma rede da SMD).
+.step param Rpu list 2.2k 4.7k 10k
+.step param Cb list 50p 100p 200p
+
+V3 3v3 0 3.3
+Rpu 3v3 sda {Rpu}
+S1 sda 0 ctl 0 SWOD
+Vctl ctl 0 PULSE(3.3 0 1u 1n 1n 100 200)
+Cl sda 0 {Cb}
+.model SWOD SW(Ron=30 Roff=100meg Vt=1.65)
+
+.tran 0 6u 0 1n
+.meas TRAN tr TRIG V(sda)=0.33 RISE=1 TARG V(sda)=2.97 RISE=1
+.end

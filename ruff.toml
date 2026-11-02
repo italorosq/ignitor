@@ -1,0 +1,35 @@
+# Configuracao do Ruff para o firmware MicroPython e os testes.
+# Escopo de uso: firmware/ e test/ (ver .github/workflows/ci.yml).
+#
+# O objetivo aqui e pegar erro real (nome indefinido, redefinicao, import
+# quebrado, escape invalido), nao impor estilo. O firmware usa `except
+# Exception` de proposito (robustez em hardware) e linhas longas para as
+# tabelas de pinos, por isso essas regras ficam desligadas.
+
+line-length = 100
+target-version = "py38"
+
+exclude = [
+    ".git",
+    ".github",
+    "docs",
+    "hardware",
+    "software",
+]
+
+[lint]
+select = ["E", "F", "W"]
+ignore = [
+    "E501", # linhas longas: tabelas de pinos e comentarios didaticos
+    "E402", # imports condicionais de compatibilidade no meio do arquivo
+    "E731", # `millisecond = lambda: ...` e intencional no shim vendorizado
+    "E741", # nomes curtos (l, I) em trechos de baixo nivel
+    "W605", # sequencias de escape em strings de baixo nivel
+]
+
+[lint.per-file-ignores]
+# Drivers de terceiros (SX127x / SSD1306): nao sao codigo do projeto.
+"firmware/micropython/sx127x.py" = ["E", "F", "W"]
+"firmware/micropython/ssd1306.py" = ["E", "F", "W"]
+# Shim de compatibilidade do driver: reexporta `Controller` de proposito.
+"firmware/micropython/config_lora.py" = ["F401"]

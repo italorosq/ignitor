@@ -564,7 +564,7 @@ class CommandStation:
         self.state = State.IDLE
         print("[CMD] Estado: IDLE — aguardando botão.")
 
-    def _enter_arming(self): 
+    def _enter_arming(self):
         self._press_start_ms = utime.ticks_ms()
         self._last_blink_ms  = self._press_start_ms
         self._last_tx_ms     = utime.ticks_add(self._press_start_ms, -RETRANSMIT_MS)

@@ -1,0 +1,29 @@
+﻿* Auto-generated testbench for N-channel MOSFET: Q2 (IRLZ44N)
+* Load type: relay
+* Model: generic NMOS (Vth=1.5V) — real threshold depends on part
+
+* Generic semiconductor models for Phase 1 simulation
+.model D_GENERIC D(IS=1e-14 N=1.05 BV=100 IBV=1e-10)
+.model D_SCHOTTKY D(IS=1e-6 N=1.05 BV=40 IBV=1e-8 RS=0.5)
+.model D_ZENER3V3 D(IS=1e-14 N=1.05 BV=3.3 IBV=5e-3)
+.model D_ZENER5V1 D(IS=1e-14 N=1.05 BV=5.1 IBV=5e-3)
+.model NPN_GENERIC NPN(IS=1e-14 BF=200 VAF=100 CJC=5p CJE=10p TF=0.3n)
+.model PNP_GENERIC PNP(IS=1e-14 BF=200 VAF=100 CJC=5p CJE=10p TF=0.6n)
+.model NMOS_GENERIC NMOS(VTO=1.5 KP=1e-2 LAMBDA=0.01)
+.model PMOS_GENERIC PMOS(VTO=-1.5 KP=5e-3 LAMBDA=0.01)
+
+
+VDD vdd 0 DC 3.3
+
+* N-channel MOSFET: drain to load, source to GND
+RLOAD vdd GND_RELAY 1k
+Vsense GND_RELAY dq2 0
+MQ2 dq2 __unnamed_3 0 0 NMOS_GENERIC L=1u W=100u
+
+* Gate drive: sweep from 0V (off) to VDD (on)
+Vgate __unnamed_3 0 DC 0
+
+.dc Vgate 0 3.3 0.033
+.meas dc vth FIND V(__unnamed_3) WHEN I(Vsense)=1m
+
+.end

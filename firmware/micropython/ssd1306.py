@@ -3,6 +3,12 @@
 #   Uso: display de status da estacao de ignicao (sem dependencias externas).
 #   Se o OLED nao estiver presente no barramento, o chamador deve detectar via
 #   scan e simplesmente nao usar o objeto (nunca travar o boot por causa disso).
+#
+#   Formato de framebuffer: MONO_VLSB (bit 0 = linha de cima da pagina),
+#   que e a convencao do driver oficial do MicroPython e do Adafruit_SSD1306
+#   com o init 0xA1/0xC8 usado abaixo. Importante: o port ESP8266 nao tem
+#   MONO_VMSB no modulo framebuf, entao MONO_VLSB e o formato que funciona
+#   em ESP8266, ESP32 e Pico.
 # ==============================================================================
 
 import framebuf
@@ -12,8 +18,11 @@ class SSD1306_I2C(framebuf.FrameBuffer):
     def __init__(self, width, height, i2c, addr=0x3C):
         self.i2c = i2c
         self.addr = addr
+        # O framebuf do ESP8266 nao expoe width/height: guardamos os nossos.
+        self._w = width
+        self._h = height
         self.buffer = bytearray((height // 8) * width)
-        super().__init__(self.buffer, width, height, framebuf.MONO_VMSB)
+        super().__init__(self.buffer, width, height, framebuf.MONO_VLSB)
         self._init_display()
         self.fill(0)
         self.show()
@@ -43,10 +52,9 @@ class SSD1306_I2C(framebuf.FrameBuffer):
         self.i2c.writeto(self.addr, bytes((0x80, cmd)))
 
     def show(self):
-        width = self.width
-        for page in range(self.height // 8):
+        for page in range(self._h // 8):
             self._write_cmd(0xB0 + page)
             self._write_cmd(0x00)
             self._write_cmd(0x10)
-            ini = page * width
-            self.i2c.writeto(self.addr, b"\x40" + self.buffer[ini:ini + width])
+            ini = page * self._w
+            self.i2c.writeto(self.addr, b"\x40" + self.buffer[ini:ini + self._w])

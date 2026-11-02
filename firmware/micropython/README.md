@@ -7,5 +7,7 @@ Scripts oficiais do projeto:
 - `estacao_ignicao_esp.py`
 - `sx127x.py`
 - `config_lora.py`
+- `ssd1306.py`
+- `logo_serra.py`
 
 Para gravacao nas placas, consulte `../../docs/README_ENVIO.md`.
