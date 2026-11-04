@@ -1,10 +1,8 @@
-# API e Protocolo
+# Protocolo LoRa
 
-> Protocolo de comunicação entre as duas estações via LoRa 433 MHz.
+As duas estações falam o mesmo protocolo em 433 MHz.
 
-## Camada Física
-
-| Parametro | Valor |
+| Parâmetro | Valor |
 | --- | --- |
 | Frequência | 433 MHz |
 | Largura de banda | 125 kHz |
@@ -14,49 +12,32 @@
 
 ## Mensagens
 
-| Mensagem | Direcao | Uso |
+| Mensagem | Direção | Uso |
 | --- | --- | --- |
-| PING | Comando → Ignição | Teste de conexão |
-| PONG | Ignição → Comando | Resposta ao PING |
-| ARM_CONFIRMED | Comando → Ignição | Comando mantido (retransmitido a cada 200 ms) |
-| ACK | Ignição → Comando | Confirma recebimento e início da contagem |
-| ABORT | Comando → Ignição | Cancela imediatamente |
-| IGNITION_COMPLETE | Ignição → Comando | Ciclo concluído |
+| `PING` | comando → ignição | teste de link |
+| `PONG` | ignição → comando | resposta ao PING |
+| `ARM_CONFIRMED` | comando → ignição | botão mantido; repetido a cada 200 ms |
+| `ACK` | ignição → comando | comando recebido, contagem iniciada |
+| `ABORT` | comando → ignição | cancela |
+| `STATUS:<estado>` | ignição → comando | `AGUARDANDO`, `CONTAGEM`, `IGNICAO`, `COMPLETO` ou `ABORT` |
+| `IGNITION_COMPLETE` | ignição → comando | ciclo concluído |
 
-## Diagrama de Estados
+## Tempos
 
-```text
-        ┌──────────┐
-        │  IDLE    │
-        └────┬─────┘
-             │ PONG
-        ┌────▼─────┐
-   ┌────│ CONNECTED│◄──┐
-   │    └────┬─────┘   │
-   │         │ARM_CONFIRMED
-   │    ┌───▼──────┐   │ timeout
-   │    │ COUNTDOWN │───┴───┘
-   │    └────┬─────┘
-   │         │ fim (5s)
-   │    ┌───▼──────┐
-   └───►│ IGNITION │──────► ACK
-        └──────────┘
-```
-
-## Timeouts
-
-| Parametro | Valor |
+| Parâmetro | Valor |
 | --- | --- |
-| Retransmissão ARM_CONFIRMED | 200 ms |
-| Timeout de comando (Ignição) | 500 ms |
-| Timeout de link (Comando) | 3000 ms |
-| Espera após IGNITION_COMPLETE | 3000 ms |
+| Botão mantido | 10 s |
+| Retransmissão de `ARM_CONFIRMED` | 200 ms |
+| Timeout na ignição | 500 ms |
+| Timeout de link no comando | 1000 ms |
+| Janela de ignição | 2 s |
+| Espera após o Mario | 3000 ms |
 
-## Regras de Segurança
+## Regras
 
-- Contagem só inicia após `ACK` recebido
-- Perda de `ARM_CONFIRMED` por > 500 ms aborta
-- Soltar botão envia `ABORT` imediatamente
-- Verificação final antes de acionar relé
-
-Consulte [../firmware/micropython/estacao_ignicao_esp.py](../firmware/micropython/estacao_ignicao_esp.py) para implementacao de referencia.
+- A contagem só começa depois do `ACK`.
+- Perda de `ARM_CONFIRMED` por mais de 500 ms aborta.
+- Soltar o botão envia `ABORT` na hora.
+- A ignição não tem botão local; o abort vem por LoRa ou por timeout.
+- Depois de um abort, o comando exige que o botão seja solto antes de rearmar.
+- O comando mostra no OLED o último `STATUS` recebido.

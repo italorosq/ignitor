@@ -89,6 +89,7 @@ test/logs/
 *.la
 *.a
 *.lib
+!hardware/kicad/spice/models/*.lib
 *.exe
 *.out
 *.app

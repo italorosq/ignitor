@@ -2,8 +2,8 @@
 #   LOGO DA SERRA ROCKETRY - bitmap 1-bit para o OLED SSD1306 128x64
 #   Gerada a partir de "LOGO 2026 - BRANCA.png" (corpo do desenho).
 #   Formato do framebuffer do display (MONO_VLSB: bit 0 = linha de cima da
-#   pagina, 1 byte por coluna). Usada na tela de sucesso do fim da sequencia
-#   de ignicao (firmware/micropython/estacao_ignicao_esp.py).
+#   pagina, 1 byte por coluna). Usada no boot do comando
+#   (firmware/micropython/estacao_comando_esp.py).
 # ==============================================================================
 
 LOGO_LARGURA = 68

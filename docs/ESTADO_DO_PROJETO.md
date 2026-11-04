@@ -1,96 +1,71 @@
 # Estado do projeto
 
-**Data:** 2026-11-02
-**Branch de referência:** `chore/reorganizacao-2026-11` (merge na `main`)
+Atualizado em 2026-11-04. Os números de DRC são do snapshot salvo às 11:19
+(hash `37D7…`). A PCB SMD mudou durante a revisão; rode o DRC de novo antes de
+fabricar.
 
-Este documento é a fonte de verdade sobre **o que está pronto, o que está em
-andamento e o que não pode ser fabricado**. Os números de ERC/DRC foram
-extraídos com `kicad-cli` 10.0.6 e devem ser reproduzidos antes de qualquer
-pedido de PCB.
+## Placas
 
-## Resumo das placas
+| Placa | Dimensão | DRC | Estado |
+| --- | --- | --- | --- |
+| Ignição SMD | 78,8 × 57,3 mm | 7 erros, 0 desconexões, 2 itens de paridade | candidata; não fabricar ainda |
+| Ignição PTH | 75 × 80 mm | 0 erros, 100 avisos, 4 itens de paridade | funcional; limpeza pendente |
+| Ignição CNC | 50 × 90 mm | 30 erros, 57 conexões faltando | em projeto |
 
-| Placa | Arquivo canônico | Dimensão | Footprints | Trilhas | ERC | DRC | Desconexões | Paridade | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Ignição SMD | `hardware/kicad/placas/ignicao_smd/ignicao_smd.kicad_pcb` | 75×75 mm | 34 | 191 | 0 | 27 erros + 100 avisos | 3 | 17 | **Candidata — não fabricar** |
-| Ignição PTH | `hardware/kicad/placas/ignicao_pth/ignicao_pth.kicad_pcb` | 75×80 mm | 35 | 173 | 0 | 0 erros + 100 avisos | 0 | 4 | Funcional, limpeza pendente |
-| Ignição CNC | `hardware/kicad/placas/ignicao_cnc/ignicao_cnc.kicad_pcb` | 50×90 mm | 29 | 0 | 0 | 30 erros + 84 avisos | 57 | 1 | Em projeto |
-| Comando | removida do repositório | — | — | — | — | — | — | — | Legado |
+### SMD
 
-> **Paridade** = diferenças entre a netlist do esquema e os footprints da PCB
-> (`--schematic-parity`). Não é o mesmo que DRC; ambos precisam estar limpos.
+Os 7 erros atuais:
 
-## Bloqueios da Ignição SMD
+- 4 de clearance: `Net-(Q1-D)` × zona GND (0,4305 mm) e `Net-(Q2-B)` × zona
+  GND (0,169 mm em três trechos).
+- 3 de annular width nos pads do Q4 (0,099988 mm contra 0,1 mm).
 
-A versão roteada foi promovida a arquivo oficial de trabalho em 2026-11-02,
-substituindo o arquivo sem trilhas. Ela **ainda não pode ser fabricada**:
+Não há curtos nem conexões faltando. O pacote JLCPCB está desatualizado: o
+BOM/CPL não tem o Q4 e o A1 está em posição antiga. A placa também não tem os
+quatro furos M3.
 
-| ID | Problema | Evidência |
+O esquema ainda trata `Q1.3`/`J12.1` como `Net-(Q1-S)`, mas a PCB liga os dois
+ao GND. A PCB está correta para chave de baixo lado; falta alinhar o esquema.
+
+### PTH
+
+Não há erros de DRC. Os 100 avisos são de serigrafia e biblioteca. Os 4 itens de
+paridade são os furos `H1`–`H4`. O pacote JLCPCB é antigo e precisa ser
+regenerado.
+
+### CNC
+
+A placa atual tem 29 footprints e nenhuma trilha. O relayout para 90 × 100 mm
+está documentado, mas não foi executado. Não fabricar.
+
+## Firmware
+
+| Estação | Arquivo | Estado |
 | --- | --- | --- |
-| SMD-B01 | 5 curtos entre redes | `shorting_items`: `Net-(Q1-G)`×NSS, `+5V_RELE`×GND (2×), GND×VIN, GND×`+5V_RELE` |
-| SMD-B02 | 3 conexões faltando | `unconnected_items` |
-| SMD-B03 | 1 violação de clearance | 0,0455 mm contra 0,2000 mm |
-| SMD-B04 | 5 bridges de máscara | `solder_mask_bridge` |
-| SMD-B05 | 13 sobreposições de courtyard | `courtyards_overlap` |
-| SMD-B06 | 17 itens de paridade | inclui conflito `Net-(Q1-G)` × `GND` |
+| Comando | `firmware/micropython/estacao_comando_esp.py` | ESP32, botão, OLED, LEDs, buzzer e LoRa |
+| Ignição | `firmware/micropython/estacao_ignicao_esp.py` | ESP32, relé, Q1/Q2, LEDs, buzzer e LoRa |
+| Pico | `firmware/micropython/legacy/` | legado; não usado nas placas atuais |
 
-O pacote `hardware/kicad/placas/ignicao_smd/jlcpcb/` é de uma revisão anterior
-e **não deve ser enviado** até ser regenerado e conferido.
+O comando tem OLED e mostra o estado da ignição. A ignição não tem botão, OLED,
+EXP nem ADC.
 
-## Estado da Ignição PTH
+## Pendências
 
-- ERC 0, DRC 0 erros e 0 conexões faltando.
-- 100 avisos: serigrafia sobre cobre/sobreposição, `lib_footprint_mismatch` e
-  `lib_footprint_issues`.
-- 4 itens de paridade `extra_footprint` (footprints presentes na PCB e ausentes
-  no esquema).
-- O pacote `jlcpcb/` precisa ser regenerado se a PCB mudou desde a última
-  geração.
+- Corrigir os 4 erros de clearance e os 3 de annular width da SMD.
+- Ligar `Q1.3`/`J12.1` ao GND no esquema da SMD.
+- Regenerar o pacote JLCPCB da SMD depois de fechar a revisão.
+- Decidir sobre os furos M3 da SMD: adicionar na placa ou refazer a caixa.
+- Regenerar o pacote JLCPCB da PTH.
+- Verificar se o módulo relé solta com 3,3 V no pino IN. Se não, usar módulo
+  compatível ou um level shifter.
+- Adicionar pull-ups de 10 k em NSS e RESET do RA-02, pull-down de 10 k na base
+  do Q4 e pull-down de 10 k no GPIO12.
+- Adicionar 10 µF + 100 nF perto do RA-02/OLED.
+- Proteger a entrada J1 contra polaridade invertida e colocar fusível.
+- Limpar avisos de serigrafia e biblioteca.
+- Executar ou cancelar o relayout da CNC.
 
-## Estado da Ignição CNC
-
-- Placa atual: 50×90 mm, 29 footprints, **0 trilhas**, 57 conexões faltando.
-- DRC: 30 erros e 84 avisos.
-- O relayout para 90×100 mm com GND em barramento, 22 jumpers e 27 ilhas está
-  documentado, mas **não foi executado**:
-  [`planejamento/2026-10-relayout-cnc.md`](./planejamento/2026-10-relayout-cnc.md).
-- Não existe pacote de fresagem válido na pasta atual. Não fabricar.
-
-## Estação de comando
-
-O projeto KiCad `pcbcomando` foi removido do repositório por decisão de
-2026-11-02. Os gerbers antigos ficam em
-[`hardware/gerbers/legado/pcbcomando/`](../hardware/gerbers/legado/pcbcomando/)
-apenas como registro histórico. O firmware da estação de comando continua em
-[`firmware/micropython/estacao_comando.py`](../firmware/micropython/estacao_comando.py)
-para o Raspberry Pi Pico.
-
-## Firmware e testes
-
-| Item | Estado |
-| --- | --- |
-| Ignição ESP32 DevKit V1 | Implementado: botão, OLED, ADC, EXP, logo, sequência de ignição |
-| Ignição Pico (THT) | Legado funcional |
-| Comando Pico | Funcional |
-| Testes estáticos | 16 passando (`pytest test/`) |
-| Lint | `ruff check firmware/ test/` passando |
-| Testes de bancada | Scripts `test/mp_*.py`; exigem placa e carga dummy |
-
-## Pendências priorizadas
-
-| Prioridade | Item | Onde |
-| --- | --- | --- |
-| P0 | Corrigir os 5 curtos e o clearance da SMD | `placas/ignicao_smd/` |
-| P0 | Corrigir as 3 conexões faltando da SMD | `placas/ignicao_smd/` |
-| P1 | Revisar paridade SMD (Q1-G × GND) | `placas/ignicao_smd/` |
-| P1 | Revisar os 4 `extra_footprint` da PTH | `placas/ignicao_pth/` |
-| P1 | Regenerar pacotes JLCPCB antes de pedir | `fabricacao/gen_jlc_package.py` |
-| P2 | Executar (ou cancelar) o relayout CNC 90×100 | `placas/ignicao_cnc/` |
-| P2 | Limpar avisos de serigrafia/biblioteca | SMD e PTH |
-| P2 | Regenerar o recorte da biblioteca compartilhada (61 itens ainda globais) | `hardware/kicad/shared/lib/` |
-| P3 | Validar cases 3D atuais (OpenSCAD) | `hardware/3d_models/` |
-
-## Como reproduzir os números
+## Como medir
 
 ```powershell
 $cli = "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
@@ -101,7 +76,3 @@ foreach ($placa in "ignicao_smd", "ignicao_pth", "ignicao_cnc") {
     & $cli pcb drc --severity-all --schematic-parity "$raiz/$placa/$placa.kicad_pcb"
 }
 ```
-
-> Os relatórios de auditoria de 2026-10-15 e 2026-10-30 são históricos e não
-> versionados. Eles descrevem revisões anteriores das placas; use este documento
-> para o estado atual.

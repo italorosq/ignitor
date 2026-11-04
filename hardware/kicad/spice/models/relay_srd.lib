@@ -1,0 +1,6 @@
+* Modulo rele SRD-05VDC-SL-C: bobina ~71.4 ohm (69.2mA @5V), L ~50mH.
+* Modulo comercial traz flyback proprio; assume-se isso.
+.subckt RELAY_COIL P N
+R1 P A 71.4
+L1 A N 50m
+.ends RELAY_COIL

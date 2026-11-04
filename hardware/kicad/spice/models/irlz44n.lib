@@ -1,0 +1,10 @@
+* IRLZ44N - HEXFET N-channel logic-level, TO-220 (Infineon/IR)
+* Modelo VDMOS APROXIMADO ajustado ao datasheet (PD-9.1346B):
+*   Vgs(th)=1.5V tip; Rds(on) ~25 mOhm @ Vgs=5V/Id=25A; ~35 mOhm @ 4V
+*   Ciss~1.7nF, Coss~0.4nF, Crss~150pF; Qg~48nC; Id=47A; Vds=55V
+* Kp calibrado: 1/(Kp*(Vgs-Vto)) + Rd + Rs ~ 25 mOhm @ 5V
+.subckt IRLZ44N D G S
+M1 D G S S IRLZ44N_VD
+.model IRLZ44N_VD VDMOS(nchan Vto=1.5 Kp=19 Lambda=0.005 Rg=2.5 Rd=5m Rs=5m
++ Cgs=1.5n Cgdmax=1.5n Cgdmin=0.15n Cjo=400p A=0.6 Is=1u N=1.05 Rb=1m tt=150n Bv=55)
+.ends IRLZ44N

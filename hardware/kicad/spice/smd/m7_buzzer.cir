@@ -1,9 +1,15 @@
-* M7 - Buzzer ativo no GPIO14 (sem transistor): corrente no pino vs limites do ESP32.
-* Rb = impedancia DC equivalente do buzzer (parametrico 80..250 ohm).
-* i_gp = corrente fornecida pelo GPIO (limite abs. 40mA; pratica <=20mA).
+* M7 - buzzer 5V chaveado por Q4 BC337 (base R3 470 do GPIO14).
+.include ../models/bc337.lib
 .step param Rb list 80 120 180 250
-V3 gp 0 3.3
-Rb gp 0 {Rb}
-.tran 0 1m 0 1u
-.meas TRAN i_gp AVG I(V3) FROM 0.5m TO 1m
+V5 s 0 5
+Rbuz s c {Rb}
+Q4 c b 0 BC337
+R3 gp b 470
+Vgpio gp 0 PULSE(0 3.3 0.5m 1u 1u 1m 2m)
+.tran 0 2m 0 1u
+.meas TRAN ib AVG I(R3) FROM 1m TO 1.5m
+.meas TRAN ic AVG I(V5) FROM 1m TO 1.5m
+.meas TRAN vce AVG V(c) FROM 1m TO 1.5m
+.meas TRAN p_q4 AVG V(c)*abs(Ic(Q4)) FROM 1m TO 1.5m
+.meas TRAN i_gp AVG I(Vgpio) FROM 1m TO 1.5m
 .end

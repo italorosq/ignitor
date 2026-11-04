@@ -1,6 +1,5 @@
-* M6 - LEDs (variante SMD): D3=STATUS (GPIO25, R7 220), D4=LED_COUNT (GPIO12, R8 220),
-*      D_ext=LED do botao (GPIO26, R1 220 via J4) e canal SKIB (J9 -> D2 -> R3 10k).
-* Correntes medidas nas fontes que representam os GPIOs (I(Vgxx) = corrente do canal).
+* M6 - LEDs: D3=STATUS (GPIO25, R7 220), D4=LED_COUNT (GPIO12, R8 220),
+*      D_ext=LED do botao (GPIO26, R1 220 via J4).
 .include ../models/led.lib
 
 V3 3v3 0 3.3
@@ -17,13 +16,8 @@ Vg26 g26 0 3.3
 R1 g26 n3 220
 Dbtn n3 0 LED_GEN
 
-Vskib sk 0 3.3
-D2 sk n4 LED_GEN
-R3 n4 0 10k
-
 .tran 0 1m 0 2u
 .meas TRAN i_stat FIND I(Vg25) AT 0.8m
 .meas TRAN i_count FIND I(Vg12) AT 0.8m
 .meas TRAN i_btn FIND I(Vg26) AT 0.8m
-.meas TRAN i_skib FIND I(Vskib) AT 0.8m
 .end

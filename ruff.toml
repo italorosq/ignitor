@@ -15,6 +15,7 @@ exclude = [
     "docs",
     "hardware",
     "software",
+    "firmware/micropython/legacy",
 ]
 
 [lint]
@@ -28,8 +29,5 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-# Drivers de terceiros (SX127x / SSD1306): nao sao codigo do projeto.
-"firmware/micropython/sx127x.py" = ["E", "F", "W"]
+# Driver de terceiro (SSD1306): nao e codigo do projeto.
 "firmware/micropython/ssd1306.py" = ["E", "F", "W"]
-# Shim de compatibilidade do driver: reexporta `Controller` de proposito.
-"firmware/micropython/config_lora.py" = ["F401"]

@@ -1,0 +1,13 @@
+* LDO interno do DOIT DevKit V1 (AMS1117-3.3): 3.3V, dropout tipico ~1.1V @0.8A
+* Modelo comportamental: Vout = min(3.3, Vin - (0.55 + 0.7*Iout))  [Vdo em volts, Iout em A]
+* Corrente de entrada = corrente de saida (Fq) + quiescencia ~5mA (Rq 1k);
+* caps internos tipicos 22u+100n na saida.
+.subckt LDO_DEVKIT IN GND OUT
+Vsense OUT_S OUT 0
+Breg OUT_S GND V = min(3.3, V(IN,GND) - (0.55 + 0.7*abs(I(Vsense))))
+Fq IN GND Vsense 1
+Rq IN GND 1k
+C1 IN GND 10u
+C2 OUT_S GND 22u
+C3 OUT_S GND 100n
+.ends LDO_DEVKIT

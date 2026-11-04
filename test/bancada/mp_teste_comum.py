@@ -1,10 +1,8 @@
 # ==============================================================================
 #   INFRAESTRUTURA COMUM DOS TESTES DE BANCADA (MicroPython)
 #   Compartilhado por:
-#     - mp_teste_hardware_esp8266.py : perifericos no ESP8266 (OLED/buzzer/botao)
-#     - mp_teste_ignicao.py          : sequencia de ignicao isolada
-#     - mp_teste_transistor.py       : cadeia de seguranca Q1/Q2 no ESP32
-#     - mp_teste_rele.py             : modulo rele SRD-05VDC no ESP32
+#     - mp_teste_transistor.py : cadeia de seguranca Q1/Q2 no ESP32
+#     - mp_teste_rele.py       : modulo rele SRD-05VDC no ESP32
 #
 #   Este arquivo vai para a placa junto com o script escolhido (mesma pasta).
 #   ESP8266 exige modulo pre-compilado (mpy-cross -march=xtensa); no ESP32 o
@@ -33,7 +31,7 @@ I2C_FREQ_BAIXO = 100_000
 # =============================================================================
 #  MAPA OFICIAL DA ESTACAO DE IGNICAO (ESP32 DevKit V1)
 #  Espelha as constantes de firmware/micropython/estacao_ignicao_esp.py.
-#  test/test_scripts_bancada.py confere que os dois continuam iguais.
+#  test/test_firmware.py confere que os dois continuam iguais.
 # =============================================================================
 
 PIN_ESP32_RELE_NUM = 32     # entrada IN do modulo rele (ativo em baixo)

@@ -1,0 +1,3 @@
+* 1N5400 - retificador 50V/3A, DO-201AD (Vishay 88516): Vf max 1.2V@3A
+* Fit: ~0.68V@0.5A, ~0.94V@3A; Cj~30pF; tt~2us.
+.model 1N5400 D(Is=1e-8 N=1.6 Rs=0.045 Cjo=30p Vj=0.7 M=0.33 Bv=50 Ibv=5u tt=2u)

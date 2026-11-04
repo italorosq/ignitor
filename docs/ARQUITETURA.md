@@ -1,34 +1,23 @@
-# Arquitetura do sistema
+# Arquitetura
 
-## Visão geral
+O sistema tem duas estações independentes ligadas por LoRa 433 MHz. A mesma PCB
+é usada nas duas para baratear a fabricação; mudam a população e o firmware.
 
 ```text
-┌──────────────────────┐         LoRa 433 MHz         ┌──────────────────────┐
-│  Estação de Comando  │  PING / PONG / ARM_CONFIRMED  │  Estação de Ignição  │
-│  Raspberry Pi Pico   │ ◄───────────────────────────► │  ESP32 DevKit V1     │
-│  botão + LEDs + buzzer│        ACK / ABORT /         │  relé + Q1/Q2 +      │
-│                      │      IGNITION_COMPLETE        │  buzzer + OLED       │
-└──────────────────────┘                               └──────────┬───────────┘
-                                                                  │
-                                                          laço de disparo
-                                                          (fonte externa +
-                                                           relé + Q1 + ignitor)
+Comando (ESP32 + OLED)            Ignição (ESP32)
+botão, LEDs, buzzer, LoRa   ───►  LoRa, LEDs, buzzer
+OLED de status              ◄───  relé, Q1/Q2
 ```
 
-As duas estações são independentes. A de comando fica na área segura; a de
-ignição fica próxima ao foguete. A comunicação é feita por dois módulos
-SX1278 em 433 MHz.
+## Estações
 
-## Componentes lógicos
+| Estação | O que faz | O que tem |
+| --- | --- | --- |
+| Comando | arma, mostra o status e aborta | botão, OLED, LEDs, buzzer, LoRa |
+| Ignição | recebe o comando e aciona o ignitor | relé, Q1/Q2, LEDs, buzzer, LoRa |
 
-| Componente | Responsabilidade |
-| --- | --- |
-| Comando Pico | Lê o botão, mantém `ARM_CONFIRMED`, mostra link/status, envia `ABORT` |
-| Ignição ESP32 | Recebe o comando, faz a contagem de 5 s, aciona o relé e a chave Q1 |
-| Ignição Pico (THT) | Mesma lógica, variante legada |
-| Relé + Q1/Q2 | Duas chaves em série no laço de disparo |
-| OLED | Status local da ignição (opcional) |
-| Testes de bancada | Validam periféricos e a ordem de arme/desarme |
+A ignição não tem botão, OLED, EXP nem ADC. O abort vem por `ABORT` ou pela
+perda de `ARM_CONFIRMED`.
 
 ## Protocolo
 
@@ -39,101 +28,64 @@ SX1278 em 433 MHz.
 | Spreading Factor | 7 |
 | Coding Rate | 4/5 |
 | Potência TX | 17 dBm |
-| Retransmissão `ARM_CONFIRMED` | 200 ms |
-| Timeout de comando na ignição | 500 ms |
-| Timeout de link no comando | 3000 ms |
+| `ARM_CONFIRMED` | a cada 200 ms |
+| Timeout na ignição | 500 ms |
+| Timeout de link no comando | 1000 ms |
 
-Mensagens: `PING`, `PONG`, `ARM_CONFIRMED`, `ACK`, `ABORT`,
-`IGNITION_COMPLETE`. Detalhes em [`README_API.md`](./README_API.md).
+Mensagens: `PING`, `PONG`, `ARM_CONFIRMED`, `ACK`, `ABORT`, `IGNITION_COMPLETE`
+e `STATUS:<estado>`.
 
-## Máquina de estados
+## Sequência
 
-```text
-IDLE
-  │ PING/PONG
-  ▼
-CONNECTED ──(solta o botão)──► ABORT
-  │ ARM_CONFIRMED (botão mantido)
-  ▼
-COUNTDOWN (5 s)
-  │ perda de ARM_CONFIRMED > 500 ms ──► ABORT
-  │ fim da contagem
-  ▼
-IGNITION (2 s)
-  │
-  ▼
-IGNITION_COMPLETE ──► IDLE (após ~3 s)
-```
+1. O comando manda `PING` a cada 1 s. A ignição responde `PONG`.
+2. O operador segura o botão por 10 s. O comando manda `ARM_CONFIRMED` a cada
+   200 ms.
+3. A ignição responde `ACK` e começa a contagem de 10 s.
+4. Se o `ARM_CONFIRMED` sumir por mais de 500 ms, ou chegar `ABORT`, a ignição
+   volta para `AGUARDANDO` e não aciona nada.
+5. No fim, a ignição fecha o relé e liga o Q1 por 2 s.
+6. A ignição manda `IGNITION_COMPLETE`; o comando mostra o resultado no OLED e
+   toca o tema do Mario.
 
-## Cadeia de segurança
+A ignição também manda `STATUS:AGUARDANDO`, `STATUS:CONTAGEM`,
+`STATUS:IGNICAO`, `STATUS:COMPLETO` e `STATUS:ABORT`. O comando usa o último
+status para atualizar o OLED.
 
-O laço de disparo tem **duas chaves em série**:
-
-1. **Q2 (`GATE_1`)** chaveia o retorno de GND da bobina do módulo relé.
-2. **Q1 (`GATE_2`)** fica em série com o contato NO do relé e o terminal SKIB.
-
-Ordem de arme:
+## Laço de disparo
 
 ```text
-boot:      GATE_1=0, GATE_2=0, RELE_IN=1   (tudo aberto)
-contagem:  GATE_1=1, GATE_2=0, RELE_IN=1   (relé energizável, contato aberto)
-fim:       GATE_1=1, GATE_2=1, RELE_IN=0   (contato fecha, Q1 assume)
-desarme:   GATE_2=0 → RELE_IN=1 → GATE_1=0 (Q1 abre primeiro)
+BAT+ ── relé COM/NO ── ignitor ── Q1 dreno
+Q1 source ───────────────────────── BAT− / GND
 ```
 
-Os gates têm pull-down de 10 kΩ e nascem em 0 no boot. O firmware só arma
-depois de 5 s contínuos de `ARM_CONFIRMED`; qualquer `ABORT` ou perda de sinal
-por mais de 500 ms cancela o ciclo.
+O relé e o Q1 ficam em série. O Q1 é uma chave de baixo lado; a fonte do laço é
+2S (6,0 a 8,4 V). O firmware fecha o relé antes de ligar o Q1 e desliga o Q1
+antes de abrir o relé.
 
 ## Alimentação
 
 ```text
-Bateria Li-ion/LiPo
-  └── TP4056 (proteção/carga)
-        └── buck 5 V (J1)
-              ├── módulo relé (J7)
-              ├── buzzer (J10)
-              └── ESP32 DevKit V1 (VIN/5V)
-                    └── regulador 3V3 onboard
-                          ├── RA-02 (LoRa)
-                          ├── OLED (J11)
-                          └── LEDs / lógica
+bateria 1S ── TP4056 ── boost 5 V ── J1
+                                     ├── relé
+                                     ├── buzzer
+                                     └── ESP32 ── 3V3 ── LoRa / OLED / LEDs
 ```
 
-O contato de comutação do relé e a fonte do laço de disparo **não passam pela
-placa**. A placa fornece apenas o acionamento do relé e a chave Q1 em série com
-o terminal do ignitor. A ligação externa está em
-[`hardware/README.md`](../hardware/README.md#ligação-externa-do-laço-de-disparo).
+O TP4056 é carregador; o 5 V vem do boost (ou de um buck, se a bateria for 2S).
+A placa não tem proteção de polaridade nem fusível.
 
-## Estrutura do repositório
+## Firmware
 
-| Pasta | Conteúdo |
-| --- | --- |
-| `firmware/micropython/` | Firmware oficial das estações |
-| `hardware/kicad/placas/` | Projetos KiCad ativos |
-| `hardware/kicad/shared/lib/` | Biblioteca compartilhada (símbolos, footprints, 3D) |
-| `hardware/kicad/spice/` | Simulações LTspice por módulo |
-| `hardware/tools/kicad/` | Automação de posicionamento, roteamento e fabricação |
-| `hardware/gerbers/legado/` | Pacotes de fabricação históricos |
-| `test/` | Testes estáticos e scripts de bancada |
-| `software/web/` | UI web legada |
-| `docs/` | Documentação, estado, histórico e planejamento |
+- `firmware/micropython/estacao_comando_esp.py`: comando com OLED.
+- `firmware/micropython/estacao_ignicao_esp.py`: ignição sem OLED.
+- `firmware/micropython/legacy/`: versões Pico, não usadas nas placas atuais.
 
-## Falhas e abortos
+## Segurança
 
-| Condição | Ação |
-| --- | --- |
-| Botão solto antes de 5 s | `ABORT` imediato; ignitor não aciona |
-| Perda de `ARM_CONFIRMED` > 500 ms | `ABORT`; contagem reinicia do zero |
-| Perda de link > 3 s no comando | Comando volta para `IDLE` e sinaliza erro |
-| Falha de inicialização do rádio | Firmware tenta novamente; não arma |
-| Ausência de OLED | Firmware segue sem display |
-| Watchdog/reset da ignição | Gates voltam a 0; relé inativo |
-
-## Documentos relacionados
-
-- [Estado do projeto](./ESTADO_DO_PROJETO.md)
-- [Protocolo](./README_API.md)
-- [Instalação](./INSTALL.md)
-- [Testes](../test/README.md)
-- [Hardware](../hardware/README.md)
+- Carga dummy antes de ignitor real.
+- Antena LoRa conectada antes de energizar.
+- J8 (ARM/RBF) aberto fora do teste.
+- Operador a pelo menos 10 m do foguete.
+- Botão solto antes dos 10 s aborta na hora.
+- Perda de `ARM_CONFIRMED` por mais de 500 ms aborta na hora.
+- Depois de um abort, solte o botão antes de tentar de novo.

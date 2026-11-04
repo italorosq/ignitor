@@ -3,7 +3,7 @@
 #   Gerada a partir de "LOGO 2026 - BRANCA.png" (corpo do desenho).
 #   Formato do framebuffer do display (MONO_VLSB: bit 0 = linha de cima da
 #   pagina, 1 byte por coluna). Usada na tela de sucesso da sequencia de
-#   ignicao do teste de bancada (test/mp_teste_hardware_esp8266.py).
+#   tela de sucesso do comando de bancada.
 # ==============================================================================
 
 LOGO_LARGURA = 68

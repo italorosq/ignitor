@@ -1,7 +1,7 @@
-* M1 - Entrada 5V + diodo serie + LDO do DevKit + cargas (variante PTH: D5=1N5400)
+* M1 - Entrada 5V + diodo serie + LDO do DevKit + cargas (variante PTH: D1=1N5818)
 * Caps PTH: C1=100u, C2=10u, C3=10u (eletroliticos; sem 100n no rail).
 * Cargas no rail 3V3: ESP32 idle 75mA -> burst 185mA (RA-02 TX 105mA) -> 120mA; OLED 25mA
-.include ../models/1n5400.lib
+.include ../models/1n5818.lib
 .include ../models/ldo_devkit.lib
 
 Vbuck buck 0 5.0
@@ -9,7 +9,7 @@ Rbuck buck r5 0.1
 C1 r5 0 100u
 C2 r5 0 10u
 C3 r5 0 10u
-D1 r5 vin 1N5400
+D1 r5 vin 1N5818
 Xldo vin 0 v3v3 LDO_DEVKIT
 
 Iesp v3v3 0 PWL(0 0.075  0.5m 0.075  0.501m 0.185  1.5m 0.185  1.501m 0.120  2.5m 0.120)

@@ -1,160 +1,110 @@
-# Hardware - Serra Rocketry Ignitor
+# Hardware
 
-O sistema tem duas estações independentes ligadas por LoRa 433 MHz:
+Uma PCB, duas montagens. A placa é a mesma para baratear a fabricação; mudam
+os componentes montados e o firmware.
 
-- **Comando**: operada pelo operador em área segura (Raspberry Pi Pico).
-- **Ignição**: fica próxima ao foguete e aciona o ignitor (ESP32 DevKit V1
-  30 pinos, ou Pico na variante THT legada).
+| Item | Comando | Ignição |
+| --- | --- | --- |
+| MCU | ESP32 DevKit V1, 30 pinos | ESP32 DevKit V1, 30 pinos |
+| LoRa | SX1278 433 MHz | SX1278 433 MHz |
+| Botão J2/J3 | sim | não |
+| LED do botão J4/J5 | sim | não |
+| OLED J11 | sim | não |
+| Relé J7/J8 | não | sim |
+| Q1/Q2 e J12 (SMD) / J9 (PTH) | não | sim |
+| LEDs D3/D4 | sim | sim |
+| Buzzer J10 + Q4 | sim | sim |
 
-## Estado atual das placas
-
-> A fonte de verdade é [`docs/ESTADO_DO_PROJETO.md`](../docs/ESTADO_DO_PROJETO.md).
-> Os números abaixo foram medidos com `kicad-cli` em 2026-11-02.
-
-| Variante | Pasta | Dimensão | Camadas | ERC | DRC | Desconexões | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Ignição SMD | [`kicad/placas/ignicao_smd/`](./kicad/placas/ignicao_smd/) | 75×75 mm | 2 | 0 | 27 erros + 100 avisos | 3 | **Candidata — NÃO FABRICAR** |
-| Ignição PTH | [`kicad/placas/ignicao_pth/`](./kicad/placas/ignicao_pth/) | 75×80 mm | 2 | 0 | 100 avisos | 0 | Funcional, limpeza pendente |
-| Ignição CNC | [`kicad/placas/ignicao_cnc/`](./kicad/placas/ignicao_cnc/) | 50×90 mm | 1 | 0 | 30 erros + 84 avisos | 57 | **Em projeto** |
-| Comando | removida do repositório | — | — | — | — | — | Legado (gerbers históricos) |
-
-A SMD tem **5 curtos reais** entre redes de potência/sinal. Ela foi promovida
-como arquivo oficial de trabalho, mas não pode ir para a fábrica antes de
-corrigir o layout. A CNC ainda é um rascunho: o plano de relayout para 90×100 mm
-está em [`docs/planejamento/2026-10-relayout-cnc.md`](../docs/planejamento/2026-10-relayout-cnc.md).
-
-## Lista de componentes (BOM)
-
-| Item | Qtd | Aplicação | Observação |
-| --- | --- | --- | --- |
-| Raspberry Pi Pico | 1 | Estação de Comando | MCU RP2040 |
-| ESP32 DevKit V1 30 pinos | 1 | Estação de Ignição (SMD/PTH) | ESP32-WROOM-32 |
-| Módulo LoRa SX1278 433 MHz | 2 | Comando e Ignição | Um por estação |
-| Antena LoRa 433 MHz | 2 | Comando e Ignição | Obrigatória antes de energizar |
-| LED amarelo 5 mm | 2 | Status de link | Com resistor |
-| LED vermelho 5 mm | 2 | Status de ignição | Com resistor |
-| Buzzer ativo | 2 | Feedback sonoro | Um por estação |
-| Botão de ignição momentâneo | 1 | Comando | Segurar por 5 s |
-| Relé ou MOSFET | 1 | Ignição | Saída para ignitor |
-| TP4056 com proteção | 2 | Carga de bateria | Um por estação |
-| Bateria Li-ion/LiPo | 2 | Alimentação | Definir capacidade |
-| Resistores 220 Ω | 4 | LEDs | Dois por estação |
+A SMD mede 78,8 × 57,3 mm. A PTH mede 75 × 80 mm e tem quatro furos M3.
 
 ## Pinagem
 
-### Estação de Comando — Raspberry Pi Pico
+| Função | GPIO | Comando | Ignição |
+| --- | ---: | --- | --- |
+| LoRa SCK | 18 | sim | sim |
+| LoRa MISO | 19 | sim | sim |
+| LoRa MOSI | 23 | sim | sim |
+| LoRa NSS | 4 | sim | sim |
+| LoRa RESET | 16 | sim | sim |
+| LoRa DIO0 | 17 | sim | sim |
+| LED STATUS | 25 | sim | sim |
+| LED vermelho / contagem | 12 | sim | sim |
+| LED do botão | 26 | sim | não |
+| Botão | 27 | sim | não |
+| Buzzer | 14 | sim | sim |
+| OLED SDA | 21 | sim | não |
+| OLED SCL | 22 | sim | não |
+| Relé IN | 32 | não | sim |
+| GATE_1 (Q2) | 13 | não | sim |
+| GATE_2 (Q1) | 33 | não | sim |
 
-| Pino | Função |
+O OLED usa I2C a 100 kHz. O módulo precisa ter os pull-ups da placa dele; a PCB
+não tem pull-ups externos.
+
+## Conectores
+
+| Ref | Uso |
 | --- | --- |
-| GP0 | LoRa MISO |
-| GP1 | LoRa CS (NSS) |
-| GP2 | LoRa SCK |
-| GP3 | LoRa MOSI |
-| GP4 | LoRa RESET |
-| GP15 | LoRa DIO0 |
-| GP11 | LED amarelo |
-| GP12 | LED vermelho |
-| GP13 | Botão de ignição |
-| GP19 | Buzzer |
-| GP25 | LED onboard (link) |
+| J1 | entrada 5 V |
+| J2/J3 | botão de comando (COM/NO) |
+| J4/J5 | LED do botão |
+| J7 | módulo relé (5 V, IN, GND chaveado) |
+| J8 | ARM/RBF: fecha os pinos 1–3 e liga o VCC da bobina |
+| J10 | buzzer |
+| J11 | OLED I2C |
+| J12 (SMD) / J9 (PTH) | dreno e source do Q1 (laço de ignição) |
 
-### Estação de Ignição — ESP32 DevKit V1 (30 pinos)
-
-Mapa oficial do firmware [`firmware/micropython/estacao_ignicao_esp.py`](../firmware/micropython/estacao_ignicao_esp.py):
-
-| Função | GPIO | Observação |
-| --- | --- | --- |
-| LoRa SCK | 18 | VSPI |
-| LoRa MISO | 19 | VSPI |
-| LoRa MOSI | 23 | VSPI |
-| LoRa CS (NSS) | 4 | pull-up externo |
-| LoRa RESET | 16 | HIGH = operação normal |
-| LoRa DIO0 | 17 | IRQ (polling no driver nativo) |
-| STATUS_LED | 25 | link/status |
-| LED_BTN | 26 | espelha STATUS 1:1 |
-| LED_COUNT | 12 | contagem/ignição; strapping (MTDI) |
-| BUTTON_IN | 27 | active-low, aborta a contagem |
-| BUZZER | 14 | buzzer ativo |
-| RELE | 32 | IN do módulo relé, ativo em baixo |
-| GATE_1 (Q2) | 13 | GND da bobina do relé, ativo em ALTO |
-| GATE_2 (Q1) | 33 | chave de saída do ignitor, ativo em ALTO |
-| EXP_A / EXP_B / EXP_C | 2 / 5 / 15 | J12; strapping, cuidado no reset |
-| ADC1_IN1 / ADC1_IN2 | 34 / 35 | somente entrada |
-| I2C SDA / SCL | 21 / 22 | OLED SSD1306 (opcional) |
-
-> GPIO2, GPIO5, GPIO12 e GPIO15 são pinos de strapping. Não os puxe para o
-> nível errado durante o reset. O LED_COUNT usa GPIO12: mantenha LOW no boot
-> com pull-down externo de 10 kΩ para GND.
-
-### Estação de Ignição — Raspberry Pi Pico (THT legado)
-
-| Pino | Função |
-| --- | --- |
-| GP0 | LoRa MISO |
-| GP1 | LoRa CS (NSS) |
-| GP2 | LoRa SCK |
-| GP3 | LoRa MOSI |
-| GP4 | LoRa RESET |
-| GP6 / GP7 | SDA / SCL (OLED) |
-| GP8 / GP9 | CONT_A / CONT_B |
-| GP11 | LED amarelo |
-| GP12 | LED vermelho |
-| GP16 | LED do botão (J9) |
-| GP19 | Buzzer |
-| GP21 | LoRa DIO0 |
-| GP26 | Relé/MOSFET (ignitor) |
-| GP25 | LED onboard (link) |
-
-## Ligação externa do laço de disparo
-
-O contato de comutação do relé e a fonte do laço **não passam pela placa**.
-Nela entram apenas os dois MOSFETs e dois terminais:
+## Laço de disparo
 
 ```text
-fonte (+) --+-- COM do módulo de relé
-            |
-            +-- NO do módulo de relé -- J6 (NO_RELE) -- Q1 (D -> S) -- J9 (SKIB) -- ignitor
-                                                                                      |
-                                                          fonte (-) -----------------+
+BAT+ ── relé COM/NO ── ignitor ── J12.2 / J9.2 (dreno Q1)
+Q1 source (J12.1 / J9.1) ───────── BAT− / GND
 ```
 
-Q2 (`GATE_1` → R6) chaveia o **retorno de GND dos 5 V da bobina** do módulo de
-relé; Q1 (`GATE_2` → R4) fica **em série com a perna do SKIB e com o contato NO**.
-São duas chaves em série no mesmo laço.
+O Q1 é uma chave de baixo lado. O contato do relé e o Q1 ficam em série. A ordem
+é: fecha o relé, depois liga o Q1; no fim, desliga o Q1 e só então abre o relé.
+O firmware já faz nessa ordem.
 
-| Estado | GATE_1 (Q2) | GATE_2 (Q1) | RELE_IN | Efeito |
-| --- | --- | --- | --- | --- |
-| Repouso / boot | 0 | 0 | 1 | nenhum caminho fechado |
-| ARM_CONFIRMED / contagem | 1 | 0 | 1 | relé energizável, contato NO aberto |
-| Fim da contagem | 1 | 0 → 1 | 0 | contato NO fecha; Q1 assume a corrente |
-| Janela de ignição (2 s) | 1 | 1 | 0 | duas chaves em série fechadas |
-| Fim da janela | 1 → 0 | 1 → 0 | 1 | Q1 abre primeiro; depois o relé |
+Não ligue o ignitor entre J12.1 e J12.2: a carga fica em paralelo com o Q1.
+Não inverta dreno e source: o diodo de corpo do IRLZ44N conduz e a carga dispara
+mesmo com `GATE_2` em zero.
 
-> A fiação externa foi confirmada pelo responsável do projeto em 2026-10-15.
-> Ela não é derivável dos arquivos do repositório: o esquema termina em J6 e J9.
+A fonte do laço é 2S (6,0 a 8,4 V). O J12/J9 é um borne de 3,5 mm; para 8 A de
+pulso, use fio curto e grosso.
 
-## Sequência de operação
+## Alimentação
 
-1. Comando envia `ARM_CONFIRMED` enquanto o botão é mantido.
-2. Ignição confirma com `ACK` e inicia contagem de 5 s.
-3. Se houver `ABORT` ou perda de sinal > 500 ms, o ciclo é cancelado.
-4. Ao final da contagem, a saída de ignição ativa por 2 s.
-5. Ignição envia `IGNITION_COMPLETE`.
+```text
+bateria 1S ── TP4056 ── boost 5 V ── J1
+                                     ├── módulo relé (J7/J8)
+                                     ├── buzzer (J10)
+                                     └── ESP32 VIN ── regulador 3V3 ── LoRa/OLED/LEDs
+```
 
-## Segurança
+O TP4056 é só carregador; o 5 V vem do boost (ou de um buck, se a bateria for
+2S). A placa não tem proteção de polaridade nem fusível. Confira a polaridade
+antes de energizar.
 
-- Sempre conectar antena LoRa antes de energizar.
-- Usar botão momentâneo (sem trava).
-- Testar com carga dummy antes de ignitor real.
-- Manter distância mínima de 10 m em testes operacionais.
-- Não fabricar a SMD enquanto o DRC tiver curtos/desconexões.
-- Não alterar a lógica de intertravamento sem revisar os testes de bancada.
+## Componentes principais
 
-## Pastas de hardware
+| Ref | Valor | Uso |
+| --- | --- | --- |
+| Q1 | IRLZ44N | chave de saída do ignitor |
+| Q2 | S8050 | liga o GND da bobina do relé |
+| Q4/Q3 | BC337 | driver do buzzer |
+| D1 | SS34 (SMD) / 1N5818 (PTH) | diodo série da entrada |
+| R2/R5 | 10 k | pull-down do gate/base |
+| R4/R6 | 220 Ω | gate/base |
+| R3 | 470 Ω | base do BC337 |
+| R1/R7/R8 | 220 Ω | LEDs |
 
-- [`kicad/`](./kicad/): projetos KiCad ativos, biblioteca compartilhada e SPICE.
-- [`tools/`](./tools): scripts de automação KiCad.
-- [`gerbers/`](./gerbers): pacotes históricos; os atuais ficam em `kicad/placas/*/jlcpcb/`.
-- [`3d_models/`](./3d_models): cases e modelos 3D (OpenSCAD é o modelo atual).
-- [`fritzing/`](./fritzing): diagramas de protoboard.
-- [`images/`](./images): fotos e esquemas de montagem.
+## Antes de energizar
+
+- Antena LoRa conectada.
+- Carga dummy no lugar do ignitor.
+- J8 aberto na ignição.
+- Botão solto no comando.
+- Fonte limitada ou fusível no laço.
+
+O estado atual das placas e os números de DRC ficam em
+[`docs/ESTADO_DO_PROJETO.md`](../docs/ESTADO_DO_PROJETO.md).

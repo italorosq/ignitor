@@ -7,7 +7,7 @@
 | Nao conecta (`PING/PONG`) | Antena ausente/solta | Reconectar as duas antenas e reiniciar |
 | Link instavel | Sinal fraco/interferencia | Aproximar estacoes e medir RSSI |
 | Buzzer sem som | Pino incorreto ou buzzer danificado | Verificar pino da placa e testar buzzer |
-| Botao nao responde | Ligacao/pull-up | Validar continuidade e pino de entrada |
+| Botao do comando nao responde | Ligacao/pull-up | Validar continuidade e GPIO27 |
 | Ignitor nao aciona | Rele/MOSFET ou pino de saida | Testar saida com carga dummy |
 | Contagem aborta | Perda de `ARM_CONFIRMED` | Melhorar enlace e reduzir distancia |
 
@@ -42,7 +42,7 @@ Exemplo de fluxo esperado:
 
 ### Aborta no meio da contagem
 
-1. Manter botao pressionado durante os 5 s.
+1. Manter o botao pressionado durante os 10 s.
 2. Validar qualidade de sinal (RSSI).
 3. Evitar interferencia e aumentar robustez (ex.: SF maior, se necessario).
 

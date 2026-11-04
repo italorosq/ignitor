@@ -2,6 +2,18 @@
 
 Baseado em [Keep a Changelog](https://keepachangelog.com) e [Versionamento Semântico](https://semver.org).
 
+## [Não lançado] - 2026-11-04
+
+### Alterado
+- Separação dos firmwares: `estacao_comando_esp.py` (ESP32 + OLED) e
+  `estacao_ignicao_esp.py` (ESP32, sem OLED, botão, EXP ou ADC).
+- Contagem de 10 s; o comando toca o tema do Mario ao receber
+  `IGNITION_COMPLETE`.
+- Pico movido para `firmware/micropython/legacy/`.
+- Testes consolidados em `test/test_firmware.py`; scripts de bancada em
+  `test/bancada/`.
+- Documentação reescrita e relatórios antigos removidos.
+
 ## [1.1.0] - 2026-11-02
 
 ### Alterado

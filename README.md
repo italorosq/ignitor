@@ -1,98 +1,74 @@
 # Serra Rocketry Ignitor
 
-[![CI](https://github.com/italorosq/ignitor/actions/workflows/ci.yml/badge.svg)](https://github.com/italorosq/ignitor/actions/workflows/ci.yml)
-
 Sistema de ignição remota para foguetes experimentais. Duas estações
-independentes se comunicam por LoRa 433 MHz:
+independentes conversam por LoRa 433 MHz.
 
-| Estação | Função | MCU |
+A mesma PCB é usada nas duas estações para baratear a fabricação. O que muda é
+a população e o firmware:
+
+| Estação | Firmware | Módulos ligados |
 | --- | --- | --- |
-| Comando | Operação remota e segurança | Raspberry Pi Pico |
-| Ignição | Acionamento do ignitor | ESP32 DevKit V1 (ESP32-WROOM-32) ou Pico (legado) |
+| Comando | `estacao_comando_esp.py` | botão, OLED, LEDs, buzzer, LoRa |
+| Ignição | `estacao_ignicao_esp.py` | relé, Q1/Q2, LEDs, buzzer, LoRa |
 
-## Estado atual
+Na estação de comando não são montados Q1, Q2, J7/J8/J12 nem o módulo relé. Na
+ignição, o OLED (J11) não é montado. O resto da placa é comum.
 
-> **Leia [`docs/ESTADO_DO_PROJETO.md`](./docs/ESTADO_DO_PROJETO.md) antes de
-> fabricar qualquer placa.**
+## Como funciona
+
+1. O operador segura o botão por **10 s**.
+2. O comando transmite `ARM_CONFIRMED` a cada 200 ms.
+3. A ignição responde `ACK` e começa a contagem de **10 s**.
+4. Se o comando sumir por mais de **500 ms**, a ignição aborta.
+5. No fim da contagem, o relé e o Q1 fecham por **2 s**.
+6. A ignição envia `IGNITION_COMPLETE`. O comando mostra o resultado no OLED e
+   toca o tema do Mario no buzzer.
+
+O laço de disparo usa duas chaves em série: o contato do relé e o Q1. O Q1 fica
+no lado de baixo:
+
+```text
+BAT+ ── relé COM/NO ── ignitor ── J12.2 (dreno Q1)
+Q1 source (J12.1) ──────────────── BAT−
+```
+
+Não ligue o ignitor entre J12.1 e J12.2: isso coloca a carga em paralelo com o
+Q1. Também não inverta dreno e source; o diodo de corpo do MOSFET conduz e a
+carga dispara mesmo com `GATE_2` em zero.
+
+## Firmware
+
+- Comando: `firmware/micropython/estacao_comando_esp.py` (ESP32 + OLED).
+- Ignição: `firmware/micropython/estacao_ignicao_esp.py` (ESP32, sem OLED).
+- Pico: `firmware/micropython/legacy/` (não é usado nas placas atuais).
+
+Os dois firmwares são independentes. O comando não carrega código de relé ou
+ADC; a ignição não carrega código de OLED, botão ou EXP.
+
+## Placas
 
 | Placa | Dimensão | Estado |
 | --- | --- | --- |
-| Ignição SMD | 75×75 mm | **Candidata — não fabricar** (5 curtos, 3 desconexões, 27 erros de DRC) |
-| Ignição PTH | 75×80 mm | Funcional; limpeza de serigrafia/paridade pendente |
-| Ignição CNC | 50×90 mm | Em projeto (0 trilhas; relayout 90×100 não executado) |
-| Comando | — | Projeto removido; gerbers históricos em `hardware/gerbers/legado/` |
-
-O firmware principal da ignição (ESP32) está implementado com botão, OLED,
-ADC, expansão e sequência de ignição. Os testes estáticos passam
-(`pytest test/`).
-
-## Sequência de ignição
-
-1. Operador segura o botão por 5 s.
-2. Comando transmite `ARM_CONFIRMED` continuamente.
-3. Ignição executa contagem regressiva (5 bipes).
-4. Relé + Q1 acionam por 2 s.
-5. Ignição envia `IGNITION_COMPLETE`.
-
-## Comece aqui
-
-| Passo | Guia |
-| --- | --- |
-| 1. Entender | [docs/ARQUITETURA.md](./docs/ARQUITETURA.md) |
-| 2. Montar | [docs/INSTALL.md](./docs/INSTALL.md) |
-| 3. Gravar firmware | [docs/README_ENVIO.md](./docs/README_ENVIO.md) |
-| 4. Testar | [test/README.md](./test/README.md) |
-| 5. Diagnosticar | [docs/troubleshooting.md](./docs/troubleshooting.md) |
-| 6. Contribuir | [CONTRIBUTING.md](./CONTRIBUTING.md) |
-
-## Estrutura do repositório
-
-```text
-ignitor/
-├── docs/                 # arquitetura, estado, instalação, protocolo, histórico
-├── firmware/
-│   └── micropython/      # firmware oficial das estações
-├── hardware/
-│   ├── kicad/
-│   │   ├── placas/       # ignicao_smd, ignicao_pth, ignicao_cnc
-│   │   ├── shared/lib/   # símbolos, footprints e modelos 3D
-│   │   └── spice/        # simulações LTspice
-│   ├── tools/kicad/      # automação de posicionamento, roteamento e fabricação
-│   ├── gerbers/legado/   # pacotes históricos de fabricação
-│   ├── 3d_models/        # cases (OpenSCAD é o modelo atual)
-│   ├── fritzing/         # diagramas de protoboard
-│   └── images/           # fotos e esquemas
-├── software/web/         # UI web legada
-├── test/                 # testes estáticos e scripts de bancada
-└── scripts/              # checagens de links e higiene do repositório
-```
-
-## Componentes principais
-
-| Qtd | Componente | Uso |
-| --- | --- | --- |
-| 1 | Raspberry Pi Pico | Estação de Comando |
-| 1 | ESP32 DevKit V1 (30 pinos) | Estação de Ignição (principal) |
-| 2 | Módulo LoRa SX1278 433 MHz | Comunicação |
-| 2 | LED amarelo 5 mm | Status de link |
-| 2 | LED vermelho 5 mm | Status de ignição |
-| 2 | Buzzer ativo | Feedback sonoro |
-| 1 | Botão de ignição 22 mm | Acionamento |
-| 1 | Relé + MOSFETs Q1/Q2 | Saída para ignitor |
-| 2 | TP4056 | Carga de bateria |
-
-BOM completa e pinagem: [hardware/README.md](./hardware/README.md).
+| Ignição SMD | 78,8 × 57,3 mm | candidata; conferir DRC antes de fabricar |
+| Ignição PTH | 75 × 80 mm | funcional; limpeza de serigrafia pendente |
+| Ignição CNC | 50 × 90 mm | em projeto |
 
 ## Segurança
 
-- Botão de ignição deve ser momentâneo (sem trava).
-- O comando precisa ser mantido pelos 5 s completos.
-- Perda de sinal por mais de 500 ms deve abortar.
-- Sempre usar carga dummy antes de ignitor real.
-- Sempre conectar antena LoRa antes de energizar.
-- Manter distância mínima de 10 m entre operador e foguete.
-- Não fabricar a SMD enquanto o DRC tiver curtos ou desconexões.
+- Use carga dummy antes de qualquer ignitor real.
+- Conecte a antena LoRa antes de energizar.
+- Feche o J8 (ARM/RBF) só no momento do teste.
+- Mantenha o operador a pelo menos 10 m do foguete.
+- O botão de comando é momentâneo: soltar antes dos 10 s aborta na hora.
+- Depois de um abort, solte o botão antes de tentar de novo.
+- A ignição não tem botão local; o abort vem por LoRa ou pela perda de sinal.
 
-## Projeto
+## Documentação
+
+- [Arquitetura](docs/ARQUITETURA.md)
+- [Instalação](docs/INSTALL.md)
+- [Protocolo](docs/README_API.md)
+- [Estado do projeto](docs/ESTADO_DO_PROJETO.md)
+- [Testes](test/README.md)
 
 Projeto da [Serra Rocketry](https://github.com/Serra-Rocketry).

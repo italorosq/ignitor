@@ -1,117 +1,68 @@
-# Guia de Instalacao
+# Instalação
 
-Resumo: monte -> grave -> teste -> opere.
+Resumo: montar a placa, gravar o firmware da estação, testar com carga dummy.
 
-## Indice
+## 1. Material
 
-| Secao | Topico |
-| --- | --- |
-| [1](#1-pre-requisitos) | Pre-requisitos |
-| [2](#2-preparar-ambiente) | Preparar ambiente |
-| [3](#3-montagem-de-hardware) | Montagem de hardware |
-| [4](#4-gravar-firmware) | Gravar firmware |
-| [5](#5-validar-operacao) | Validar operacao |
-| [6](#6-integracao-com-ignitor-real) | Integracao com ignitor real |
-| [7](#7-troubleshooting) | Troubleshooting |
+- 2 × ESP32 DevKit V1, 30 pinos.
+- 2 × SX1278 433 MHz + antena.
+- 1 × botão momentâneo.
+- 1 × OLED SSD1306 128×64 (só no comando).
+- 2 × buzzers ativos.
+- 1 × módulo relé 5 V com flyback.
+- 1 × borne de ignição.
+- 2 × bateria + TP4056 + boost 5 V.
+- LEDs, resistores e fios.
 
-## 1. Pre-requisitos
+## 2. Montagem
 
-### Software
+### Comando
 
-- Python 3.8+.
-- Dependencias do projeto: `pip install -r requirements.txt`.
-- Thonny IDE (recomendado) ou VS Code com extensao MicroPython.
+Montar J1, J2/J3 (botão), J4/J5 (LED do botão), J10 (buzzer), J11 (OLED), U1
+(LoRa), A1 e os LEDs D3/D4. Não montar Q1, Q2, J7/J8 nem J12.
 
-### Hardware
+### Ignição
 
-- Multimetro.
-- Fonte/bateria adequada.
-- Ferramentas de montagem (ferro de solda, estanho, etc.).
+Montar J1, J7/J8 (relé), J10 (buzzer), J12 (SMD) ou J9 (PTH), U1, A1, Q1, Q2,
+Q4 e os LEDs D3/D4. Não montar J2/J3, J4/J5 nem J11.
 
-## 2. Preparar Ambiente
+O J8 é o ARM/RBF: feche os pinos 1–3 para alimentar a bobina do relé.
 
-```bash
-git clone https://github.com/Serra-Rocketry/ignitor.git
-cd ignitor
-pip install -r requirements.txt
-```
+## 3. Firmware
 
-## 3. Montagem de Hardware
-
-### 3.1 Estacao de Comando
-
-- 1x Raspberry Pi Pico.
-- 1x SX1278 433 MHz.
-- 2x LEDs + resistores.
-- 1x buzzer.
-- 1x botao de ignicao.
-
-Pinagem detalhada: [../hardware/README.md](../hardware/README.md#pinagem).
-
-### 3.2 Estacao de Ignicao
-
-- 1x ESP32 DevKit V1, 30 pinos (ESP32-WROOM-32) — ou Pico, variante legada.
-- 1x SX1278 433 MHz.
-- 2x LEDs + resistores.
-- 1x buzzer.
-- 1x rele/MOSFET para ignitor.
-
-Pinagem detalhada: [../hardware/README.md](../hardware/README.md#pinagem).
-
-### 3.3 Checklist Antes de Energizar
-
-1. Verificar curto e polaridade com multimetro.
-2. Confirmar conexoes SPI.
-3. Confirmar antenas LoRa conectadas e apertadas.
-4. Nao energizar SX1278 sem antena.
-
-## 4. Gravar Firmware
-
-Scripts oficiais:
-
-- `firmware/micropython/estacao_comando.py`
-- `firmware/micropython/estacao_ignicao.py` (Pico)
-- `firmware/micropython/estacao_ignicao_esp.py` (ESP32 DevKit V1)
-- `firmware/micropython/sx127x.py` (compatibilidade)
-- `firmware/micropython/config_lora.py` (compatibilidade)
-
-### 4.1 Envio com `ampy`
-
-```bash
-# Estacao de Comando (Pico)
-ampy --port /dev/ttyACM0 put firmware/micropython/estacao_comando.py main.py
-
-# Estacao de Ignicao (Pico)
-ampy --port /dev/ttyACM1 put firmware/micropython/estacao_ignicao.py main.py
-
-# Estacao de Ignicao (ESP32 DevKit V1)
-ampy --port /dev/ttyUSB0 put firmware/micropython/estacao_ignicao_esp.py main.py
-```
-
-## 5. Validar Operacao
-
-1. Ligar estacao de comando.
-2. Ligar estacao de ignicao.
-3. Confirmar `PING/PONG` no serial e LED amarelo de link.
-4. Executar teste com carga dummy no lugar do ignitor.
-
-Se o enlace nao subir, checar antena primeiro.
-
-## 6. Integracao com Ignitor Real
-
-Realizar apenas em ambiente seguro e com procedimento validado.
-
-1. Confirmar continuidade do ignitor.
-2. Confirmar antena conectada antes de energizar.
-3. Posicionar operador a distancia segura (>= 10 m).
-4. Executar sequencia completa.
-
-## 7. Troubleshooting
-
-| Problema | Possivel causa | Acao |
+| Estação | Arquivo | Salvar como |
 | --- | --- | --- |
-| Sem link LoRa | Antena ausente/solta | Reapertar antenas e reiniciar |
-| Buzzer sem som | Ligacao incorreta | Verificar pino de buzzer da placa |
-| Ignitor nao aciona | Rele/MOSFET | Testar saida com carga dummy |
+| Comando | `firmware/micropython/estacao_comando_esp.py` | `main.py` |
+| Ignição | `firmware/micropython/estacao_ignicao_esp.py` | `main.py` |
 
-Detalhes: [troubleshooting.md](./troubleshooting.md).
+O comando também precisa de `ssd1306.py` e `logo_serra.py`. A ignição não usa
+esses arquivos.
+
+Com `mpremote`:
+
+```bash
+mpremote connect COM5 fs cp firmware/micropython/estacao_comando_esp.py :main.py
+mpremote connect COM5 fs cp firmware/micropython/ssd1306.py :ssd1306.py
+mpremote connect COM5 fs cp firmware/micropython/logo_serra.py :logo_serra.py
+```
+
+Na ignição, troque o arquivo por `estacao_ignicao_esp.py`.
+
+## 4. Teste
+
+1. Antenas conectadas.
+2. Carga dummy no lugar do ignitor.
+3. J8 aberto.
+4. Ligar as duas estações.
+5. Conferir `PING/PONG` e o link no OLED.
+6. Fechar o J8.
+7. Segurar o botão por 10 s.
+8. Conferir a contagem, o acionamento por 2 s e o `IGNITION_COMPLETE`.
+9. Soltar o botão antes dos 10 s e conferir o abort.
+
+## 5. Antes do ignitor real
+
+- Conferir continuidade do ignitor.
+- Afastar o operador pelo menos 10 m.
+- Usar fonte limitada ou fusível no laço.
+- Não energizar sem antena.

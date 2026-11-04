@@ -1,0 +1,2 @@
+* LED generico 5mm vermelho/ambar (D2/D3/D4 THT): Vf ~1.95V @ 6mA
+.model LED_GEN D(Is=1e-22 N=1.65 Rs=5 Cjo=30p)

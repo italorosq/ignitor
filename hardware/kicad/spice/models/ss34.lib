@@ -1,0 +1,4 @@
+* SS34 - Schottky 40V/3A, SMA (DO-214AC), catodo = faixa
+* Fit ao datasheet (YONGYUTAI/Jahan/LCSC C8678): Vf~0.39V@0.3A, ~0.51V@3A (max 0.6V);
+* Ir~0.4mA@40V/25C; tt Schottky curto.
+.model SS34 D(Is=2e-7 N=1.05 Rs=0.02 Cjo=180p Vj=0.5 M=0.5 Bv=40 Ibv=500u tt=10n)
