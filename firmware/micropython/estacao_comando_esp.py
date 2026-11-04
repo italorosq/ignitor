@@ -798,11 +798,6 @@ class CommandStation:
 
         now = utime.ticks_ms()
         self._ping_if_due(now)
-        self._link_ok = self._link_ok_now(now)
-        if not self._link_ok:
-            print("[CMD] Link instavel - ABORT imediato.")
-            self._enter_aborting()
-            return
 
         if utime.ticks_diff(now, self._last_tx_ms) >= RETRANSMIT_MS:
             self._last_tx_ms = now
@@ -825,6 +820,12 @@ class CommandStation:
         elif incoming == MSG_PONG:
             self._last_pong_ms = now
             self._link_ok = True
+
+        self._link_ok = self._link_ok_now(now)
+        if not self._link_ok:
+            print("[CMD] Link instavel - ABORT imediato.")
+            self._enter_aborting()
+            return
 
         self._blink_tick()
 
@@ -853,11 +854,6 @@ class CommandStation:
 
         now = utime.ticks_ms()
         self._ping_if_due(now)
-        self._link_ok = self._link_ok_now(now)
-        if not self._link_ok:
-            print("[CMD] Link instavel - ABORT imediato.")
-            self._enter_aborting()
-            return
 
         # Reenvia o comando de armamento periodicamente.
         if utime.ticks_diff(now, self._last_tx_ms) >= RETRANSMIT_MS:
@@ -882,6 +878,12 @@ class CommandStation:
         elif incoming == MSG_PONG:
             self._last_pong_ms = now
             self._link_ok = True
+
+        self._link_ok = self._link_ok_now(now)
+        if not self._link_ok:
+            print("[CMD] Link instavel - ABORT imediato.")
+            self._enter_aborting()
+            return
 
         # Se não receber ACK dentro do tempo, reinicia a janela de espera.
         if utime.ticks_diff(now, self._tx_start_ms) >= ACK_TIMEOUT_MS:
