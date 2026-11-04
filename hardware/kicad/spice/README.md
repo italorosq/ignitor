@@ -36,6 +36,7 @@ Os resultados (`.meas`) ficam no `.log`.
 | m8_i2c | I2C do OLED (só comando) | tr ≤ 300 ns a 400 kHz ou 1000 ns a 100 kHz |
 | m9_v3v3_droop | degrau de TX do RA-02 | dip < ~150 mV |
 | m10_spi | SPI 1 MHz | dentro dos níveis do ESP32/RA-02 |
+| m12_sistema_ignicao | base completa: Q2, relé, e-match e Q1 | sem corrente antes/depois; ~7,3 A por 2 s |
 
 ## Limitações
 

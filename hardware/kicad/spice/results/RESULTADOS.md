@@ -20,6 +20,28 @@ LTspice 26.1.1, 2026-11-04. Valores dos decks `smd/` e `pth/`; logs em
 | M9 | dip 3V3 sem/100n/10u | 146 / 111 / 14 mV | idem |
 | M10 | SPI 1 MHz | 3,518 V / −0,218 V | idem |
 
+## Sistema completo da ignição
+
+Deck `smd/m12_sistema_ignicao.cir`: Q2 liga em 1 s, contato do relé fecha em
+2,005 s, Q1 liga em 2,01 s por 2 s, Q1 desliga em 4,01 s, contato abre em
+4,025 s e Q2 desliga em 4,1 s.
+
+| Métrica | Resultado |
+| --- | --- |
+| Corrente antes do disparo | 1 µA |
+| Corrente durante a janela | **7,34 A** |
+| Corrente depois do disparo | 1 µA |
+| Vds do Q1 | 0,319 V |
+| Dissipação do Q1 | 2,34 W |
+| Corrente da bobina do relé | 69,2 mA |
+| Vce do Q2 | 52,9 mV |
+| Queda no rail 5 V | 7 mV |
+| Pico de Vds no desligamento | 8,4 V |
+
+A sequência do firmware (relé antes do Q1, Q1 antes de abrir o relé) não deixa
+corrente passar antes da janela nem depois. O contato do relé foi modelado como
+chave comportamental com 50 mΩ; a bobina e o flyback foram modelados como R+L.
+
 ## Pontos de atenção
 
 - **M3**: o Q2 é S8050 (NPN), não MOSFET. O modelo antigo de IRLZ44N não vale.

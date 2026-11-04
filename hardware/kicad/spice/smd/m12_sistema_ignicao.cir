@@ -1,0 +1,60 @@
+* M12 - sistema completo da base de ignicao (2S, rele, Q1/Q2, e-match)
+* Sequencia: Q2 ON em 1 s; contato do rele fecha em 2,005 s; Q1 ON em 2,01 s
+* por 2 s; Q1 OFF em 4,01 s; contato abre em 4,025 s; Q2 OFF em 4,1 s.
+.include ../models/irlz44n.lib
+.include ../models/s8050.lib
+.include ../models/relay_srd.lib
+
+* --- rail 5 V ---
+V5 src 0 5
+Rsrc src s 0.1
+C1 s 0 100u
+C2 s 0 10u
+C3 s 0 100n
+
+* --- modulo rele: bobina + flyback + Q2 ---
+Vsense_coil s sc 0
+Xcoil sc c RELAY_COIL
+Dfly c s DFLY
+Q2 c qb 0 S8050
+R6 gp1 qb 220
+R5 qb 0 10k
+Vg1 gp1 0 PWL(0 0, 1.0 0, 1.001 3.3, 4.1 3.3, 4.101 0)
+
+* --- contato do rele (comportamental, fecha 5 ms apos IN baixo) ---
+Vctrl ctrl 0 PWL(0 0, 2.0 0, 2.005 3.3, 4.02 3.3, 4.025 0)
+Srel com no ctrl 0 SWREL
+
+* --- laco: BAT+ -> contato -> e-match -> Q1 -> BAT- ---
+Vbatt vbat 0 8.4
+Rbatt vbat vbp 0.05
+Lw vbp com 2u
+Vsense no d 0
+Rem d d2 1.0
+Xq1 d2 gg 0 IRLZ44N
+Vg2 gp2 0 PWL(0 0, 2.01 0, 2.011 3.3, 4.01 3.3, 4.011 0)
+R4 gp2 gg 220
+R2 gg 0 10k
+
+.model SWREL SW(Ron=0.05 Roff=1meg Vt=1.65)
+.model DFLY D(Is=2.52n Rs=0.568 N=1.752 Cjo=4p M=0.4 tt=20n)
+
+.tran 0 5 0 20u
+.meas TRAN i_pre MAX I(Vsense) FROM 0 TO 2.0
+.meas TRAN i_on AVG I(Vsense) FROM 2.1 TO 4.0
+.meas TRAN i_post MAX I(Vsense) FROM 4.1 TO 5
+.meas TRAN vds_on AVG V(d2) FROM 2.1 TO 4.0
+.meas TRAN vds_max MAX V(d2) FROM 4.0 TO 4.1
+.meas TRAN p_q1 AVG V(d2)*I(Vsense) FROM 2.1 TO 4.0
+.meas TRAN icoil AVG I(Vsense_coil) FROM 2.1 TO 4.0
+.meas TRAN vce_q2 AVG V(c) FROM 2.1 TO 4.0
+.meas TRAN v5_min MIN V(s) FROM 0 TO 5
+.meas TRAN ibatt MAX I(Vbatt) FROM 2.1 TO 4.0
+.meas TRAN ib FIND I(R6) AT 3.0
+.meas TRAN vbe FIND V(qb) AT 3.0
+.meas TRAN ic FIND I(Vsense_coil) AT 3.0
+.meas TRAN vce FIND V(c) AT 3.0
+.meas TRAN vgp FIND V(gp1) AT 3.0
+.end
+
+
