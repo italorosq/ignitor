@@ -512,9 +512,94 @@
 			(uuid "8d691e2e-88e5-487f-938d-821710271e4d")
 		)
 		(instances
-			(project "ignicao_pth"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/8723d3be-2d9b-46e1-8f2a-4d1920a0a70e"
 					(reference "#PWR013")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PCM_SL_Connectors:JST_04")
+		(at 95.504 96.52 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "95632f91-c173-4736-b0ed-233aca795dcd")
+		(property "Reference" "J6"
+			(at 84.836 96.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "EXP"
+			(at 87.376 96.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_EH_B4B-EH-A_1x04_P2.50mm_Vertical"
+			(at 95.25 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 95.25 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "JST Connector  4 pins"
+			(at 95.25 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "166c06a6-d00c-432e-a9f5-44c8b1b0ae18")
+		)
+		(pin "1"
+			(uuid "4cd361e9-4e4b-4147-99c6-5738b7065ef4")
+		)
+		(pin "3"
+			(uuid "4a3122d5-3f43-4fdd-b11d-3c7a36e76892")
+		)
+		(pin "4"
+			(uuid "1667927e-c292-4b86-beaf-2810161d7ef6")
+		)
+		(instances
+			(project "pcbsmd"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/8723d3be-2d9b-46e1-8f2a-4d1920a0a70e"
+					(reference "J6")
 					(unit 1)
 				)
 			)

@@ -24,7 +24,7 @@
 	(fp_line (start -1.55 -0.79) (end 1.55 -0.79) (layer F.CrtYd) (width 0.05))
 	(fp_line (start 1.55 -0.79) (end 1.55 0.79) (layer F.CrtYd) (width 0.05))
 	(fp_line (start 1.55 0.79) (end -1.55 0.79) (layer F.CrtYd) (width 0.05))
-	(model "${KIPRJMOD}/../../../shared/lib/3dmodels/R1206_L3.2-W1.6-H0.6.step"
+	(model "${EASYEDA2KICAD}/easyeda2kicad.3dshapes/R1206_L3.2-W1.6-H0.6.wrl"
 		(offset (xyz 0.000 0.000 0.000))
 		(scale (xyz 1 1 1))
 		(rotate (xyz 0 0 0))

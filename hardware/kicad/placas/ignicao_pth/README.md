@@ -7,6 +7,8 @@ mudam os encapsulamentos (D1 1N5818, C3 de 10 µF e Q3 BC337).
 
 - DRC: 0 erros, 100 avisos (serigrafia e biblioteca), 0 desconexões.
 - Paridade: 4 itens, todos os furos `H1`–`H4`.
+- `Q1.3`/`J9.1` no GND; `Q1.2`/`J9.2` no dreno. O `J9.1` é o retorno
+  BAT−/GND; o `J9.2` é o NO do relé/dreno.
 - Pacote JLCPCB antigo; regenerar antes de fabricar.
 
 ## Conectores

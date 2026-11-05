@@ -6,15 +6,13 @@ montado na ignição.
 
 ## Estado
 
-- DRC: 7 erros (4 de clearance e 3 de annular width), 0 desconexões, 2 itens de
-  paridade.
-- Sem curtos.
+- DRC: 4 erros de clearance, 0 desconexões, 2 itens de paridade.
+- Sem curtos. Os pads do Q4 foram corrigidos.
 - Sem furos M3 na revisão atual.
 - Pacote JLCPCB desatualizado: o BOM/CPL não tem o Q4 e o A1 está em posição
   antiga.
 
-Não fabricar antes de corrigir o clearance, o annular width e regenerar o
-pacote.
+Não fabricar antes de corrigir o clearance e regenerar o pacote.
 
 ## Conectores
 
@@ -37,5 +35,5 @@ $cli = "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
 & $cli pcb drc --severity-all --schematic-parity ignicao_smd.kicad_pcb
 ```
 
-O esquema ainda trata `Q1.3`/`J12.1` como `Net-(Q1-S)`; a PCB liga os dois ao
-GND. Alinhar o esquema antes de fabricar.
+O esquema e a PCB estão alinhados: `Q1.3`/`J12.1` no GND e `Q1.2`/`J12.2` no
+dreno. O `J12.1` é o retorno BAT−/GND; o `J12.2` é o NO do relé/dreno.

@@ -512,7 +512,7 @@
 			(uuid "8d691e2e-88e5-487f-938d-821710271e4d")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/8723d3be-2d9b-46e1-8f2a-4d1920a0a70e"
 					(reference "#PWR022")
 					(unit 1)
@@ -597,7 +597,7 @@
 			(uuid "1667927e-c292-4b86-beaf-2810161d7ef6")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/8723d3be-2d9b-46e1-8f2a-4d1920a0a70e"
 					(reference "J12")
 					(unit 1)

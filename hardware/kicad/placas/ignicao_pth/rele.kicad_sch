@@ -1731,6 +1731,12 @@
 		(uuid "9cc7bd1d-c65b-490e-a7b3-8c23c82e4dc7")
 	)
 	(junction
+		(at 102.87 106.68)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0bee6c22-26e5-4a12-9676-6762683c03f2")
+	)
+	(junction
 		(at 180.34 66.04)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1838,7 +1844,7 @@
 	)
 	(wire
 		(pts
-			(xy 95.25 106.68) (xy 121.92 106.68)
+			(xy 95.25 106.68) (xy 102.87 106.68)
 		)
 		(stroke
 			(width 0)
@@ -1875,6 +1881,16 @@
 			(type default)
 		)
 		(uuid "5d4e0935-a747-4577-a402-531f8126eafa")
+	)
+	(wire
+		(pts
+			(xy 102.87 106.68) (xy 121.92 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8a900dc3-0ba8-4522-b87e-8d0c2166d271")
 	)
 	(wire
 		(pts
@@ -2819,6 +2835,84 @@
 			(project "ignicao_pth"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/00758f45-d93e-4cf4-88d7-8df70201d85b"
 					(reference "#PWR015")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 102.87 106.68 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c56fb90c-a9e6-40cd-9dc7-60e14a15a0e2")
+		(property "Reference" "#PWR022"
+			(at 102.87 100.33 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 102.87 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 102.87 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 102.87 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 102.87 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a7ac6576-660b-4d01-b34b-ba0e6c22ad91")
+		)
+		(instances
+			(project "ignicao_pth"
+				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/00758f45-d93e-4cf4-88d7-8df70201d85b"
+					(reference "#PWR022")
 					(unit 1)
 				)
 			)

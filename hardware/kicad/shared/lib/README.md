@@ -70,13 +70,13 @@ editado alem dos caminhos de modelo 3D).
 ## Modelos 3D (`3dmodels/`)
 
 Todos os caminhos `(model ...)` dos footprints e das tres PCBs apontam para
-esta pasta. Sao 21 arquivos (~10 MB):
+esta pasta. Sao 23 arquivos (~10 MB):
 
-- **KiCad oficial (14 `.step`)**: JST EH ×3, PinHeader 1x01/1x02/1x03,
+- **KiCad oficial (15 `.step`)**: JST EH ×3, PinHeader 1x01/1x02/1x03,
   PinSocket 1x02, CP_Radial D5/D10, D_DO-201AD, LED_D5.0mm, R_Axial DIN0207,
-  TerminalBlock Phoenix, TO-220-3_Vertical.
-- **easyeda2kicad (4 `.step` + 1 `.wrl`)**: C1206, R0805, R1206, SMA (o `.wrl`
-  do R0805 continua referenciado por um footprint da PCB SMD).
+  TerminalBlock Phoenix, TO-220-3_Vertical, TO-92_Inline.
+- **easyeda2kicad (5 `.step` + 1 `.wrl`)**: C1206, R0805, R1206, SMA, TO-92-3
+  (o `.wrl` do R0805 continua referenciado por um footprint da PCB SMD).
 - **DOIT ESP32 DevKit (1 `.wrl`)**.
 - **RA-02 (1 `.STEP`)**: usado pelo footprint de adaptador `RA-02_THT` e tambem
   pelos footprints `RA-02` da `ignitor.pretty`.

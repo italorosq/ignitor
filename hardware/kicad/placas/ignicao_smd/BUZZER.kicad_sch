@@ -751,7 +751,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7dc151e1-1f71-4d54-af84-35a9a10e7354")
-		(property "Reference" "Q3"
+		(property "Reference" "Q4"
 			(at 120.65 90.17 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -816,7 +816,7 @@
 		(instances
 			(project "ignicao_smd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/14ff497f-d977-4c03-ab02-bcde3eb4472e"
-					(reference "Q3")
+					(reference "Q4")
 					(unit 1)
 				)
 			)

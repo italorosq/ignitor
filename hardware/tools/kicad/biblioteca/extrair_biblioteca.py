@@ -197,6 +197,8 @@ MODELS += [
      "TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal.step"),
     (KICAD_3D_SRC / "Package_TO_SOT_THT.3dshapes" / "TO-220-3_Vertical.step",
      "TO-220-3_Vertical.step"),
+    (KICAD_3D_SRC / "Package_TO_SOT_THT.3dshapes" / "TO-92_Inline.step",
+     "TO-92_Inline.step"),
     (EASYEDA / "easyeda2kicad.3dshapes" / "C1206_L3.2-W1.6-H1.3.step",
      "C1206_L3.2-W1.6-H1.3.step"),
     (EASYEDA / "easyeda2kicad.3dshapes" / "R0805_L2.0-W1.3-H0.6.step",
@@ -207,6 +209,8 @@ MODELS += [
      "R1206_L3.2-W1.6-H0.6.step"),
     (EASYEDA / "easyeda2kicad.3dshapes" / "SMA_L4.3-W2.6-LS5.2-RD.step",
      "SMA_L4.3-W2.6-LS5.2-RD.step"),
+    (EASYEDA / "easyeda2kicad.3dshapes" / "TO-92-3_L4.9-W3.7-P1.27-L.step",
+     "TO-92-3_L4.9-W3.7-P1.27-L.step"),
     (THIRD_3D / "com_github_Sajitha-Aldeniya_KiCad-Simple-Libraries" /
      "SL_Development_Boards.3dshapes" / "DOIT_ESP32_devkit_V1.wrl",
      "DOIT_ESP32_devkit_V1.wrl"),

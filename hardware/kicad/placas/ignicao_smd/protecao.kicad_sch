@@ -1702,6 +1702,38 @@
 			(embedded_fonts no)
 		)
 	)
+	(junction
+		(at 160.02 76.2)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "69f78c48-6ea4-4710-a8f3-8efa51b9aaa9")
+	)
+	(junction
+		(at 149.86 104.14)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a5a1737e-65bf-45ef-bdf8-f67b16895c19")
+	)
+	(wire
+		(pts
+			(xy 160.02 76.2) (xy 160.02 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1a47ef2d-bb95-4aae-be9a-ade3da039aff")
+	)
+	(wire
+		(pts
+			(xy 160.02 76.2) (xy 163.83 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1dd21ae3-fad8-4965-bf61-0e14288b3523")
+	)
 	(wire
 		(pts
 			(xy 160.02 100.33) (xy 160.02 102.87)
@@ -1724,7 +1756,17 @@
 	)
 	(wire
 		(pts
-			(xy 148.59 74.93) (xy 156.21 74.93)
+			(xy 154.94 104.14) (xy 154.94 74.93)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "698e3453-6b31-4d6e-af7c-2563b7a05ca3")
+	)
+	(wire
+		(pts
+			(xy 154.94 104.14) (xy 149.86 104.14)
 		)
 		(stroke
 			(width 0)
@@ -1734,13 +1776,33 @@
 	)
 	(wire
 		(pts
-			(xy 163.83 74.93) (xy 163.83 78.74)
+			(xy 149.86 104.14) (xy 149.86 76.2)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "8cd6c14a-9b27-4e78-9ac0-6befeb84ef32")
+	)
+	(wire
+		(pts
+			(xy 149.86 104.14) (xy 142.24 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "91cc9c8f-f377-4712-994c-cc8f9e3cbf97")
+	)
+	(wire
+		(pts
+			(xy 154.94 74.93) (xy 148.59 74.93)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0b2bd7e-071b-4df4-9806-7780b893d03b")
 	)
 	(wire
 		(pts
@@ -1764,7 +1826,17 @@
 	)
 	(wire
 		(pts
-			(xy 160.02 83.82) (xy 160.02 74.93)
+			(xy 149.86 76.2) (xy 160.02 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e0681c48-9ab4-47e0-9a3c-f6cba59ffb0b")
+	)
+	(wire
+		(pts
+			(xy 163.83 76.2) (xy 163.83 78.74)
 		)
 		(stroke
 			(width 0)
@@ -1826,7 +1898,7 @@
 			)
 		)
 		(property "Value" "1A rapido (logica)"
-			(at 127.635 74.93 90)
+			(at 129.54 92.456 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1875,7 +1947,7 @@
 			(uuid "fdfb239e-95f1-4041-9844-1411209a9548")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "F2")
 					(unit 1)
@@ -1956,7 +2028,7 @@
 			(uuid "2ffa8397-defb-42d7-9ad1-0f7ac843b554")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "C1")
 					(unit 1)
@@ -2033,7 +2105,7 @@
 			(uuid "4c8b4b5d-5a1b-4d9c-850c-1fb015cd95b2")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "#PWR003")
 					(unit 1)
@@ -2112,7 +2184,7 @@
 			(uuid "ac8a6a35-c32b-404e-9470-b619657c1ddb")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "J8")
 					(unit 1)
@@ -2189,7 +2261,7 @@
 			(uuid "944fb6ff-d548-4a39-8086-e79b8a03936c")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "#PWR001")
 					(unit 1)
@@ -2266,7 +2338,7 @@
 			(uuid "57d07554-29ba-480a-b018-a2839c293a4d")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "#PWR002")
 					(unit 1)
@@ -2345,7 +2417,7 @@
 			(uuid "12d28937-45a5-4641-b0dd-9bb613b0aa43")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "D2")
 					(unit 1)
@@ -2355,7 +2427,7 @@
 	)
 	(symbol
 		(lib_id "Device:D_TVS")
-		(at 160.02 74.93 0)
+		(at 146.05 104.14 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2365,7 +2437,7 @@
 		(dnp no)
 		(uuid "d54725c9-47ce-43ba-8678-144a7d20e70e")
 		(property "Reference" "D3"
-			(at 160.02 72.39 0)
+			(at 146.05 101.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2375,7 +2447,7 @@
 			)
 		)
 		(property "Value" "SMBJ10A"
-			(at 160.02 77.47 0)
+			(at 137.16 115.824 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2385,7 +2457,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 160.02 74.93 0)
+			(at 146.05 104.14 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2396,7 +2468,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 160.02 74.93 0)
+			(at 146.05 104.14 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2407,7 +2479,7 @@
 			)
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
-			(at 160.02 74.93 0)
+			(at 146.05 104.14 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2424,7 +2496,7 @@
 			(uuid "b9036120-8190-4a1c-aef7-3612dc2cabe7")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "D3")
 					(unit 1)
@@ -2505,7 +2577,7 @@
 			(uuid "090e64f6-1dba-4fda-8017-9aa0b68d231a")
 		)
 		(instances
-			(project "ignicao_smd"
+			(project "pcbsmd"
 				(path "/a458e973-2f3f-4941-a026-37b74a48edf4/4adddeef-3732-4993-b33e-93399270c195"
 					(reference "C2")
 					(unit 1)
