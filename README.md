@@ -16,15 +16,20 @@ ignição, o OLED (J11) não é montado. O resto da placa é comum.
 
 ## Como funciona
 
-1. O operador segura o botão por **10 s**.
+1. O operador segura o botão até o OLED mostrar **CONFIRMADO** (cerca de 13 s).
 2. O comando transmite `ARM_CONFIRMED` a cada 200 ms.
 3. A ignição responde `ACK` e começa a contagem de **10 s**.
 4. Se o comando sumir por mais de **500 ms**, a ignição aborta.
 5. No fim da contagem, o relé e o Q1 fecham por **2 s**.
 6. A ignição envia `IGNITION_COMPLETE`. O comando mostra o resultado no OLED e
    toca o tema do Mario no buzzer.
+7. Soltar o botão a qualquer momento, inclusive durante a queima, envia `ABORT`.
+8. Depois da queima ou de um abort, o comando espera o botão ser solto e
+   pressionado de novo antes de iniciar outro ciclo.
 
-O laço de disparo usa duas chaves em série: o contato do relé e o Q1. O Q1 fica
+Ao energizar, o comando toca o tema do **Zelda**. Enquanto o botão está
+pressionado, dá um bip curto por segundo. No fim da queima, toca o tema do
+**Mario**. O laço de disparo usa duas chaves em série: o contato do relé e o Q1. O Q1 fica
 no lado de baixo:
 
 ```text
@@ -59,9 +64,13 @@ ADC; a ignição não carrega código de OLED, botão ou EXP.
 - Conecte a antena LoRa antes de energizar.
 - Feche o J8 (ARM/RBF) só no momento do teste.
 - Mantenha o operador a pelo menos 10 m do foguete.
-- O botão de comando é momentâneo: soltar antes dos 10 s aborta na hora.
-- Depois de um abort, solte o botão antes de tentar de novo.
+- O botão de comando é momentâneo: soltar a qualquer momento aborta na hora.
+  Só solte depois de o OLED mostrar `CONFIRMADO`.
+- Depois de um abort ou de uma queima, solte o botão antes de tentar de novo.
 - A ignição não tem botão local; o abort vem por LoRa ou pela perda de sinal.
+- O link do comando é supervisão: quem corta o disparo é a ignição, em 500 ms.
+- O protocolo usa ID de sistema e sequência, mas não tem criptografia. O J8
+  continua sendo a barreira física.
 
 ## Documentação
 

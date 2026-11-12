@@ -38,7 +38,7 @@ painel.
 
 ## Comando
 
-- Botão de hold de 10 s no topo.
+- Botão de hold até `CONFIRMADO` no topo (cerca de 13 s).
 - OLED na frente.
 - LED do botão e LEDs de status no painel.
 - USB micro do DevKit para programação; USB-C separado para carga.

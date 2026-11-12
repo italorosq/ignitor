@@ -1,0 +1,2655 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-11T16:02:49",
+    "ignored_checks": [
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "schematic_parity": [
+        {
+            "description": "Connector_JST:JST_EH_B3B-EH-A_1x03_P2.50mm_Vertical não corresponde aos filtros de footprint do símbolo (Connector_JST:JST_EH_S3B-EH_1x03_P2.50mm_Horizontal)",
+            "items": [
+                {
+                    "description": "Footprint J7",
+                    "pos": {
+                        "x": 213.1314,
+                        "y": 82.0
+                    },
+                    "uuid": "3242077c-f8ef-48ef-8a89-3baf54b98f2a"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Connector_JST:JST_EH_B3B-EH-A_1x03_P2.50mm_Vertical não corresponde aos filtros de footprint do símbolo (Connector_JST:JST_EH_S3B-EH_1x03_P2.50mm_Horizontal)",
+            "items": [
+                {
+                    "description": "Footprint J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 82.0
+                    },
+                    "uuid": "faee0c20-ea42-4ea7-b3f7-019f2540dc04"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "easyeda2kicad:R1206 não corresponde aos filtros de footprint do símbolo (Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm*)",
+            "items": [
+                {
+                    "description": "Footprint R2",
+                    "pos": {
+                        "x": 214.47,
+                        "y": 104.63
+                    },
+                    "uuid": "60973d2a-b24a-4191-8639-b6a3e160e8d5"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "easyeda2kicad:R0805 não corresponde aos filtros de footprint do símbolo (Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm*)",
+            "items": [
+                {
+                    "description": "Footprint R4",
+                    "pos": {
+                        "x": 211.05,
+                        "y": 104.62
+                    },
+                    "uuid": "fdd43647-d671-4887-bf99-60e87d854717"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "easyeda2kicad:R1206 não corresponde aos filtros de footprint do símbolo (Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm*)",
+            "items": [
+                {
+                    "description": "Footprint R5",
+                    "pos": {
+                        "x": 214.99,
+                        "y": 90.88
+                    },
+                    "uuid": "13087187-0873-470e-8867-a1fd199ff0ad"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "easyeda2kicad:R0805 não corresponde aos filtros de footprint do símbolo (Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm*)",
+            "items": [
+                {
+                    "description": "Footprint R6",
+                    "pos": {
+                        "x": 211.91,
+                        "y": 90.79
+                    },
+                    "uuid": "2af43144-50ce-48b4-bb2c-3dc981f5019e"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Connector_JST:JST_EH_B2B-EH-A_1x02_P2.50mm_Vertical não corresponde aos filtros de footprint do símbolo (Connector_JST:JST_EH_S2B-EH_1x02_P2.50mm_Horizontal)",
+            "items": [
+                {
+                    "description": "Footprint J10",
+                    "pos": {
+                        "x": 219.63,
+                        "y": 93.0
+                    },
+                    "uuid": "ce2ea56e-2f41-47ae-b69a-206cdc7e523c"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "easyeda2kicad:TO-92-3_L4.9-W3.7-P1.27-L não corresponde ao footprint indicado pelo símbolo (PCM_Package_TO_SOT_THT_AKL:TO-92_Inline_Wide_CBE)",
+            "items": [
+                {
+                    "description": "Footprint Q4",
+                    "pos": {
+                        "x": 220.43,
+                        "y": 99.55
+                    },
+                    "uuid": "8be7e188-19fe-4133-b397-f5f5288449d6"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_mismatch"
+        },
+        {
+            "description": "Os atributos do footprint não batem com o símbolo: As configurações de 'Não montar' são diferentes",
+            "items": [
+                {
+                    "description": "Footprint Q4",
+                    "pos": {
+                        "x": 220.43,
+                        "y": 99.55
+                    },
+                    "uuid": "8be7e188-19fe-4133-b397-f5f5288449d6"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_mismatch"
+        },
+        {
+            "description": "easyeda2kicad:R0805 não corresponde aos filtros de footprint do símbolo (Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm*)",
+            "items": [
+                {
+                    "description": "Footprint R3",
+                    "pos": {
+                        "x": 189.1906,
+                        "y": 74.4694
+                    },
+                    "uuid": "3accfe31-bde8-4f0a-8f0e-12a720f69ad0"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "LED_THT:LED_D5.0mm não corresponde aos filtros de footprint do símbolo (LED_D5.0mm_Clear LED_D5.0mm_Horizontal_O1.27mm_Z3.0mm LED_D5.0mm_Horizontal_O3.81mm_Z3.0mm LED_D5.0mm_Horizontal_O6.35mm_Z3.0mm)",
+            "items": [
+                {
+                    "description": "Footprint D3",
+                    "pos": {
+                        "x": 200.76,
+                        "y": 82.99
+                    },
+                    "uuid": "5121d978-2ea6-4b9d-8d97-b1aa740916ba"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "LED_THT:LED_D5.0mm não corresponde aos filtros de footprint do símbolo (LED_D5.0mm_Clear LED_D5.0mm_Horizontal_O1.27mm_Z3.0mm LED_D5.0mm_Horizontal_O3.81mm_Z3.0mm LED_D5.0mm_Horizontal_O6.35mm_Z3.0mm)",
+            "items": [
+                {
+                    "description": "Footprint D4",
+                    "pos": {
+                        "x": 186.19,
+                        "y": 82.59
+                    },
+                    "uuid": "d60fb7d9-80b1-4996-819b-bbed9c631bfa"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Connector_JST:JST_EH_B4B-EH-A_1x04_P2.50mm_Vertical não corresponde aos filtros de footprint do símbolo (Connector_JST:JST_EH_S4B-EH_1x04_P2.50mm_Horizontal)",
+            "items": [
+                {
+                    "description": "Footprint J11",
+                    "pos": {
+                        "x": 158.623,
+                        "y": 65.3796
+                    },
+                    "uuid": "2466e4aa-54b9-4ba0-a2b1-c9f79319e586"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_filters_mismatch"
+        }
+    ],
+    "source": "ignicao_smd.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Violação do isolamento (zona isolamento 0,5000 mm; atual 0,1690 mm)",
+            "items": [
+                {
+                    "description": "Trilha [Net-(Q2-B)] no F.Cu, comprimento 0,9051 mm",
+                    "pos": {
+                        "x": 210.39,
+                        "y": 90.43
+                    },
+                    "uuid": "86aebf7a-db09-4b86-8353-09286236944c"
+                },
+                {
+                    "description": "Zona [GND] no F.Cu e B.Cu, prioridade 0",
+                    "pos": {
+                        "x": 145.7706,
+                        "y": 61.5442
+                    },
+                    "uuid": "86db3028-423a-43d6-a1e3-c0b22d3db468"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Violação do isolamento (zona isolamento 0,5000 mm; atual 0,4305 mm)",
+            "items": [
+                {
+                    "description": "Trilha [Net-(Q1-D)] no F.Cu, comprimento 32,8400 mm",
+                    "pos": {
+                        "x": 177.84,
+                        "y": 117.4
+                    },
+                    "uuid": "c571aa49-b34d-419c-9785-2cf4f861b68c"
+                },
+                {
+                    "description": "Zona [GND] no F.Cu e B.Cu, prioridade 0",
+                    "pos": {
+                        "x": 145.7706,
+                        "y": 61.5442
+                    },
+                    "uuid": "86db3028-423a-43d6-a1e3-c0b22d3db468"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Violação do isolamento (zona isolamento 0,5000 mm; atual 0,1690 mm)",
+            "items": [
+                {
+                    "description": "Trilha [Net-(Q2-B)] no F.Cu, comprimento 2,7436 mm",
+                    "pos": {
+                        "x": 212.33,
+                        "y": 97.29
+                    },
+                    "uuid": "6560a1de-8d3c-4f3c-8be1-7b01c0abb212"
+                },
+                {
+                    "description": "Zona [GND] no F.Cu e B.Cu, prioridade 0",
+                    "pos": {
+                        "x": 145.7706,
+                        "y": 61.5442
+                    },
+                    "uuid": "86db3028-423a-43d6-a1e3-c0b22d3db468"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Violação do isolamento (zona isolamento 0,5000 mm; atual 0,1690 mm)",
+            "items": [
+                {
+                    "description": "Trilha [Net-(Q2-B)] no F.Cu, comprimento 4,9200 mm",
+                    "pos": {
+                        "x": 210.39,
+                        "y": 95.35
+                    },
+                    "uuid": "3bef8d2c-b79e-4312-8647-11a148683309"
+                },
+                {
+                    "description": "Zona [GND] no F.Cu e B.Cu, prioridade 0",
+                    "pos": {
+                        "x": 145.7706,
+                        "y": 61.5442
+                    },
+                    "uuid": "86db3028-423a-43d6-a1e3-c0b22d3db468"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint R8",
+                    "pos": {
+                        "x": 192.33,
+                        "y": 74.61
+                    },
+                    "uuid": "00aae8e3-14c4-466f-9dbe-653ed5bfba7c"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint R7",
+                    "pos": {
+                        "x": 195.33,
+                        "y": 74.61
+                    },
+                    "uuid": "01c72b44-2fcb-472d-b64c-d871b96815cb"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint R3",
+                    "pos": {
+                        "x": 189.1906,
+                        "y": 74.4694
+                    },
+                    "uuid": "3accfe31-bde8-4f0a-8f0e-12a720f69ad0"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint D3",
+                    "pos": {
+                        "x": 200.76,
+                        "y": 82.99
+                    },
+                    "uuid": "5121d978-2ea6-4b9d-8d97-b1aa740916ba"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint D4",
+                    "pos": {
+                        "x": 186.19,
+                        "y": 82.59
+                    },
+                    "uuid": "d60fb7d9-80b1-4996-819b-bbed9c631bfa"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint D1",
+                    "pos": {
+                        "x": 200.6346,
+                        "y": 70.1196
+                    },
+                    "uuid": "d888ca17-3686-4481-b6e8-c8b2f347be53"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint R1",
+                    "pos": {
+                        "x": 186.33,
+                        "y": 74.61
+                    },
+                    "uuid": "e336d859-6f28-4f4e-b232-e29c4e7e3613"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "items": [
+                {
+                    "description": "Trilha [BUZZ] no B.Cu, comprimento 3,3922 mm",
+                    "pos": {
+                        "x": 191.9863,
+                        "y": 79.7551
+                    },
+                    "uuid": "ed8393ea-5884-448b-9874-1ea24a30002f"
+                },
+                {
+                    "description": "Via [BUZZ] no F.Cu - B.Cu",
+                    "pos": {
+                        "x": 191.897,
+                        "y": 79.629
+                    },
+                    "uuid": "fd7e09d5-4201-4812-a7a9-e4f1e98b35d8"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_not_centered_on_via"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "items": [
+                {
+                    "description": "Trilha [Net-(J4-Pad1)] no F.Cu, comprimento 30,6934 mm",
+                    "pos": {
+                        "x": 183.9214,
+                        "y": 78.0186
+                    },
+                    "uuid": "783dc85b-7276-472b-89b4-34ee7f23132d"
+                },
+                {
+                    "description": "Via [Net-(J4-Pad1)] no F.Cu - B.Cu",
+                    "pos": {
+                        "x": 183.8794,
+                        "y": 108.8556
+                    },
+                    "uuid": "554714ef-e799-4daa-aafc-f03134c55451"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_not_centered_on_via"
+        },
+        {
+            "description": "Footprint has no courtyard defined",
+            "items": [
+                {
+                    "description": "Footprint G***",
+                    "pos": {
+                        "x": 194.236,
+                        "y": 95.7368
+                    },
+                    "uuid": "ea3b5c2b-1118-44b2-a736-e3e174f5aa49"
+                }
+            ],
+            "severity": "warning",
+            "type": "missing_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "Ilha PTH 1 [GND] de D3",
+                    "pos": {
+                        "x": 200.76,
+                        "y": 82.99
+                    },
+                    "uuid": "0005ff77-a162-4168-9a0a-bac8e1228296"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "warning",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "Ilha PTH 2 [Net-(D3-Pad2)] de D3",
+                    "pos": {
+                        "x": 198.22,
+                        "y": 82.99
+                    },
+                    "uuid": "f6ac799a-c33b-4155-8e91-19788e86fd3a"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "warning",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "Ilha PTH 1 [GND] de D4",
+                    "pos": {
+                        "x": 186.19,
+                        "y": 82.59
+                    },
+                    "uuid": "c4487e3b-ba59-4b4b-9b75-f384f7fc016a"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "warning",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "Ilha PTH 2 [Net-(D4-Pad2)] de D4",
+                    "pos": {
+                        "x": 188.73,
+                        "y": 82.59
+                    },
+                    "uuid": "efbaa0b1-15cf-4192-b4d3-24fdb75629d7"
+                },
+                {
+                    "description": "Footprint A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "fddea57a-0967-4623-b794-5909c1f55f91"
+                }
+            ],
+            "severity": "warning",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Campo de referência do J11",
+                    "pos": {
+                        "x": 162.373,
+                        "y": 62.5796
+                    },
+                    "uuid": "235d0740-61d6-45e9-99a8-eed9177051ba"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Segmento de J12 em F.Silkscreen",
+                    "pos": {
+                        "x": 168.19,
+                        "y": 119.2775
+                    },
+                    "uuid": "f210bf39-96e5-4ea4-9e8f-afcb0c4a6ff2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Segmento de J12 em F.Silkscreen",
+                    "pos": {
+                        "x": 169.76,
+                        "y": 119.2775
+                    },
+                    "uuid": "9a79889b-e01c-4580-b305-2b080d16bac9"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Segmento de J12 em F.Silkscreen",
+                    "pos": {
+                        "x": 175.43,
+                        "y": 111.4375
+                    },
+                    "uuid": "2fbcf203-fc78-441c-a2c4-a1d2ae85d27a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Segmento de J12 em F.Silkscreen",
+                    "pos": {
+                        "x": 175.43,
+                        "y": 119.2775
+                    },
+                    "uuid": "be4bc9e6-4e24-4f5d-902f-7bcff16e3ff3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Polígono de J12 em F.Silkscreen",
+                    "pos": {
+                        "x": 170.06,
+                        "y": 119.2775
+                    },
+                    "uuid": "8fd3315e-8ee5-4f2a-bcc2-5ef7b8e6c075"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Valor do campo de J8 (ENDSTOP/SW)",
+                    "pos": {
+                        "x": 224.4,
+                        "y": 79.5
+                    },
+                    "uuid": "18d0a6a4-ffd9-4875-9c05-8a33032172ae"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 189.541561,
+                        "y": 119.370866
+                    },
+                    "uuid": "df5eb380-ede7-4a94-9b4e-d5092d043758"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Retângulo no Edge.Cuts",
+                    "pos": {
+                        "x": 146.09,
+                        "y": 61.97
+                    },
+                    "uuid": "0edf9c05-5940-46a2-a778-d9aead5765b3"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 161.967117,
+                        "y": 117.821623
+                    },
+                    "uuid": "025cf94c-653a-4f85-a5be-ea8bcf77f23b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "O componente do footprint não bate com os footprints das ilhas (era esperado o 'Furo passante'; atual 'técnica de montagem em superfície (SMD)')",
+            "items": [
+                {
+                    "description": "Footprint Q4",
+                    "pos": {
+                        "x": 220.43,
+                        "y": 99.55
+                    },
+                    "uuid": "8be7e188-19fe-4133-b397-f5f5288449d6"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_type_mismatch"
+        },
+        {
+            "description": "O footprint 'TO-92-3_L4.9-W3.7-P1.27-L' não corresponde à cópia na biblioteca 'easyeda2kicad'",
+            "items": [
+                {
+                    "description": "Footprint Q4",
+                    "pos": {
+                        "x": 220.43,
+                        "y": 99.55
+                    },
+                    "uuid": "8be7e188-19fe-4133-b397-f5f5288449d6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Campo de referência do R1",
+                    "pos": {
+                        "x": 186.3256,
+                        "y": 77.0586
+                    },
+                    "uuid": "48eb68ec-1ce6-4775-be1b-6224d096a04c"
+                },
+                {
+                    "description": "Segmento de R1 em F.Silkscreen",
+                    "pos": {
+                        "x": 185.41,
+                        "y": 76.37
+                    },
+                    "uuid": "9e7fb4e7-6445-473f-95a4-2374764fd414"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Retângulo de U1 em F.Silkscreen",
+                    "pos": {
+                        "x": 150.27,
+                        "y": 104.39
+                    },
+                    "uuid": "955e99eb-fe91-4af9-b8f5-acd395b565d6"
+                },
+                {
+                    "description": "Polígono no F.Silkscreen",
+                    "pos": {
+                        "x": 150.27,
+                        "y": 91.1
+                    },
+                    "uuid": "ed144757-06fc-401a-bc9b-605a3343e5ee"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segmento de R3 em F.Silkscreen",
+                    "pos": {
+                        "x": 188.2706,
+                        "y": 76.2294
+                    },
+                    "uuid": "41982dd7-813e-4312-a2a6-906b8c96142c"
+                },
+                {
+                    "description": "Campo de referência do R3",
+                    "pos": {
+                        "x": 189.2406,
+                        "y": 76.8594
+                    },
+                    "uuid": "504227fa-4c05-4b69-8ea5-acaffef5c88d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Campo de referência do R3",
+                    "pos": {
+                        "x": 189.2406,
+                        "y": 76.8594
+                    },
+                    "uuid": "504227fa-4c05-4b69-8ea5-acaffef5c88d"
+                },
+                {
+                    "description": "Segmento de R3 em F.Silkscreen",
+                    "pos": {
+                        "x": 190.1106,
+                        "y": 76.2294
+                    },
+                    "uuid": "9108235e-9031-467b-a83e-e91f88329d11"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Campo de referência do D1",
+                    "pos": {
+                        "x": 194.0646,
+                        "y": 69.8896
+                    },
+                    "uuid": "1ab5514a-806a-4b8d-b953-54496261d94c"
+                },
+                {
+                    "description": "Retângulo de A1 em F.Silkscreen",
+                    "pos": {
+                        "x": 188.845805,
+                        "y": 63.475
+                    },
+                    "uuid": "79054ba8-8bb2-484e-9568-dc7efc871c51"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Arco de D4 em F.Silkscreen",
+                    "pos": {
+                        "x": 187.46,
+                        "y": 82.59
+                    },
+                    "uuid": "6ae9f0da-ee2f-47a7-a30a-1e9eb6fbb82c"
+                },
+                {
+                    "description": "Campo de referência do A1",
+                    "pos": {
+                        "x": 190.379971,
+                        "y": 83.52
+                    },
+                    "uuid": "d09b4e90-11af-4dae-b3ac-d1f7e9eabd7b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Campo de referência do A1",
+                    "pos": {
+                        "x": 190.379971,
+                        "y": 83.52
+                    },
+                    "uuid": "d09b4e90-11af-4dae-b3ac-d1f7e9eabd7b"
+                },
+                {
+                    "description": "Círculo de D4 em F.Silkscreen",
+                    "pos": {
+                        "x": 187.46,
+                        "y": 82.59
+                    },
+                    "uuid": "d9842a9f-78c5-4940-9946-33e4ce0c0b23"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Campo de referência do R8",
+                    "pos": {
+                        "x": 192.35,
+                        "y": 77.0
+                    },
+                    "uuid": "99608021-d8c7-489b-9d31-2ac41d0ba2af"
+                },
+                {
+                    "description": "Segmento de R8 em F.Silkscreen",
+                    "pos": {
+                        "x": 193.25,
+                        "y": 76.37
+                    },
+                    "uuid": "ce0c49c8-9181-4207-8994-1ba58fc343ce"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Campo de referência do R5",
+                    "pos": {
+                        "x": 216.69,
+                        "y": 90.74
+                    },
+                    "uuid": "131bebd0-2492-48b7-82ee-fbb3862e6006"
+                },
+                {
+                    "description": "Segmento de R5 em F.Silkscreen",
+                    "pos": {
+                        "x": 216.07,
+                        "y": 89.93
+                    },
+                    "uuid": "7da41fbd-681a-49eb-aa18-d8c9d8fad52e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Campo de referência do J10",
+                    "pos": {
+                        "x": 221.19,
+                        "y": 91.73
+                    },
+                    "uuid": "d3eefcb0-f448-4897-a45f-6f5721947dfb"
+                },
+                {
+                    "description": "Ilha PTH 2 [GNDBUZZ] de J10",
+                    "pos": {
+                        "x": 219.63,
+                        "y": 90.5
+                    },
+                    "uuid": "48c803d6-5e4f-453e-ab55-a6279e75a390"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Campo de referência do J10",
+                    "pos": {
+                        "x": 221.19,
+                        "y": 91.73
+                    },
+                    "uuid": "d3eefcb0-f448-4897-a45f-6f5721947dfb"
+                },
+                {
+                    "description": "Ilha PTH 1 [+5V_RELE] de J10",
+                    "pos": {
+                        "x": 219.63,
+                        "y": 93.0
+                    },
+                    "uuid": "c4b79a0f-ae40-4158-8aed-72db451cf139"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Campo de referência do J8",
+                    "pos": {
+                        "x": 222.52,
+                        "y": 79.48
+                    },
+                    "uuid": "571dee4c-6d6d-4a1c-8e9a-7f178ef979ab"
+                },
+                {
+                    "description": "Ilha PTH 2 [unconnected-(J8-Pad2)] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 79.5
+                    },
+                    "uuid": "dc6661e5-371a-454a-885d-f1e70ee55dab"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 158.039488,
+                        "y": 87.806966
+                    },
+                    "uuid": "8c1d9166-ff5c-484c-98bf-f11f98fce34f"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 159.719325,
+                        "y": 83.527674
+                    },
+                    "uuid": "de5b3381-58e2-46ac-ae2b-04d4171ee429"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 159.476555,
+                        "y": 83.551863
+                    },
+                    "uuid": "f663f7f6-3a63-4578-b385-704dd8e98154"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 157.475456,
+                        "y": 81.406421
+                    },
+                    "uuid": "9873f428-8b03-430a-81dd-91e0140b41e0"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 159.476555,
+                        "y": 83.551863
+                    },
+                    "uuid": "f663f7f6-3a63-4578-b385-704dd8e98154"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 167.100796,
+                        "y": 88.493614
+                    },
+                    "uuid": "df0ec5ba-7098-4095-b3ed-a33ee46fcbd7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 154.213875,
+                        "y": 83.429581
+                    },
+                    "uuid": "43d16659-71ed-4989-a24e-21e16e0aba92"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 168.848411,
+                        "y": 85.135291
+                    },
+                    "uuid": "5c71a972-4494-4428-bfbb-b9dd12553620"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 162.257472,
+                        "y": 77.311053
+                    },
+                    "uuid": "9eb61828-3eb4-4967-b83b-e807c78192b1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 173.305989,
+                        "y": 85.387523
+                    },
+                    "uuid": "0a908f67-11ec-4c26-8c7a-3287bb98ecd5"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 162.257472,
+                        "y": 77.311053
+                    },
+                    "uuid": "9eb61828-3eb4-4967-b83b-e807c78192b1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 166.265004,
+                        "y": 97.547124
+                    },
+                    "uuid": "c84dba58-6f53-4a22-9e75-2a78b02e630f"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 166.549025,
+                        "y": 95.948654
+                    },
+                    "uuid": "f71527ef-b727-4160-85ff-ddea4e429708"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.494529,
+                        "y": 90.933669
+                    },
+                    "uuid": "58293d2c-70a8-4703-a5b3-832a7610d336"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 166.265004,
+                        "y": 97.547124
+                    },
+                    "uuid": "c84dba58-6f53-4a22-9e75-2a78b02e630f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 169.136218,
+                        "y": 84.986802
+                    },
+                    "uuid": "1df663cd-5f2b-47a0-b814-b4da386f0d37"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 168.848411,
+                        "y": 85.135291
+                    },
+                    "uuid": "5c71a972-4494-4428-bfbb-b9dd12553620"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 168.848411,
+                        "y": 85.135291
+                    },
+                    "uuid": "5c71a972-4494-4428-bfbb-b9dd12553620"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 169.822867,
+                        "y": 83.245657
+                    },
+                    "uuid": "bdc7d2a9-42d9-454a-8f79-5e0673fa5b9a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 168.848411,
+                        "y": 85.135291
+                    },
+                    "uuid": "5c71a972-4494-4428-bfbb-b9dd12553620"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 171.122594,
+                        "y": 82.534486
+                    },
+                    "uuid": "8e2b340e-8816-49e7-8194-e035cd30de8b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.138943,
+                        "y": 86.176175
+                    },
+                    "uuid": "2188b3db-d97e-4114-a4dd-046abf16e2e7"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 164.942758,
+                        "y": 86.764731
+                    },
+                    "uuid": "8980f6a5-fb82-4441-9889-38d2e540e83c"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.126682,
+                        "y": 86.544023
+                    },
+                    "uuid": "c60454bb-6b55-49c8-91df-b891fc0b77c6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 164.95502,
+                        "y": 87.193886
+                    },
+                    "uuid": "9e85c602-4e9a-421e-912b-6914f1fde0d3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 163.630769,
+                        "y": 84.802879
+                    },
+                    "uuid": "bfe8cac5-3de8-4f1d-8161-4c46b8e0f7d5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 164.820142,
+                        "y": 84.079445
+                    },
+                    "uuid": "7eda0792-37ab-481b-a38b-d66674606ba5"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 164.795619,
+                        "y": 87.157102
+                    },
+                    "uuid": "be9dd471-b206-4540-8e80-b86cbf0f7cd0"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.359651,
+                        "y": 87.549472
+                    },
+                    "uuid": "65168014-bd33-4416-95ee-f71d21d51dd9"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.065374,
+                        "y": 87.046748
+                    },
+                    "uuid": "f4e4ab7a-9814-4df6-a903-fff57f7aaa23"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.237036,
+                        "y": 87.61078
+                    },
+                    "uuid": "4a788ce3-2100-411e-b5d1-4ad231bb5dba"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.886899,
+                        "y": 87.794704
+                    },
+                    "uuid": "2a11fde8-a95e-49f3-93b2-54f690617c24"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.555837,
+                        "y": 87.794704
+                    },
+                    "uuid": "3f79f902-87e4-4666-b817-346c2a9ba4b5"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.371913,
+                        "y": 87.623042
+                    },
+                    "uuid": "d6d0bf0b-8eae-4999-814b-3d96b4e1daab"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.81333,
+                        "y": 87.868274
+                    },
+                    "uuid": "c979af11-d430-449b-b31e-0ec093d2e645"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.997254,
+                        "y": 87.966366
+                    },
+                    "uuid": "451f8298-cfb8-483f-aae1-17c456d05f0b"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 167.149842,
+                        "y": 87.856012
+                    },
+                    "uuid": "0331cd3e-f106-472c-a4d9-9ab01b1d6b45"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 165.224774,
+                        "y": 89.719773
+                    },
+                    "uuid": "971dd181-8684-48d7-a985-d9bbf7d815f0"
+                },
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 163.288027,
+                        "y": 87.913086
+                    },
+                    "uuid": "9e5e2aea-bed3-4033-92c5-fc39dfa0a81b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 171.381886,
+                        "y": 85.317796
+                    },
+                    "uuid": "01d5bb6f-efbe-4513-9227-567d39594763"
+                },
+                {
+                    "description": "Polígono no B.Silkscreen",
+                    "pos": {
+                        "x": 171.895074,
+                        "y": 84.410508
+                    },
+                    "uuid": "57976820-818b-4d87-97df-23cc7742adac"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 180.303553,
+                        "y": 84.902885
+                    },
+                    "uuid": "865247d6-ff8e-4460-bed7-6e2040c64635"
+                },
+                {
+                    "description": "Ilha PTH 4 [EXP_A] de A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 81.785
+                    },
+                    "uuid": "08dad5c9-8b6c-4b43-ac97-26a95eae73f2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 180.303553,
+                        "y": 84.902885
+                    },
+                    "uuid": "865247d6-ff8e-4460-bed7-6e2040c64635"
+                },
+                {
+                    "description": "Ilha PTH 5 [NSS] de A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 84.325
+                    },
+                    "uuid": "a7d32f73-0ddb-49e8-b8d1-caeba893390b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 170.285536,
+                        "y": 115.021067
+                    },
+                    "uuid": "e0aa9483-e45a-4faf-9570-0d73023164ec"
+                },
+                {
+                    "description": "Ilha PTH 1 [GND] de J12",
+                    "pos": {
+                        "x": 170.06,
+                        "y": 114.6575
+                    },
+                    "uuid": "a2fa10d5-7953-4077-bbbc-1c18390cd940"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.582248,
+                        "y": 71.215883
+                    },
+                    "uuid": "4f09573e-ec63-4930-af59-ab0362440c56"
+                },
+                {
+                    "description": "Ilha PTH 2 [GND] de J1",
+                    "pos": {
+                        "x": 221.1578,
+                        "y": 70.6882
+                    },
+                    "uuid": "fa8726f8-a9c8-44aa-aaaf-ae2e7d65bf62"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.308353,
+                        "y": 69.770332
+                    },
+                    "uuid": "cdd09868-49b5-4670-aaae-238ba073a581"
+                },
+                {
+                    "description": "Ilha PTH 2 [GND] de J1",
+                    "pos": {
+                        "x": 221.1578,
+                        "y": 70.6882
+                    },
+                    "uuid": "fa8726f8-a9c8-44aa-aaaf-ae2e7d65bf62"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.261656,
+                        "y": 70.193587
+                    },
+                    "uuid": "f5f3888e-498a-4f0b-815d-86ceb1a26ff0"
+                },
+                {
+                    "description": "Ilha PTH 2 [GND] de J1",
+                    "pos": {
+                        "x": 221.1578,
+                        "y": 70.6882
+                    },
+                    "uuid": "fa8726f8-a9c8-44aa-aaaf-ae2e7d65bf62"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.310271,
+                        "y": 71.468604
+                    },
+                    "uuid": "f13ee2d8-47b3-4633-902b-df804afd6759"
+                },
+                {
+                    "description": "Ilha PTH 2 [GND] de J1",
+                    "pos": {
+                        "x": 221.1578,
+                        "y": 70.6882
+                    },
+                    "uuid": "fa8726f8-a9c8-44aa-aaaf-ae2e7d65bf62"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.552476,
+                        "y": 68.391008
+                    },
+                    "uuid": "bd9b5ebd-4a3b-4a75-92a6-7720e83182ca"
+                },
+                {
+                    "description": "Ilha PTH 1 [+5V_RELE] de J1",
+                    "pos": {
+                        "x": 221.1578,
+                        "y": 68.1482
+                    },
+                    "uuid": "1699565d-3d06-45f2-8254-780776ca8d5d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.680337,
+                        "y": 77.487153
+                    },
+                    "uuid": "ed120235-8f0e-4b11-b4c5-10547ea3e28e"
+                },
+                {
+                    "description": "Ilha PTH 3 [+5V_RELE] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 77.0
+                    },
+                    "uuid": "34e1e917-e6e3-47a3-abff-ef908d032722"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.661387,
+                        "y": 76.775737
+                    },
+                    "uuid": "9fd823ea-dbbb-452e-9ec5-c2675a9b547c"
+                },
+                {
+                    "description": "Ilha PTH 3 [+5V_RELE] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 77.0
+                    },
+                    "uuid": "34e1e917-e6e3-47a3-abff-ef908d032722"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.657994,
+                        "y": 76.421806
+                    },
+                    "uuid": "d9e3476c-9347-458b-ab40-ac2e69f6eb26"
+                },
+                {
+                    "description": "Ilha PTH 3 [+5V_RELE] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 77.0
+                    },
+                    "uuid": "34e1e917-e6e3-47a3-abff-ef908d032722"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 212.169385,
+                        "y": 74.111431
+                    },
+                    "uuid": "6e9cf2e6-24bf-40ff-adcc-e808c0dcc7e1"
+                },
+                {
+                    "description": "Ilha PTH 1 [5V_RELE_S] de J7",
+                    "pos": {
+                        "x": 213.1314,
+                        "y": 82.0
+                    },
+                    "uuid": "5ab18794-b32d-4712-937d-ec3039185414"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 212.169385,
+                        "y": 74.111431
+                    },
+                    "uuid": "6e9cf2e6-24bf-40ff-adcc-e808c0dcc7e1"
+                },
+                {
+                    "description": "Ilha PTH 2 [RELE_IN] de J7",
+                    "pos": {
+                        "x": 213.1314,
+                        "y": 79.5
+                    },
+                    "uuid": "618fb0b5-0107-4f85-bb4d-2b40ba91fa2a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 212.169385,
+                        "y": 74.111431
+                    },
+                    "uuid": "6e9cf2e6-24bf-40ff-adcc-e808c0dcc7e1"
+                },
+                {
+                    "description": "Ilha PTH 3 [/rele/GND_RELAY] de J7",
+                    "pos": {
+                        "x": 213.1314,
+                        "y": 77.0
+                    },
+                    "uuid": "b1c8072d-9bd0-42ea-8dd0-abb4036705ba"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 168.775142,
+                        "y": 75.107855
+                    },
+                    "uuid": "c0c8cd34-d52c-4005-89ff-64ff6ea6f798"
+                },
+                {
+                    "description": "Ilha PTH 2 [GND] de U1",
+                    "pos": {
+                        "x": 168.77,
+                        "y": 75.04
+                    },
+                    "uuid": "5b2a34c7-bc31-465a-ab51-fe53a8f30240"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 180.644871,
+                        "y": 79.13682
+                    },
+                    "uuid": "c7ee7df7-e657-4960-86e7-a80b7e6c5327"
+                },
+                {
+                    "description": "Ilha PTH 3 [EXP_C] de A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 79.245
+                    },
+                    "uuid": "6bd3d747-3a1e-4e04-93a8-1acf097ea96e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 179.750675,
+                        "y": 76.920879
+                    },
+                    "uuid": "df3734c8-ead7-4281-aa5e-9683d479e57a"
+                },
+                {
+                    "description": "Ilha PTH 1 [+3V3] de A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 74.165
+                    },
+                    "uuid": "26c80f7d-58b8-4601-97b6-85c7be2e3cce"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 179.750675,
+                        "y": 76.920879
+                    },
+                    "uuid": "df3734c8-ead7-4281-aa5e-9683d479e57a"
+                },
+                {
+                    "description": "Ilha PTH 2 [GND] de A1",
+                    "pos": {
+                        "x": 180.4694,
+                        "y": 76.705
+                    },
+                    "uuid": "2bfc7c1c-7f67-4df5-8999-bdf111c3a2a7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 171.364568,
+                        "y": 77.194413
+                    },
+                    "uuid": "c47dcfac-62df-4dbb-bb2e-e7ab27541c9b"
+                },
+                {
+                    "description": "Ilha PTH 1 [GND] de U1",
+                    "pos": {
+                        "x": 171.31,
+                        "y": 75.04
+                    },
+                    "uuid": "52684d21-cc39-449a-b037-028426984818"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 161.110043,
+                        "y": 65.598213
+                    },
+                    "uuid": "a7423c03-d2fd-43d2-8054-8169f6c6f19c"
+                },
+                {
+                    "description": "Ilha PTH 2 [+3V3] de J11",
+                    "pos": {
+                        "x": 161.123,
+                        "y": 65.3796
+                    },
+                    "uuid": "11c41670-834f-4fda-96ed-5004bd55086d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 166.643299,
+                        "y": 74.427877
+                    },
+                    "uuid": "65bf44c6-cd38-4e10-a632-115fc2203c61"
+                },
+                {
+                    "description": "Ilha PTH 3 [+3V3] de U1",
+                    "pos": {
+                        "x": 166.23,
+                        "y": 75.04
+                    },
+                    "uuid": "8f14e0c1-9ed2-435b-a35a-61121c505773"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 213.047958,
+                        "y": 98.138857
+                    },
+                    "uuid": "805632a6-62bd-4642-9954-dd26371e091d"
+                },
+                {
+                    "description": "Ilha PTH 1 [GND] de Q2",
+                    "pos": {
+                        "x": 213.58,
+                        "y": 98.56
+                    },
+                    "uuid": "7ca90987-a812-4b85-9323-1ff7ec8438d4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 213.047958,
+                        "y": 98.138857
+                    },
+                    "uuid": "805632a6-62bd-4642-9954-dd26371e091d"
+                },
+                {
+                    "description": "Ilha PTH 2 [Net-(Q2-B)] de Q2",
+                    "pos": {
+                        "x": 213.58,
+                        "y": 97.29
+                    },
+                    "uuid": "472e51b1-fa6c-485f-b8fb-61cb0a711212"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 214.682031,
+                        "y": 113.248817
+                    },
+                    "uuid": "67cdee2b-514d-48b9-9849-a99921f80fef"
+                },
+                {
+                    "description": "Ilha PTH 1 [Net-(Q1-G)] de Q1",
+                    "pos": {
+                        "x": 216.79,
+                        "y": 110.45
+                    },
+                    "uuid": "061eb469-84b4-4fbb-981c-00fb3bb93099"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 209.139652,
+                        "y": 111.98195
+                    },
+                    "uuid": "a4707cec-8b57-4e6d-978f-26854e04e4f0"
+                },
+                {
+                    "description": "Ilha PTH 3 [GND] de Q1",
+                    "pos": {
+                        "x": 211.71,
+                        "y": 110.45
+                    },
+                    "uuid": "07531b54-afb7-4409-b3f7-c87a2cf12c49"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 205.663813,
+                        "y": 92.374624
+                    },
+                    "uuid": "6f1e3223-ee84-47f6-b027-54c5e7e3dd64"
+                },
+                {
+                    "description": "Ilha PTH 23 [STATUS] de A1",
+                    "pos": {
+                        "x": 205.8694,
+                        "y": 91.945
+                    },
+                    "uuid": "0362c1ad-ba0f-4d01-bbda-3803dca82b03"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.484946,
+                        "y": 82.455616
+                    },
+                    "uuid": "4ce5aefa-1e9e-4328-9cfc-808cc86e532a"
+                },
+                {
+                    "description": "Ilha PTH 1 [5V_RELE_S] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 82.0
+                    },
+                    "uuid": "4a28f4be-42ba-496b-8ced-d09f66897547"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.406061,
+                        "y": 81.114057
+                    },
+                    "uuid": "69e11c58-481e-4e3d-9049-71a2d6a6359b"
+                },
+                {
+                    "description": "Ilha PTH 1 [5V_RELE_S] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 82.0
+                    },
+                    "uuid": "4a28f4be-42ba-496b-8ced-d09f66897547"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.704506,
+                        "y": 81.897625
+                    },
+                    "uuid": "d73f26d5-a1a9-44fc-966e-fc053e6a7d74"
+                },
+                {
+                    "description": "Ilha PTH 1 [5V_RELE_S] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 82.0
+                    },
+                    "uuid": "4a28f4be-42ba-496b-8ced-d09f66897547"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 217.820063,
+                        "y": 77.773306
+                    },
+                    "uuid": "dd57a187-1291-483c-b4f4-157ed76b0fea"
+                },
+                {
+                    "description": "Ilha PTH 3 [GND] de Q4",
+                    "pos": {
+                        "x": 219.16,
+                        "y": 99.55
+                    },
+                    "uuid": "f852de64-4ca7-4e65-bbb3-00a147734126"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 217.820063,
+                        "y": 77.773306
+                    },
+                    "uuid": "dd57a187-1291-483c-b4f4-157ed76b0fea"
+                },
+                {
+                    "description": "Ilha PTH 1 [+5V_RELE] de J10",
+                    "pos": {
+                        "x": 219.63,
+                        "y": 93.0
+                    },
+                    "uuid": "c4b79a0f-ae40-4158-8aed-72db451cf139"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 217.820063,
+                        "y": 77.773306
+                    },
+                    "uuid": "dd57a187-1291-483c-b4f4-157ed76b0fea"
+                },
+                {
+                    "description": "Ilha PTH 2 [GNDBUZZ] de J10",
+                    "pos": {
+                        "x": 219.63,
+                        "y": 90.5
+                    },
+                    "uuid": "48c803d6-5e4f-453e-ab55-a6279e75a390"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.749683,
+                        "y": 82.897637
+                    },
+                    "uuid": "1f1e3824-aafe-4883-ad79-c6d49665a6fe"
+                },
+                {
+                    "description": "Ilha PTH 1 [5V_RELE_S] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 82.0
+                    },
+                    "uuid": "4a28f4be-42ba-496b-8ced-d09f66897547"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.688924,
+                        "y": 80.121386
+                    },
+                    "uuid": "3de600a0-77fb-4f4b-8ba5-03995a0edffb"
+                },
+                {
+                    "description": "Ilha PTH 2 [unconnected-(J8-Pad2)] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 79.5
+                    },
+                    "uuid": "dc6661e5-371a-454a-885d-f1e70ee55dab"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 221.421563,
+                        "y": 79.490995
+                    },
+                    "uuid": "6111fe32-3822-4f7a-9c07-ee02df97f444"
+                },
+                {
+                    "description": "Ilha PTH 2 [unconnected-(J8-Pad2)] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 79.5
+                    },
+                    "uuid": "dc6661e5-371a-454a-885d-f1e70ee55dab"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Polígono de G*** em B.Silkscreen",
+                    "pos": {
+                        "x": 219.471897,
+                        "y": 83.757348
+                    },
+                    "uuid": "051cc930-270e-43b0-b81f-2f7dbf6a27df"
+                },
+                {
+                    "description": "Ilha PTH 1 [5V_RELE_S] de J8",
+                    "pos": {
+                        "x": 221.0,
+                        "y": 82.0
+                    },
+                    "uuid": "4a28f4be-42ba-496b-8ced-d09f66897547"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        }
+    ]
+}

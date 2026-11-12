@@ -10,6 +10,12 @@
 - `ssd1306.py` — driver do OLED.
 - `logo_serra.py` — bitmap da logo.
 
+## Depuração
+
+Na ignição, `DEBUG = False` no topo de `estacao_ignicao_esp.py` esconde o log
+de cada quadro recebido. Para bancada, mude para `True`; em voo, mantenha
+`False` para não bloquear o laço de segurança com USB.
+
 ## Legado
 
 - `legacy/estacao_comando.py` — Pico.

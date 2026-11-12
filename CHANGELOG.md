@@ -2,12 +2,25 @@
 
 Baseado em [Keep a Changelog](https://keepachangelog.com) e [Versionamento Semântico](https://semver.org).
 
-## [Não lançado] - 2026-11-04
+## [Não lançado] - 2026-11-06
+
+### Corrigido
+- Ignição mantém a janela de 2 s durante toda a queima; antes abortava em
+  ~500 ms por usar um timestamp congelado.
+- Estado `BLOQUEADO` e número de ciclo impedem segundo disparo com o mesmo
+  aperto, inclusive se `IGNITION_COMPLETE` for perdido.
+- Comando exige soltura do botão no boot e trata `STATUS:ABORT` e
+  `STATUS:COMPLETO` como transições.
+- Link do comando passou a 3 s e aceita `ACK`/`STATUS` como sinal de vida.
+- Ignição ganhou `try/finally` e timer one-shot de 2,5 s para cortar o relé em
+  caso de exceção.
+- `arm` por serial desabilitado no firmware de voo.
+- Protocolo ganhou `IG1`, epoch, sequência e ciclo; replay simples é rejeitado.
 
 ### Alterado
 - Separação dos firmwares: `estacao_comando_esp.py` (ESP32 + OLED) e
   `estacao_ignicao_esp.py` (ESP32, sem OLED, botão, EXP ou ADC).
-- Contagem de 10 s; o comando toca o tema do Mario ao receber
+- Contagem de 10 s; o comando toca Zelda no boot e Mario ao receber
   `IGNITION_COMPLETE`.
 - Pico movido para `firmware/micropython/legacy/`.
 - Testes consolidados em `test/test_firmware.py`; scripts de bancada em

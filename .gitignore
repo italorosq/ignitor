@@ -27,6 +27,9 @@ venv/
 # Ferramentas locais do agente
 .opencode/
 
+# Versao local RP2040 (nao versionar)
+firmware/micropython/rp2040/
+
 # Artefatos gerados por analises automatizadas
 analysis/
 **/analysis/

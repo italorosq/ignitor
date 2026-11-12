@@ -1,0 +1,270 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-11T15:59:58",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4",
+            "violations": [
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Rótulo global 'EXP_C'",
+                            "pos": {
+                                "x": 1.2065,
+                                "y": 0.7366
+                            },
+                            "uuid": "282596d1-f3ee-4084-8b21-a4530230f1af"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Rótulo global 'EXP_A'",
+                            "pos": {
+                                "x": 1.2065,
+                                "y": 0.762
+                            },
+                            "uuid": "13252605-a287-4957-b8a1-f2e3a0f28671"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Rótulo global 'EXP_B'",
+                            "pos": {
+                                "x": 1.2065,
+                                "y": 0.9144
+                            },
+                            "uuid": "79e09311-a427-4449-8956-fe58b46375bc"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Rótulo global 'ADC2'",
+                            "pos": {
+                                "x": 1.7018,
+                                "y": 1.0414
+                            },
+                            "uuid": "9407a97f-2fad-40a2-b509-090c05ab9735"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Rótulo global 'ADC1'",
+                            "pos": {
+                                "x": 1.7018,
+                                "y": 1.0668
+                            },
+                            "uuid": "d7efec5c-573e-4351-b26f-d36e33aa183b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Rótulo global 'EXP2'",
+                            "pos": {
+                                "x": 1.7018,
+                                "y": 1.0922
+                            },
+                            "uuid": "ff5578f4-a787-44c3-9a5d-1afcd2a37be3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Rótulo global 'EXP1'",
+                            "pos": {
+                                "x": 1.7018,
+                                "y": 1.1176
+                            },
+                            "uuid": "9eb744cd-a31c-4489-84e0-cc2f453d394f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "O símbolo 1k não foi encontrado na biblioteca 'PCM_SL_Resistors'",
+                    "items": [
+                        {
+                            "description": "Símbolo R3 [1k]",
+                            "pos": {
+                                "x": 1.2065,
+                                "y": 0.7493
+                            },
+                            "uuid": "eb85beb4-0bc0-4591-b66b-946b0ae60400"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Footprint 'TO-92_Inline_Wide_CBE' não encontrado na biblioteca 'PCM_Package_TO_SOT_THT_AKL'",
+                    "items": [
+                        {
+                            "description": "Símbolo Q4 [BC337]",
+                            "pos": {
+                                "x": 1.2065,
+                                "y": 0.8382
+                            },
+                            "uuid": "7dc151e1-1f71-4d54-af84-35a9a10e7354"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "A biblioteca de símbolos 'ignitor' não foi encontrada em 'C:\\Users\\italo\\OneDrive\\Área de Trabalho\\ignitor\\hardware\\kicad\\placas\\ignicao_smd/../../shared/lib/ignitor.kicad_sym'",
+                    "items": [
+                        {
+                            "description": "Símbolo U1 [Ra-02]",
+                            "pos": {
+                                "x": 1.3843,
+                                "y": 0.9525
+                            },
+                            "uuid": "8b6763d8-3a3b-49e5-84cb-485a03716fa2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                }
+            ]
+        },
+        {
+            "path": "/mcu_esp32/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4/bc52cfe6-fe19-46d5-a598-69ef7c827bb3",
+            "violations": []
+        },
+        {
+            "path": "/Alimentação/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4/ae61fd89-87c7-4b43-b598-ee873ba87de5",
+            "violations": [
+                {
+                    "description": "Os pinos do tipo Unspecified e Passive estão conectados",
+                    "items": [
+                        {
+                            "description": "Symbol D1 Pino 2 [A, Unspecified, Line]",
+                            "pos": {
+                                "x": 1.4478,
+                                "y": 0.7874
+                            },
+                            "uuid": "274b7cc5-a75c-4a2b-987a-00d5747a8311"
+                        },
+                        {
+                            "description": "Symbol J1 Pino 1 [Passive, Line]",
+                            "pos": {
+                                "x": 1.4478,
+                                "y": 0.7493
+                            },
+                            "uuid": "f2fa2973-80b0-419f-bb32-94583d103e07"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Os pinos do tipo Unspecified e Power input estão conectados",
+                    "items": [
+                        {
+                            "description": "Symbol D1 Pino 1 [K, Unspecified, Line]",
+                            "pos": {
+                                "x": 1.4478,
+                                "y": 0.889
+                            },
+                            "uuid": "1f103b52-8630-4545-802f-d68e2a0f52b0"
+                        },
+                        {
+                            "description": "Symbol #PWR05 Pino oculto 1 [VIN, Power input, Line]",
+                            "pos": {
+                                "x": 1.4478,
+                                "y": 0.9398
+                            },
+                            "uuid": "6a113d2c-bf36-4d3d-a6ca-a5c73babe7a1"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                }
+            ]
+        },
+        {
+            "path": "/lora/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4/2e1fc7cb-62c7-47e9-8a14-1f6e060758ad",
+            "violations": []
+        },
+        {
+            "path": "/Botão/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4/1ce885c9-cc5a-4554-9243-17e0fefc16b8",
+            "violations": []
+        },
+        {
+            "path": "/rele/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4/00758f45-d93e-4cf4-88d7-8df70201d85b",
+            "violations": []
+        },
+        {
+            "path": "/BUZZER/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4/14ff497f-d977-4c03-ab02-bcde3eb4472e",
+            "violations": []
+        },
+        {
+            "path": "/led_oled/",
+            "uuid_path": "/a458e973-2f3f-4941-a026-37b74a48edf4/639140e0-5af0-4112-a2d2-499239e3928e",
+            "violations": []
+        }
+    ],
+    "source": "ignicao_smd.kicad_sch"
+}

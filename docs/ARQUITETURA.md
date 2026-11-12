@@ -30,26 +30,39 @@ perda de `ARM_CONFIRMED`.
 | Potência TX | 17 dBm |
 | `ARM_CONFIRMED` | a cada 200 ms |
 | Timeout na ignição | 500 ms |
-| Timeout de link no comando | 1000 ms |
+| Timeout de link no comando | 3000 ms |
 
-Mensagens: `PING`, `PONG`, `ARM_CONFIRMED`, `ACK`, `ABORT`, `IGNITION_COMPLETE`
-e `STATUS:<estado>`.
+Cada quadro tem o formato:
+
+```text
+IG1|<epoch>|<seq>|<ciclo>|<BODY>
+```
+
+- `IG1`: identificador do sistema.
+- `epoch`: 8 dígitos hex, sorteado a cada boot.
+- `seq`: incrementa a cada quadro; replay e sequência antiga são descartados.
+- `ciclo`: incrementa a cada novo armamento; `0` nos quadros de serviço.
+- `BODY`: `PING`, `PONG`, `ARM_CONFIRMED`, `ACK`, `ABORT`,
+  `IGNITION_COMPLETE` ou `STATUS:<estado>`.
 
 ## Sequência
 
-1. O comando manda `PING` a cada 1 s. A ignição responde `PONG`.
-2. O operador segura o botão por 10 s. O comando manda `ARM_CONFIRMED` a cada
-   200 ms.
+1. No `IDLE`, o comando manda `PING` a cada 1 s. A ignição responde `PONG`.
+2. O operador segura o botão até o OLED mostrar `CONFIRMADO` (cerca de 13 s).
+   O comando manda `ARM_CONFIRMED` a cada 200 ms.
 3. A ignição responde `ACK` e começa a contagem de 10 s.
 4. Se o `ARM_CONFIRMED` sumir por mais de 500 ms, ou chegar `ABORT`, a ignição
-   volta para `AGUARDANDO` e não aciona nada.
+   desliga tudo e vai para `BLOQUEADO`.
 5. No fim, a ignição fecha o relé e liga o Q1 por 2 s.
-6. A ignição manda `IGNITION_COMPLETE`; o comando mostra o resultado no OLED e
-   toca o tema do Mario.
+6. A ignição manda `IGNITION_COMPLETE`; o comando mostra o resultado no OLED,
+   toca o tema do Mario e espera um novo ciclo.
+7. Soltar o botão a qualquer momento, inclusive durante a queima, manda `ABORT`.
 
-A ignição também manda `STATUS:AGUARDANDO`, `STATUS:CONTAGEM`,
-`STATUS:IGNICAO`, `STATUS:COMPLETO` e `STATUS:ABORT`. O comando usa o último
-status para atualizar o OLED.
+Ao energizar, o comando toca o tema do **Zelda**; enquanto o botão está
+pressionado, dá um bip curto por segundo; no fim da queima, o tema do
+**Mario**. A ignição também manda `STATUS:AGUARDANDO`, `STATUS:CONTAGEM`,
+`STATUS:IGNICAO`, `STATUS:COMPLETO`, `STATUS:ABORT` e `STATUS:BLOQUEADO`.
+O comando usa o último status para atualizar o OLED.
 
 ## Laço de disparo
 
@@ -86,6 +99,11 @@ A placa não tem proteção de polaridade nem fusível.
 - Antena LoRa conectada antes de energizar.
 - J8 (ARM/RBF) aberto fora do teste.
 - Operador a pelo menos 10 m do foguete.
-- Botão solto antes dos 10 s aborta na hora.
+- Botão solto a qualquer momento aborta na hora. Só solte após `CONFIRMADO`.
 - Perda de `ARM_CONFIRMED` por mais de 500 ms aborta na hora.
-- Depois de um abort, solte o botão antes de tentar de novo.
+- Depois de um abort ou de uma queima, solte o botão antes de tentar de novo.
+- A ignição só aceita um ciclo novo depois de 1,5 s sem ARM.
+- O link de 3 s do comando é supervisão; o corte real é o timeout de 500 ms da
+  ignição.
+- `IG1` + sequência separam estações e rejeitam replay simples, mas não são
+  autenticação criptográfica. O J8 continua sendo a trava física.

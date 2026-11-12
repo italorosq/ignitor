@@ -10,7 +10,13 @@ Pinos:
 """
 
 import utime
+import protocolo_lora
 from machine import Pin, SPI, WDT
+
+try:
+    from machine import Timer
+except ImportError:
+    Timer = None
 
 USE_SX127X_DRIVER = False
 
@@ -63,7 +69,7 @@ PIN_STATUS     = Pin(PIN_STATUS_NUM, Pin.OUT, value=0)
 PIN_LED_COUNT  = Pin(PIN_LED_COUNT_NUM, Pin.OUT, value=0)
 
 RELE_ACTIVE_LEVEL   = 0
-RELE_INACTIVE_LEVEL = 1
+RELE_INACTIVE_LEVEL = 0 if RELE_ACTIVE_LEVEL else 1
 
 def _set_rele(ligado):
     PIN_RELE.value(RELE_ACTIVE_LEVEL if ligado else RELE_INACTIVE_LEVEL)
@@ -254,9 +260,9 @@ def _sx127x_read_payload():
 def lora_reset():
     # Pulso de reset por hardware conforme datasheet do SX1278 (minimo 100us)
     LORA_RESET.value(0)
-    utime.sleep_ms(10)
+    utime.sleep_ms(20)
     LORA_RESET.value(1)
-    utime.sleep_ms(10)
+    utime.sleep_ms(100)
 
 def lora_init(frequency=433_000_000):
     global lora_driver, lora_backend
@@ -423,6 +429,7 @@ ESTADO_AGUARDANDO = "AGUARDANDO"
 ESTADO_CONTAGEM   = "CONTAGEM"
 ESTADO_IGNICAO    = "IGNICAO"
 ESTADO_COMPLETO   = "COMPLETO"
+ESTADO_BLOQUEADO  = "BLOQUEADO"
 
 TEMPO_CONTAGEM_MS = 10000
 TEMPO_IGNICAO_MS  = 2000
@@ -433,26 +440,75 @@ INTERVALO_BUZZER_MS = 500
 INTERVALO_PING_BOOT_MS = 700
 INTERVALO_PISCA_STATUS_MS = 500
 TEMPO_POS_COMPLETO_MS = 3000
+TEMPO_GAP_REARME_MS = 1500
+INTERVALO_ACK_MS = 1000
+INTERVALO_DONE_MS = 300
+TEMPO_GUARDA_IGNICAO_MS = 2500
 
 MSG_ARM   = "ARM_CONFIRMED"
 MSG_ABORT = "ABORT"
 MSG_ACK   = "ACK"
 MSG_DONE  = "IGNITION_COMPLETE"
+MSG_PING  = "PING"
+MSG_PONG  = "PONG"
 MSG_STATUS = "STATUS:"
 
-def _status(estado):
-    lora_send(MSG_STATUS + estado)
+DEBUG = False  # logs de cada quadro; deixe False em voo
+
+codec = protocolo_lora.Codec()
+fire_timer = None
+
+
+def _debug(texto):
+    if DEBUG:
+        print(texto)
+
+
+def _enviar(body, ciclo=0):
+    lora_send(codec.encode(body, ciclo))
+
+
+def _status(estado, ciclo=0):
+    _enviar(MSG_STATUS + estado, ciclo)
+
+
+def _cancelar_timer_ignicao():
+    global fire_timer
+    if fire_timer is not None:
+        try:
+            fire_timer.deinit()
+        except Exception:
+            pass
+        fire_timer = None
+
+
+def _iniciar_timer_ignicao():
+    global fire_timer
+    _cancelar_timer_ignicao()
+    if Timer is None:
+        return
+    try:
+        fire_timer = Timer(0)
+        fire_timer.init(
+            period=TEMPO_GUARDA_IGNICAO_MS,
+            mode=Timer.ONE_SHOT,
+            callback=lambda _t: desligar_tudo(),
+        )
+    except Exception as exc:
+        fire_timer = None
+        print("[WARN] Timer de seguranca indisponivel: {}".format(exc))
 
 def executar():
     print("[BOOT] Estacao de ignicao")
     desligar_tudo()
     buzzer_bip(300)
 
-    if not lora_init(433_000_000):
-        print("[ERRO] SX1278 nao detectado.")
-        while True:
-            sinalizar_erro(5)
-            utime.sleep_ms(1000)
+    tentativas = 0
+    while not lora_init(433_000_000):
+        tentativas += 1
+        print("[ERRO] SX1278 nao detectado (tentativa {}).".format(tentativas))
+        sinalizar_erro(2)
+        utime.sleep_ms(2000)
 
     lora_receive_mode()
     print("[BOOT] LoRa OK")
@@ -472,16 +528,19 @@ def executar():
             _set_status(led)
         if utime.ticks_diff(agora, t_ping) >= INTERVALO_PING_BOOT_MS:
             t_ping = agora
-            lora_send("PING")
+            _enviar(MSG_PING)
         if lora_packet_available():
-            msg = lora_read_packet()
-            if msg == "PING":
-                lora_send("PONG")
-                conexao = True
-                break
-            if msg == "PONG":
-                conexao = True
-                break
+            bruto = lora_read_packet()
+            decodificado = codec.decode(bruto) if bruto else None
+            if decodificado:
+                msg, _ciclo = decodificado
+                if msg == MSG_PING:
+                    _enviar(MSG_PONG)
+                    conexao = True
+                    break
+                if msg == MSG_PONG:
+                    conexao = True
+                    break
         utime.sleep_ms(10)
 
     if conexao:
@@ -499,145 +558,258 @@ def executar():
     t_inicio_ignicao = 0
     t_ultimo_pisca = 0
     t_ultimo_buz = 0
+    t_ultimo_ack = 0
+    t_ultimo_status = 0
+    t_fim = 0
+    t_ultimo_done = 0
+    done_enviados = 0
     led_vermelho = False
     link_reportado = None
+    ciclo_atual = None
+    ciclo_bloqueado = None
+    t_ultimo_arm_bloqueado = 0
 
     try:
         wdt = WDT(timeout=8000)
     except Exception:
         wdt = None
 
-    _status(ESTADO_AGUARDANDO)
+    _status(ESTADO_AGUARDANDO, 0)
 
-    while True:
-        agora = utime.ticks_ms()
-        msg = None
-
-        if lora_packet_available():
-            msg = lora_read_packet()
-            if msg:
-                t_ultimo_link = agora
-                print("[RX] {} | {}".format(msg, estado))
-
-        if msg == "PING":
-            lora_send("PONG")
-            t_ultimo_link = agora
+    try:
+        while True:
+            agora = utime.ticks_ms()
             msg = None
+            ciclo_msg = 0
 
-        link_ok = (
-            t_ultimo_link is not None
-            and utime.ticks_diff(agora, t_ultimo_link) <= TIMEOUT_LINK_MS
-        )
-        if link_ok != link_reportado:
-            link_reportado = link_ok
-            print("[LINK] {}".format("OK" if link_ok else "PERDIDO"))
+            if lora_packet_available():
+                bruto = lora_read_packet()
+                decodificado = codec.decode(bruto) if bruto else None
+                if decodificado:
+                    msg, ciclo_msg = decodificado
+                    t_ultimo_link = agora
 
-        if link_ok:
-            _set_status(True)
-        elif utime.ticks_diff(agora, t_ultimo_pisca) >= INTERVALO_PISCA_STATUS_MS:
-            t_ultimo_pisca = agora
-            _toggle_status()
-
-        if estado == ESTADO_AGUARDANDO:
-            _set_status(True)
-            PIN_LED_COUNT.value(0)
-            PIN_BUZZER.value(0)
-
-            if msg == MSG_ARM:
-                lora_send(MSG_ACK)
-                _status(ESTADO_CONTAGEM)
-                print("[ARM] Contagem de 10 s")
-                _set_gate1(True)
-                t_inicio_contagem = agora
-                t_ultimo_arm = agora
-                t_ultimo_pisca = agora
-                t_ultimo_buz = agora
-                estado = ESTADO_CONTAGEM
-
-        elif estado == ESTADO_CONTAGEM:
-            _set_status(True)
-
-            if msg == MSG_ARM:
-                t_ultimo_arm = agora
-
-            sinal_perdido = utime.ticks_diff(agora, t_ultimo_arm) > TIMEOUT_SINAL_MS
-            abort = (msg == MSG_ABORT)
-
-            if abort or sinal_perdido:
-                print("[SEGURANCA] {}".format("ABORT" if abort else "sinal perdido"))
-                desligar_tudo()
-                _status(MSG_ABORT)
-                sinalizar_erro(6)
-                estado = ESTADO_AGUARDANDO
-                continue
-
-            if utime.ticks_diff(agora, t_ultimo_pisca) >= INTERVALO_PISCA_MS:
-                led_vermelho = not led_vermelho
-                PIN_LED_COUNT.value(1 if led_vermelho else 0)
-                t_ultimo_pisca = agora
-
-            if utime.ticks_diff(agora, t_ultimo_buz) >= INTERVALO_BUZZER_MS:
-                PIN_BUZZER.value(0 if PIN_BUZZER.value() else 1)
-                t_ultimo_buz = agora
-
-            decorrido = utime.ticks_diff(agora, t_inicio_contagem)
-            if decorrido >= TEMPO_CONTAGEM_MS:
-                if lora_packet_available():
-                    final = lora_read_packet()
-                    if final == MSG_ABORT:
+                    # ABORT tem prioridade absoluta: corta antes de qualquer
+                    # print, status ou bipe.
+                    if msg == MSG_ABORT:
+                        _cancelar_timer_ignicao()
                         desligar_tudo()
-                        _status(MSG_ABORT)
-                        sinalizar_erro(6)
-                        estado = ESTADO_AGUARDANDO
+                        if estado in (
+                            ESTADO_CONTAGEM,
+                            ESTADO_IGNICAO,
+                            ESTADO_COMPLETO,
+                        ):
+                            _status(MSG_ABORT, ciclo_atual or 0)
+                            ciclo_bloqueado = ciclo_atual
+                            ciclo_atual = None
+                            t_ultimo_arm_bloqueado = t_ultimo_arm
+                            estado = ESTADO_BLOQUEADO
+                        print("[SEGURANCA] ABORT recebido")
                         continue
-                if utime.ticks_diff(agora, t_ultimo_arm) > TIMEOUT_SINAL_MS:
+
+                    _debug("[RX] {} | ciclo {} | {}".format(msg, ciclo_msg, estado))
+                else:
+                    _debug("[RX] quadro ignorado")
+
+            if msg == MSG_PING:
+                _enviar(MSG_PONG)
+                t_ultimo_link = agora
+                msg = None
+
+            # Todo ARM valido renova o prazo, inclusive durante a ignicao.
+            if msg == MSG_ARM:
+                t_ultimo_arm = agora
+
+            link_ok = (
+                t_ultimo_link is not None
+                and utime.ticks_diff(agora, t_ultimo_link) <= TIMEOUT_LINK_MS
+            )
+            if link_ok != link_reportado:
+                link_reportado = link_ok
+                print("[LINK] {}".format("OK" if link_ok else "PERDIDO"))
+
+            if link_ok:
+                _set_status(True)
+            elif utime.ticks_diff(agora, t_ultimo_pisca) >= INTERVALO_PISCA_STATUS_MS:
+                t_ultimo_pisca = agora
+                _toggle_status()
+
+            if estado == ESTADO_AGUARDANDO:
+                PIN_LED_COUNT.value(0)
+                PIN_BUZZER.value(0)
+
+                if msg == MSG_ARM and ciclo_msg > 0 and ciclo_msg != ciclo_bloqueado:
+                    _enviar(MSG_ACK, ciclo_msg)
+                    _status(ESTADO_CONTAGEM, ciclo_msg)
+                    print("[ARM] Contagem de 10 s (ciclo {})".format(ciclo_msg))
+                    _set_gate1(True)
+                    t_inicio_contagem = agora
+                    t_ultimo_arm = agora
+                    t_ultimo_pisca = agora
+                    t_ultimo_buz = agora
+                    t_ultimo_ack = agora
+                    ciclo_atual = ciclo_msg
+                    ciclo_bloqueado = None
+                    estado = ESTADO_CONTAGEM
+
+            elif estado == ESTADO_CONTAGEM:
+                abortar = msg == MSG_ABORT
+                ciclo_novo = msg == MSG_ARM and ciclo_msg != ciclo_atual
+                sinal_perdido = utime.ticks_diff(agora, t_ultimo_arm) > TIMEOUT_SINAL_MS
+
+                if abortar or ciclo_novo or sinal_perdido:
+                    if abortar:
+                        motivo = "ABORT"
+                    elif ciclo_novo:
+                        motivo = "ciclo novo"
+                    else:
+                        motivo = "sinal perdido"
                     desligar_tudo()
-                    _status(MSG_ABORT)
+                    print("[SEGURANCA] {} durante a contagem".format(motivo))
+                    _status(MSG_ABORT, ciclo_atual or 0)
                     sinalizar_erro(6)
-                    estado = ESTADO_AGUARDANDO
+                    ciclo_bloqueado = ciclo_atual
+                    ciclo_atual = None
+                    t_ultimo_arm_bloqueado = t_ultimo_arm
+                    estado = ESTADO_BLOQUEADO
                     continue
 
+                if (
+                    msg == MSG_ARM
+                    and utime.ticks_diff(agora, t_ultimo_ack) >= INTERVALO_ACK_MS
+                ):
+                    _enviar(MSG_ACK, ciclo_atual)
+                    t_ultimo_ack = agora
+
+                if utime.ticks_diff(agora, t_ultimo_pisca) >= INTERVALO_PISCA_MS:
+                    led_vermelho = not led_vermelho
+                    PIN_LED_COUNT.value(1 if led_vermelho else 0)
+                    t_ultimo_pisca = agora
+
+                if utime.ticks_diff(agora, t_ultimo_buz) >= INTERVALO_BUZZER_MS:
+                    PIN_BUZZER.value(0 if PIN_BUZZER.value() else 1)
+                    t_ultimo_buz = agora
+
+                decorrido = utime.ticks_diff(agora, t_inicio_contagem)
+                if decorrido >= TEMPO_CONTAGEM_MS:
+                    if utime.ticks_diff(agora, t_ultimo_arm) > TIMEOUT_SINAL_MS:
+                        desligar_tudo()
+                        print("[SEGURANCA] sinal perdido no fim da contagem")
+                        _status(MSG_ABORT, ciclo_atual or 0)
+                        sinalizar_erro(6)
+                        ciclo_bloqueado = ciclo_atual
+                        ciclo_atual = None
+                        t_ultimo_arm_bloqueado = t_ultimo_arm
+                        estado = ESTADO_BLOQUEADO
+                        continue
+
+                    PIN_BUZZER.value(0)
+                    PIN_LED_COUNT.value(1)
+                    _iniciar_timer_ignicao()
+                    _set_rele(True)
+                    _set_gate2(True)
+                    _status(ESTADO_IGNICAO, ciclo_atual)
+                    print("[IGNICAO] Rele e Q1 acionados")
+                    t_inicio_ignicao = agora
+                    estado = ESTADO_IGNICAO
+
+            elif estado == ESTADO_IGNICAO:
+                abortar = msg == MSG_ABORT
+                ciclo_novo = msg == MSG_ARM and ciclo_msg != ciclo_atual
+                sinal_perdido = utime.ticks_diff(agora, t_ultimo_arm) > TIMEOUT_SINAL_MS
+
+                if abortar or ciclo_novo or sinal_perdido:
+                    if abortar:
+                        motivo = "ABORT"
+                    elif ciclo_novo:
+                        motivo = "ciclo novo"
+                    else:
+                        motivo = "sinal perdido"
+                    _cancelar_timer_ignicao()
+                    desligar_tudo()
+                    print("[SEGURANCA] {} durante a ignicao".format(motivo))
+                    _status(MSG_ABORT, ciclo_atual or 0)
+                    sinalizar_erro(4)
+                    ciclo_bloqueado = ciclo_atual
+                    ciclo_atual = None
+                    t_ultimo_arm_bloqueado = t_ultimo_arm
+                    estado = ESTADO_BLOQUEADO
+                    continue
+
+                # Sem ACK durante a queima: o envio pode bloquear e esticar
+                # a janela de 2 s. O DONE/STATUS logo depois ja confirma o link.
+                if utime.ticks_diff(agora, t_inicio_ignicao) >= TEMPO_IGNICAO_MS:
+                    _cancelar_timer_ignicao()
+                    _set_gate2(False)
+                    _set_rele(False)
+                    _set_gate1(False)
+                    ciclo_done = ciclo_atual or 0
+                    for _ in range(3):
+                        _enviar(MSG_DONE, ciclo_done)
+                        utime.sleep_ms(80)
+                    _status(ESTADO_COMPLETO, ciclo_done)
+                    print("[OK] Ignicao concluida")
+                    for _ in range(3):
+                        buzzer_bip(120)
+                        utime.sleep_ms(120)
+                    t_fim = utime.ticks_ms()
+                    t_ultimo_done = t_fim
+                    done_enviados = 3
+                    estado = ESTADO_COMPLETO
+
+            elif estado == ESTADO_COMPLETO:
+                PIN_LED_COUNT.value(0)
                 PIN_BUZZER.value(0)
-                _set_status(True)
-                PIN_LED_COUNT.value(1)
-                _set_rele(True)
-                _set_gate2(True)
-                _status(ESTADO_IGNICAO)
-                print("[IGNICAO] Rele e Q1 acionados")
-                t_inicio_ignicao = agora
-                estado = ESTADO_IGNICAO
+                if (
+                    done_enviados < 5
+                    and utime.ticks_diff(agora, t_ultimo_done) >= INTERVALO_DONE_MS
+                ):
+                    _enviar(MSG_DONE, ciclo_atual or 0)
+                    done_enviados += 1
+                    t_ultimo_done = agora
 
-        elif estado == ESTADO_IGNICAO:
-            if msg == MSG_ABORT or utime.ticks_diff(agora, t_ultimo_arm) > TIMEOUT_SINAL_MS:
-                print("[SEGURANCA] ABORT durante a ignicao")
-                desligar_tudo()
-                _status(MSG_ABORT)
-                sinalizar_erro(4)
-                estado = ESTADO_AGUARDANDO
-                continue
+                if utime.ticks_diff(agora, t_fim) >= TEMPO_POS_COMPLETO_MS:
+                    _cancelar_timer_ignicao()
+                    desligar_tudo()
+                    _status(ESTADO_BLOQUEADO, ciclo_atual or 0)
+                    ciclo_bloqueado = ciclo_atual
+                    t_ultimo_arm_bloqueado = t_ultimo_arm
+                    ciclo_atual = None
+                    estado = ESTADO_BLOQUEADO
 
-            if utime.ticks_diff(agora, t_inicio_ignicao) >= TEMPO_IGNICAO_MS:
-                _set_gate2(False)
-                _set_rele(False)
-                lora_send(MSG_DONE)
-                _status(ESTADO_COMPLETO)
-                print("[OK] Ignicao concluida")
-                for _ in range(3):
-                    buzzer_bip(120)
-                    utime.sleep_ms(120)
-                estado = ESTADO_COMPLETO
-                t_fim = agora
+            elif estado == ESTADO_BLOQUEADO:
+                PIN_LED_COUNT.value(0)
+                PIN_BUZZER.value(0)
 
-        elif estado == ESTADO_COMPLETO:
-            _set_rele(False)
-            if utime.ticks_diff(agora, t_fim) >= TEMPO_POS_COMPLETO_MS:
-                desligar_tudo()
-                _status(ESTADO_AGUARDANDO)
-                estado = ESTADO_AGUARDANDO
+                if utime.ticks_diff(agora, t_ultimo_status) >= INTERVALO_ACK_MS:
+                    _status(ESTADO_BLOQUEADO, ciclo_bloqueado or 0)
+                    t_ultimo_status = agora
 
-        if wdt:
-            wdt.feed()
-        utime.sleep_ms(5)
+                if msg == MSG_ARM and ciclo_msg > 0:
+                    if ciclo_msg == ciclo_bloqueado:
+                        t_ultimo_arm_bloqueado = agora
+                    elif (
+                        utime.ticks_diff(agora, t_ultimo_arm_bloqueado)
+                        >= TEMPO_GAP_REARME_MS
+                    ):
+                        print("[ARM] Novo ciclo {} aceito".format(ciclo_msg))
+                        ciclo_bloqueado = None
+                        ciclo_atual = None
+                        estado = ESTADO_AGUARDANDO
+                    else:
+                        print(
+                            "[ARM] Ciclo {} aguardando gap de rearme".format(ciclo_msg)
+                        )
+
+            if wdt:
+                wdt.feed()
+            utime.sleep_ms(5)
+
+    except Exception as exc:
+        print("[ERRO] Falha na ignicao: {}".format(exc))
+    finally:
+        _cancelar_timer_ignicao()
+        desligar_tudo()
 
 if __name__ == "__main__":
     executar()

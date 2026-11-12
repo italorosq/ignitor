@@ -35,18 +35,20 @@ O J8 é o ARM/RBF: feche os pinos 1–3 para alimentar a bobina do relé.
 | Comando | `firmware/micropython/estacao_comando_esp.py` | `main.py` |
 | Ignição | `firmware/micropython/estacao_ignicao_esp.py` | `main.py` |
 
-O comando também precisa de `ssd1306.py` e `logo_serra.py`. A ignição não usa
-esses arquivos.
+As duas estações também precisam de `protocolo_lora.py`. O comando precisa ainda
+de `ssd1306.py` e `logo_serra.py`; a ignição não usa esses dois.
 
 Com `mpremote`:
 
 ```bash
+mpremote connect COM5 fs cp firmware/micropython/protocolo_lora.py :protocolo_lora.py
 mpremote connect COM5 fs cp firmware/micropython/estacao_comando_esp.py :main.py
 mpremote connect COM5 fs cp firmware/micropython/ssd1306.py :ssd1306.py
 mpremote connect COM5 fs cp firmware/micropython/logo_serra.py :logo_serra.py
 ```
 
-Na ignição, troque o arquivo por `estacao_ignicao_esp.py`.
+Na ignição, troque `estacao_comando_esp.py` por `estacao_ignicao_esp.py` e não
+copie `ssd1306.py` nem `logo_serra.py`.
 
 ## 4. Teste
 
@@ -56,9 +58,10 @@ Na ignição, troque o arquivo por `estacao_ignicao_esp.py`.
 4. Ligar as duas estações.
 5. Conferir `PING/PONG` e o link no OLED.
 6. Fechar o J8.
-7. Segurar o botão por 10 s.
+7. Segurar o botão até o OLED mostrar `CONFIRMADO` (cerca de 13 s).
 8. Conferir a contagem, o acionamento por 2 s e o `IGNITION_COMPLETE`.
-9. Soltar o botão antes dos 10 s e conferir o abort.
+9. Repetir soltando o botão antes dos 10 s e conferir o abort.
+10. Repetir soltando o botão durante a queima e conferir o corte imediato.
 
 ## 5. Antes do ignitor real
 

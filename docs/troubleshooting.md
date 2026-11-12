@@ -42,8 +42,8 @@ Exemplo de fluxo esperado:
 
 ### Aborta no meio da contagem
 
-1. Manter o botao pressionado durante os 10 s.
-2. Validar qualidade de sinal (RSSI).
+1. Manter o botao pressionado ate o OLED mostrar CONFIRMADO.
+2. Conferir se o link nao ficou 3 s sem nenhum quadro valido.
 3. Evitar interferencia e aumentar robustez (ex.: SF maior, se necessario).
 
 ### Ignitor nao aciona no fim
@@ -53,6 +53,10 @@ Exemplo de fluxo esperado:
 3. Revisar acionamento do rele/MOSFET.
 
 ## Coleta de Logs
+
+Na ignição, os quadros recebidos só aparecem com `DEBUG = True` no topo de
+`estacao_ignicao_esp.py`. Em voo, mantenha `False`.
+
 
 ```bash
 screen -L /dev/ttyACM0 115200

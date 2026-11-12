@@ -51,6 +51,28 @@ MAPA_COMANDO = {
     "PIN_I2C_SCL": 22,
 }
 
+# Pinagem fisica do modulo ESP32 (footprint DOIT_ESP32_DEVKIT_30Pins),
+# extraida do KiCad: (pino do modulo, GPIO usado no firmware).
+# O firmware usa o GPIO, nao o numero do pino fisico.
+MAPA_KICAD = {
+    "RELE_IN":    (21, 32),
+    "GATE_2":     (22, 33),
+    "STATUS":     (23, 25),
+    "LED_BUTTON": (24, 26),
+    "BTN":        (25, 27),
+    "BUZZ":       (26, 14),
+    "LED_COUNT":  (27, 12),
+    "GATE_1":     (28, 13),
+    "NSS":        (5, 4),
+    "RESET":      (6, 16),
+    "DIO0":       (7, 17),
+    "SCK":        (9, 18),
+    "MISO":       (10, 19),
+    "MOSI":       (15, 23),
+    "OLED_SDA":   (11, 21),
+    "OLED_SCL":   (14, 22),
+}
+
 PROIBIDOS_IGNICAO = (
     "PIN_BUTTON", "PIN_LED_BTN", "PIN_I2C_SDA", "PIN_I2C_SCL",
     "PIN_EXP_A", "PIN_EXP_B", "PIN_EXP_C",
@@ -164,6 +186,52 @@ def test_pinagem_comando():
     _checa_mapa(COMANDO, MAPA_COMANDO, PROIBIDOS_COMANDO)
 
 
+def test_pinagem_kicad():
+    """Garante que o firmware usa o GPIO certo para cada pino do modulo."""
+    ign = _constantes(IGNICAO)
+    cmd = _constantes(COMANDO)
+
+    # O rele esta no pino fisico 21 do modulo, que e GPIO32.
+    assert MAPA_KICAD["RELE_IN"] == (21, 32)
+    assert ign["PIN_RELE_NUM"] == MAPA_KICAD["RELE_IN"][1]
+
+    for nome, constante in (
+        ("GATE_2", "PIN_GATE_2_NUM"),
+        ("GATE_1", "PIN_GATE_1_NUM"),
+        ("BUZZ", "PIN_BUZZER_NUM"),
+        ("STATUS", "PIN_STATUS_NUM"),
+        ("LED_COUNT", "PIN_LED_COUNT_NUM"),
+        ("NSS", "PIN_LORA_CS_NUM"),
+        ("RESET", "PIN_LORA_RESET_NUM"),
+        ("DIO0", "PIN_LORA_DIO0_NUM"),
+    ):
+        assert ign[constante] == MAPA_KICAD[nome][1], (nome, constante)
+
+    for nome, constante in (
+        ("SCK", "SPI_SCK"),
+        ("MISO", "SPI_MISO"),
+        ("MOSI", "SPI_MOSI"),
+    ):
+        assert ign[constante] == MAPA_KICAD[nome][1], (nome, constante)
+
+    for nome, constante in (
+        ("NSS", "PIN_CS"),
+        ("RESET", "PIN_RESET"),
+        ("DIO0", "PIN_DIO0"),
+        ("SCK", "PIN_SCK"),
+        ("MISO", "PIN_MISO"),
+        ("MOSI", "PIN_MOSI"),
+        ("BTN", "PIN_BUTTON"),
+        ("BUZZ", "PIN_BUZZER"),
+        ("STATUS", "PIN_LED_YELLOW"),
+        ("LED_COUNT", "PIN_LED_RED"),
+        ("LED_BUTTON", "PIN_LED_LINK"),
+        ("OLED_SDA", "PIN_I2C_SDA"),
+        ("OLED_SCL", "PIN_I2C_SCL"),
+    ):
+        assert cmd[constante] == MAPA_KICAD[nome][1], (nome, constante)
+
+
 def test_tempos_de_seguranca():
     ign = _constantes(IGNICAO)
     assert ign["TEMPO_CONTAGEM_MS"] == 10000
@@ -173,7 +241,7 @@ def test_tempos_de_seguranca():
     cmd = _constantes(COMANDO)
     assert cmd["HOLD_REQUIRED_MS"] == 10000
     assert cmd["RETRANSMIT_MS"] == 200
-    assert cmd["LINK_TIMEOUT_MS"] == 1000
+    assert cmd["LINK_TIMEOUT_MS"] == 3000
 
 
 def test_protocolo_lora():
@@ -189,12 +257,26 @@ def test_protocolo_lora():
             assert consts.get(nome) == valor, f"{caminho.name}: {nome}"
 
 
-def test_comando_tem_oled_e_mario():
+def test_comando_tem_oled_e_musicas():
     fonte = COMANDO.read_text(encoding="utf-8")
     assert "SSD1306_I2C" in fonte
     assert "SEQUENCIA_MARIO" in fonte
+    assert "SEQUENCIA_ZELDA" in fonte
     assert "PIN_I2C_SDA" in fonte
+    assert '"LORA " + lora' in fonte
+    assert '"OK" if self.lora.backend in ("native", "sx127x") else "MOCK"' in fonte
+    assert "def verificar" in fonte
+    assert "self.lora.verificar()" in fonte
+    assert "self.musica.tocar(SEQUENCIA_ZELDA)" in fonte
+    assert "self.musica.tocar(SEQUENCIA_MARIO" in fonte
+    assert "self.musica.tocar([(2000, 60), (0, 940)], now)" in fonte
+    assert "self.buzzer.value(self._blink_on)" not in fonte
     assert fonte.count("Link instavel - ABORT imediato") == 2
+
+
+def test_ignicao_retenta_lora():
+    fonte = IGNICAO.read_text(encoding="utf-8")
+    assert "while not lora_init" in fonte
 
 
 def test_ignicao_nao_tem_oled():
